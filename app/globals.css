@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+:root {
+  --canvas: #ffffff;
+  --ink: #0a0a0a;
+  --muted: #888888;
+  --red: #e8002d;
+  --card: #f5f5f5;
+  --border: rgba(10, 10, 10, 0.1);
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-red: var(--red);
+  --color-card: var(--card);
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: 'Syne', system-ui, sans-serif;
+}
