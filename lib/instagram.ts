@@ -1,4 +1,4 @@
-const APP_ID = process.env.INSTAGRAM_APP_ID!;
+const APP_ID = process.env.INSTAGRAM_APP_ID ?? '1620617545694436';
 const APP_SECRET = process.env.INSTAGRAM_APP_SECRET!;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
 const REDIRECT_URI = `${APP_URL}/api/auth/callback`;
