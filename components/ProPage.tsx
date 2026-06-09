@@ -88,7 +88,7 @@ export default function ProPage() {
       <div className="mb-10 flex items-start justify-between">
         <div>
           <span className="text-[10px] uppercase tracking-[0.2em] text-[#e8002d] font-bold">Pro</span>
-          <h1 className="font-[family-name:var(--font-syne)] font-extrabold text-4xl md:text-5xl uppercase leading-none mt-2">
+          <h1 className="font-display font-extrabold text-4xl md:text-5xl uppercase leading-none mt-2">
             AI Hook<br />Analyzer
           </h1>
         </div>

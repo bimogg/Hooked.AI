@@ -6,7 +6,7 @@ export default function ConnectPage() {
       <div className="w-14 h-14 bg-[#e8002d] rounded-2xl flex items-center justify-center mx-auto mb-8">
         <span className="text-white font-black text-xl tracking-tight">IG</span>
       </div>
-      <h1 className="font-[family-name:var(--font-syne)] font-extrabold text-3xl uppercase mb-4">
+      <h1 className="font-display font-extrabold text-3xl uppercase mb-4">
         Connect Instagram
       </h1>
       <p className="text-[#888] text-sm leading-relaxed mb-10 max-w-sm mx-auto">

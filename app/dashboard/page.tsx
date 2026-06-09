@@ -58,7 +58,7 @@ export default async function DashboardPage() {
       <div className="flex items-start justify-between mb-10 gap-4">
         <div>
           <p className="text-[10px] uppercase tracking-[0.2em] text-[#888] mb-1">Pro · Connected</p>
-          <h1 className="font-[family-name:var(--font-syne)] font-extrabold text-3xl md:text-4xl uppercase">
+          <h1 className="font-display font-extrabold text-3xl md:text-4xl uppercase">
             Your Reels
           </h1>
         </div>
@@ -171,7 +171,7 @@ function DemoSection() {
   return (
     <div className="mt-10 bg-[#0a0a0a] text-white rounded-2xl p-6 md:p-8">
       <p className="text-[10px] uppercase tracking-widest text-white/30 mb-1">Demo</p>
-      <p className="font-[family-name:var(--font-syne)] font-bold text-2xl uppercase mb-1">
+      <p className="font-display font-bold text-2xl uppercase mb-1">
         Drop at 0:02s
       </p>
       <p className="text-[#e8002d] text-sm mb-5">−44% viewers lost at second 2</p>
@@ -199,7 +199,7 @@ function NotConnected() {
   return (
     <div className="max-w-xl mx-auto px-6 py-24 text-center">
       <p className="text-[10px] uppercase tracking-[0.2em] text-[#888] mb-4">Pro feature</p>
-      <h1 className="font-[family-name:var(--font-syne)] font-extrabold text-3xl uppercase mb-4">
+      <h1 className="font-display font-extrabold text-3xl uppercase mb-4">
         Dashboard
       </h1>
       <p className="text-[#888] text-sm mb-8">

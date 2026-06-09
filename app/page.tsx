@@ -41,7 +41,7 @@ export default async function LibraryPage({
     <div className="max-w-7xl mx-auto px-6 py-12">
       <div className="mb-8">
         <p className="text-[10px] uppercase tracking-[0.2em] text-[#888] mb-3">Free · 1000+ hooks</p>
-        <h1 className="font-[family-name:var(--font-syne)] font-extrabold text-4xl md:text-5xl uppercase leading-none">
+        <h1 className="font-display font-extrabold text-4xl md:text-5xl uppercase leading-none">
           Hook<br />Library
         </h1>
         <p className="text-[#888] text-sm mt-4 max-w-md">
@@ -75,7 +75,7 @@ export default async function LibraryPage({
 
       <div className="mt-16 border-t border-black/10 pt-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div>
-          <p className="font-[family-name:var(--font-syne)] font-bold text-lg uppercase">Want to know why YOUR Reels drop?</p>
+          <p className="font-display font-bold text-lg uppercase">Want to know why YOUR Reels drop?</p>
           <p className="text-[#888] text-sm mt-1">Connect Instagram and we decode your retention graph.</p>
         </div>
         <a href="/connect" className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap">

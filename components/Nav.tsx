@@ -6,7 +6,7 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-black/10 h-14 flex items-center px-6 justify-between">
-      <Link href="/" className="font-[family-name:var(--font-syne)] font-bold text-sm tracking-tight flex items-center gap-2">
+      <Link href="/" className="font-display font-bold text-sm tracking-tight flex items-center gap-2">
         <span className="w-6 h-6 bg-[#e8002d] rounded flex items-center justify-center text-white text-[10px] font-black">H</span>
         HookedAI
       </Link>
