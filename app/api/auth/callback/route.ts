@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exchangeCode, getLongLivedToken, getMe } from '@/lib/instagram';
 
+const APP_ID = process.env.INSTAGRAM_APP_ID ?? '1620617545694436';
+const APP_SECRET = process.env.INSTAGRAM_APP_SECRET ?? '';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://hooked-ai-seven.vercel.app';
+const REDIRECT_URI = `${APP_URL}/api/auth/callback`;
 const COOKIE_MAX = 60 * 60 * 24 * 60;
 
 export async function GET(req: NextRequest) {
@@ -9,43 +11,35 @@ export async function GET(req: NextRequest) {
   const code = searchParams.get('code');
   const error = searchParams.get('error');
 
-  // This page closes the popup and notifies the parent window
-  const closePopup = (success: boolean, username?: string) => {
-    const html = `<!DOCTYPE html>
-<html>
-<head><title>Authorizing...</title></head>
-<body>
-<script>
-  if (window.opener) {
-    window.opener.postMessage({ type: 'ig_auth', success: ${success}, username: '${username ?? ''}' }, '*');
-    window.close();
-  } else {
-    window.location.href = '${APP_URL}/pro${success ? '' : '?error=token'}';
+  if (error || !code) {
+    return NextResponse.redirect(`${APP_URL}/pro?error=denied`);
   }
-</script>
-</body>
-</html>`;
-    return new NextResponse(html, { headers: { 'Content-Type': 'text/html' } });
-  };
-
-  if (error || !code) return closePopup(false);
 
   try {
-    const short = await exchangeCode(code);
-    if (!short.access_token) return closePopup(false);
+    // Exchange code → access token (Facebook Login)
+    const tokenRes = await fetch(
+      `https://graph.facebook.com/v22.0/oauth/access_token?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&client_secret=${APP_SECRET}&code=${code}`
+    );
+    const tokenData = await tokenRes.json();
 
-    const long = await getLongLivedToken(short.access_token);
-    if (!long.access_token) return closePopup(false);
+    if (!tokenData.access_token) {
+      console.error('Token error:', tokenData);
+      return NextResponse.redirect(`${APP_URL}/pro?error=token`);
+    }
 
-    const me = await getMe(long.access_token);
+    // Get user info
+    const meRes = await fetch(
+      `https://graph.facebook.com/v22.0/me?fields=id,name,email&access_token=${tokenData.access_token}`
+    );
+    const me = await meRes.json();
 
-    const res = closePopup(true, me.username);
-    res.cookies.set('ig_token', long.access_token, { httpOnly: true, secure: true, maxAge: COOKIE_MAX, path: '/' });
-    res.cookies.set('ig_user_id', me.id, { httpOnly: true, secure: true, maxAge: COOKIE_MAX, path: '/' });
-    res.cookies.set('ig_username', me.username, { httpOnly: false, secure: true, maxAge: COOKIE_MAX, path: '/' });
+    const res = NextResponse.redirect(`${APP_URL}/pro`);
+    res.cookies.set('fb_user_id', me.id ?? '', { httpOnly: true, secure: true, maxAge: COOKIE_MAX, path: '/' });
+    res.cookies.set('fb_name', me.name ?? '', { httpOnly: false, secure: true, maxAge: COOKIE_MAX, path: '/' });
+    res.cookies.set('fb_token', tokenData.access_token, { httpOnly: true, secure: true, maxAge: COOKIE_MAX, path: '/' });
     return res;
   } catch (e) {
     console.error('Auth callback error:', e);
-    return closePopup(false);
+    return NextResponse.redirect(`${APP_URL}/pro?error=server`);
   }
 }
