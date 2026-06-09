@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Eye, Heart, Zap, Copy, Check, Loader2, ArrowRight, ExternalLink } from 'lucide-react';
+import { Eye, Heart, Zap, Copy, Check, Loader2, ArrowRight, ExternalLink, Lock, RotateCcw } from 'lucide-react';
 
 function fmt(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -28,6 +28,26 @@ const PLACEMENT_LABEL: Record<string, string> = {
 
 interface Reel { shortCode: string; caption: string; views: number; likes: number; thumbnail: string | null; permalink: string; }
 interface Analysis { reel: Reel; hookType: string; placement: string; hookScript: string; reason: string; viewsBoost: number; }
+interface SavedSession { username: string; results: Analysis[]; savedAt: number; }
+
+const STORAGE_KEY = 'hooked_pro_session';
+
+function loadSession(): SavedSession | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function saveSession(username: string, results: Analysis[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ username, results, savedAt: Date.now() }));
+  } catch { /* ignore */ }
+}
+
+function clearSession() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+}
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -52,7 +72,7 @@ function AnalysisCard({ data }: { data: Analysis }) {
             ? <img src={reel.thumbnail} alt="" className="w-full h-full object-cover" style={{ aspectRatio: '9/14' }} />
             : <div className="w-full bg-gradient-to-br from-gray-200 to-gray-400" style={{ aspectRatio: '9/14' }} />
           }
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
             <div className="bg-black/60 rounded-full p-2"><ExternalLink size={14} className="text-white" /></div>
           </div>
         </a>
@@ -83,25 +103,42 @@ function AnalysisCard({ data }: { data: Analysis }) {
   );
 }
 
-export default function ProAnalyzer({ username }: { username: string }) {
+export default function ProAnalyzer() {
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Analysis[] | null>(null);
+  const [activeUser, setActiveUser] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [step, setStep] = useState('');
+  const [hydrated, setHydrated] = useState(false);
 
-  const analyze = async () => {
-    setLoading(true); setError(''); setResults(null);
+  useEffect(() => {
+    const session = loadSession();
+    if (session) {
+      setResults(session.results);
+      setActiveUser(session.username);
+      setUsername(session.username);
+    }
+    setHydrated(true);
+  }, []);
+
+  const analyze = async (uname?: string) => {
+    const target = (uname ?? username).replace('@', '').trim();
+    if (!target) return;
+    setLoading(true); setError(''); setResults(null); setActiveUser(null);
     setStep('Загружаем reels...');
     const timer = setTimeout(() => setStep('ИИ анализирует каждое видео...'), 20000);
     try {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({ username: target }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? 'Ошибка'); return; }
       setResults(data.reels);
+      setActiveUser(target);
+      saveSession(target, data.reels);
     } catch {
       setError('Ошибка сети. Попробуй ещё раз.');
     } finally {
@@ -109,32 +146,75 @@ export default function ProAnalyzer({ username }: { username: string }) {
     }
   };
 
-  useEffect(() => { analyze(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const reset = () => {
+    clearSession();
+    setResults(null);
+    setActiveUser(null);
+    setUsername('');
+    setError('');
+  };
+
+  if (!hydrated) return null;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
+      {/* Input row — always shown */}
+      {!activeUser ? (
+        <>
+          <div className="flex gap-2">
+            <div className="flex-1 flex items-center border border-black/20 rounded-full overflow-hidden focus-within:border-black transition-colors bg-white">
+              <span className="pl-5 text-[#aaa] text-sm select-none">@</span>
+              <input
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && !loading && analyze()}
+                placeholder="твой_instagram"
+                className="flex-1 px-2 py-3.5 text-sm outline-none bg-transparent"
+                autoFocus
+              />
+            </div>
+            <button onClick={() => analyze()} disabled={loading || !username.trim()}
+              className="bg-[#e8002d] text-white font-bold text-sm px-6 py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center gap-2 whitespace-nowrap">
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
+              {loading ? 'Анализ...' : 'Анализировать'}
+            </button>
+          </div>
+          <div className="flex items-center gap-2 -mt-2 pl-1">
+            <Lock size={10} className="text-[#bbb]" />
+            <p className="text-[11px] text-[#bbb]">Только ты видишь свой анализ · Публичный аккаунт · 30–60 сек</p>
+          </div>
+        </>
+      ) : (
+        <div className="flex items-center justify-between bg-[#f7f7f7] rounded-2xl px-4 py-3 border border-black/8">
+          <div className="flex items-center gap-2">
+            <Lock size={12} className="text-[#e8002d]" />
+            <div>
+              <p className="text-[11px] text-[#888] uppercase tracking-wider font-bold">Конфиденциальный анализ</p>
+              <p className="text-sm font-semibold">@{activeUser}</p>
+            </div>
+          </div>
+          <button onClick={reset} className="flex items-center gap-1 text-[11px] text-[#aaa] hover:text-black transition-colors">
+            <RotateCcw size={11} /> Другой аккаунт
+          </button>
+        </div>
+      )}
+
       {loading && (
         <div className="text-center py-16 flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-2 border-[#e8002d] border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-[#888]">{step}</p>
-          <p className="text-[11px] text-[#bbb]">30–60 секунд</p>
         </div>
       )}
       {error && !loading && (
         <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 flex justify-between items-center">
           <span>{error}</span>
-          <button onClick={analyze} className="text-xs font-bold underline ml-3 shrink-0">Повторить</button>
+          <button onClick={() => analyze()} className="text-xs font-bold underline ml-3 shrink-0">Повторить</button>
         </div>
       )}
       {results && !loading && (
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-[#888]">{results.length} reels · ИИ рекомендации готовы</p>
-            <button onClick={analyze} disabled={loading}
-              className="text-[11px] text-[#888] hover:text-black transition-colors flex items-center gap-1">
-              <ArrowRight size={11} />Обновить
-            </button>
-          </div>
+          <p className="text-xs text-[#888]">{results.length} reels · ИИ рекомендации готовы</p>
           {results.map((r, i) => <AnalysisCard key={i} data={r} />)}
           <div className="border border-dashed border-black/15 rounded-2xl p-6 text-center mt-1">
             <p className="text-sm font-medium">Хочешь больше примеров таких хуков?</p>
