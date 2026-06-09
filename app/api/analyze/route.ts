@@ -13,25 +13,17 @@ const HOOK_TYPES = [
 export const maxDuration = 120;
 
 export async function POST(req: NextRequest) {
-  const igToken = req.cookies.get('ig_token')?.value;
+  const { username } = await req.json().catch(() => ({}));
+  if (!username) return NextResponse.json({ error: 'username required' }, { status: 400 });
 
   let reels: Reel[] = [];
-
-  if (igToken) {
-    // Authenticated: use Instagram Graph API
-    reels = await fetchFromInstagram(igToken);
-    if (!reels.length) {
-      return NextResponse.json({ error: 'Не найдено видео в аккаунте. Убедись что есть опубликованные Reels.' }, { status: 404 });
-    }
-  } else {
-    // Fallback: scrape by username (unauthenticated)
-    const { username } = await req.json().catch(() => ({}));
-    if (!username) return NextResponse.json({ error: 'Нет авторизации' }, { status: 401 });
-    try {
-      reels = await scrapeByUsername(username.replace('@', '').trim());
-    } catch {
-      return NextResponse.json({ error: 'Не удалось загрузить reels.' }, { status: 422 });
-    }
+  try {
+    reels = await scrapeByUsername(username.replace('@', '').trim());
+  } catch {
+    return NextResponse.json({ error: 'Не удалось загрузить reels. Проверь username.' }, { status: 422 });
+  }
+  if (!reels.length) {
+    return NextResponse.json({ error: 'Reels не найдены. Аккаунт должен быть публичным.' }, { status: 404 });
   }
 
   const analyses = await Promise.all(reels.map(r => analyzeReel(r)));
