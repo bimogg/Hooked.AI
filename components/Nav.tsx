@@ -11,7 +11,7 @@ export default function Nav() {
         HookedAI
       </Link>
       <nav className="hidden md:flex items-center gap-8 text-[11px] uppercase tracking-widest text-[#888]">
-        <Link href="/" className="hover:text-black transition-colors">Library</Link>
+        <Link href="/library" className="hover:text-black transition-colors">Library</Link>
         <Link href="/pro" className="hover:text-black transition-colors">Pro</Link>
         <Link href="/pricing" className="hover:text-black transition-colors">Pricing</Link>
         <Link href="/dashboard" className="hover:text-black transition-colors">Dashboard</Link>
@@ -29,7 +29,7 @@ export default function Nav() {
       </button>
       {open && (
         <div className="absolute top-14 inset-x-0 bg-white border-b border-black/10 flex flex-col gap-4 px-6 py-6 md:hidden">
-          <Link href="/" onClick={() => setOpen(false)} className="text-sm text-[#888]">Library</Link>
+          <Link href="/library" onClick={() => setOpen(false)} className="text-sm text-[#888]">Library</Link>
           <Link href="/pro" onClick={() => setOpen(false)} className="text-sm font-bold text-[#e8002d]">Pro — AI Analyzer</Link>
           <Link href="/pricing" onClick={() => setOpen(false)} className="text-sm text-[#888]">Pricing</Link>
           <Link href="/dashboard" onClick={() => setOpen(false)} className="text-sm text-[#888]">Dashboard</Link>

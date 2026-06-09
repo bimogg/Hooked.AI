@@ -1,89 +1,165 @@
-import { supabaseAdmin as supabase, Hook } from '@/lib/supabase';
-import HookCard from '@/components/HookCard';
-import CountdownBanner from '@/components/CountdownBanner';
+import Link from 'next/link';
+import { ArrowRight, Zap, BarChart2, BookOpen, Lock } from 'lucide-react';
 
-const HOOK_TYPES = ['all', 'Hook Tutorial', 'Visual Hook', 'Question Hook', 'Tutorial Hook', 'Engagement Hook', 'Curiosity Hook', 'Warning Hook', 'Challenge Hook', 'Mistake Hook'];
+export const metadata = {
+  title: 'HookedAI — Stop The Drop',
+  description: 'AI hook analyzer for Instagram creators. Find winning hooks, decode why your Reels lose viewers.',
+};
 
-async function getHooks(type?: string): Promise<Hook[]> {
-  try {
-    let q = supabase
-      .from('hooks')
-      .select('*')
-      .not('caption', 'is', null)
-      .neq('caption', '')
-      .order('views', { ascending: false })
-      .limit(200);
-    if (type && type !== 'all') q = q.eq('niche', type);
-    const timeout = new Promise<null>((r) => setTimeout(() => r(null), 5000));
-    const result = await Promise.race([q, timeout]);
-    if (result && 'data' in result && result.data && result.data.length > 0) {
-      const hooks = result.data as Hook[];
-      const seen = new Map<string, number>();
-      return hooks.filter(h => {
-        const c = seen.get(h.creator_username) ?? 0;
-        if (c >= 2) return false;
-        seen.set(h.creator_username, c + 1);
-        return true;
-      });
-    }
-  } catch {}
-  return [];
-}
-
-export default async function LibraryPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ type?: string }>;
-}) {
-  const { type } = await searchParams;
-  const hooks = await getHooks(type);
-
+export default function LandingPage() {
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      <CountdownBanner />
-      <div className="mb-8 mt-6">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#888] mb-3">Free · 1000+ hooks</p>
-        <h1 className="font-display font-extrabold text-4xl md:text-5xl uppercase leading-none">
-          Hook<br />Library
-        </h1>
-        <p className="text-[#888] text-sm mt-4 max-w-md">
-          Hooks from top creators with real views data. Find what works before you record.
-        </p>
-      </div>
+    <div className="flex flex-col">
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        {HOOK_TYPES.map(t => (
-          <a
-            key={t}
-            href={t === 'all' ? '/' : `/?type=${encodeURIComponent(t)}`}
-            className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors capitalize ${
-              (type === t) || (!type && t === 'all')
-                ? 'bg-black text-white border-black'
-                : 'border-black/20 text-[#555] hover:border-black hover:text-black'
-            }`}
-          >
-            {t}
-          </a>
-        ))}
-      </div>
-
-      <p className="text-xs text-[#888] mb-3">{hooks.length} hooks · sorted by views</p>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {hooks.map((h) => (
-          <HookCard key={h.id} hook={h} />
-        ))}
-      </div>
-
-      <div className="mt-16 border-t border-black/10 pt-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div>
-          <p className="font-display font-bold text-lg uppercase">Want to know why YOUR Reels drop?</p>
-          <p className="text-[#888] text-sm mt-1">Connect Instagram and we decode your retention graph.</p>
+      {/* HERO */}
+      <section className="max-w-5xl mx-auto px-6 pt-20 pb-24 text-center flex flex-col items-center gap-8">
+        <div className="inline-flex items-center gap-2 bg-black text-white text-[10px] uppercase tracking-widest font-bold px-4 py-1.5 rounded-full">
+          <span className="w-1.5 h-1.5 bg-[#e8002d] rounded-full animate-pulse" />
+          Early Access — Free Pro Trial
         </div>
-        <a href="/connect" className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap">
-          Connect Instagram →
-        </a>
-      </div>
+
+        <h1 className="font-display font-extrabold text-5xl md:text-7xl lg:text-8xl uppercase leading-[0.9] tracking-tight">
+          Stop<br />
+          <span className="text-[#e8002d]">The</span><br />
+          Drop
+        </h1>
+
+        <p className="text-[#666] text-base md:text-lg max-w-lg leading-relaxed">
+          Your Reels lose 80% of viewers in the first 3 seconds.
+          HookedAI finds the exact hook that makes them stay.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <Link href="/pro"
+            className="bg-[#e8002d] text-white font-bold text-sm px-8 py-4 rounded-full hover:opacity-90 transition-opacity flex items-center gap-2">
+            Analyze My Reels <ArrowRight size={16} />
+          </Link>
+          <Link href="/library"
+            className="border border-black/20 text-black font-bold text-sm px-8 py-4 rounded-full hover:border-black transition-colors">
+            Browse Hook Library
+          </Link>
+        </div>
+
+        <p className="text-xs text-[#bbb]">Free to start · No credit card · Works with public accounts</p>
+      </section>
+
+      {/* PROBLEM */}
+      <section className="bg-[#0a0a0a] text-white py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-[10px] uppercase tracking-widest text-[#555] font-bold mb-4">The Problem</p>
+          <h2 className="font-display font-extrabold text-3xl md:text-5xl uppercase leading-tight mb-6">
+            You tried everything.<br />Views still drop.
+          </h2>
+          <p className="text-[#888] text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+            You post consistently. You follow trends. You copy what works for others.
+            But your Reels still lose viewers after 2 seconds — and nobody tells you why.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-14">
+            {[
+              { stat: '80%', label: 'of viewers leave in the first 3 seconds' },
+              { stat: '3 sec', label: 'is all you have to hook someone in' },
+              { stat: '0', label: 'tools that tell you exactly what hook to use' },
+            ].map(({ stat, label }) => (
+              <div key={stat} className="border border-white/10 rounded-2xl p-6">
+                <p className="font-display font-extrabold text-4xl text-[#e8002d]">{stat}</p>
+                <p className="text-[#888] text-sm mt-2 leading-snug">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-[10px] uppercase tracking-widest text-[#888] font-bold mb-4 text-center">What You Get</p>
+          <h2 className="font-display font-extrabold text-3xl md:text-5xl uppercase leading-tight text-center mb-14">
+            Two tools.<br />One mission.
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Hook Library */}
+            <div className="border border-black/10 rounded-3xl p-8 flex flex-col gap-4 hover:border-black/25 transition-colors">
+              <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                <BookOpen size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-[#888] font-bold mb-1">Free</p>
+                <h3 className="font-display font-extrabold text-2xl uppercase">Hook Library</h3>
+              </div>
+              <p className="text-[#666] text-sm leading-relaxed">
+                15+ viral hooks from top creators with real views data. Filter by type — Visual, Question, Warning, Tutorial and more. See what actually works before you record.
+              </p>
+              <Link href="/library"
+                className="mt-auto inline-flex items-center gap-2 text-sm font-bold hover:gap-3 transition-all">
+                Browse Library <ArrowRight size={14} />
+              </Link>
+            </div>
+
+            {/* Pro Analyzer */}
+            <div className="border border-[#e8002d] rounded-3xl p-8 flex flex-col gap-4 bg-[#fff8f8]">
+              <div className="w-10 h-10 bg-[#e8002d] rounded-xl flex items-center justify-center">
+                <Zap size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-[#e8002d] font-bold mb-1">Pro</p>
+                <h3 className="font-display font-extrabold text-2xl uppercase">AI Hook Analyzer</h3>
+              </div>
+              <p className="text-[#666] text-sm leading-relaxed">
+                Enter your Instagram username — AI scrapes your latest Reels, analyzes each one, and writes a custom hook script. Exact type, exact placement, ready to copy.
+              </p>
+              <Link href="/pro"
+                className="mt-auto inline-flex items-center gap-2 text-sm font-bold text-[#e8002d] hover:gap-3 transition-all">
+                Try for Free <ArrowRight size={14} />
+              </Link>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="bg-[#f7f7f7] py-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-[10px] uppercase tracking-widest text-[#888] font-bold mb-4 text-center">How It Works</p>
+          <h2 className="font-display font-extrabold text-3xl md:text-5xl uppercase leading-tight text-center mb-14">
+            3 steps.<br />Better hooks.
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { n: '01', title: 'Enter username', desc: 'Type your Instagram @username. Account must be public.' },
+              { n: '02', title: 'AI analyzes', desc: 'We pull your latest Reels and Claude AI analyzes each hook in detail.' },
+              { n: '03', title: 'Get your scripts', desc: 'Receive custom hook scripts per video — type, placement, copy-ready text.' },
+            ].map(({ n, title, desc }) => (
+              <div key={n} className="flex flex-col gap-3">
+                <span className="font-display font-extrabold text-5xl text-black/10">{n}</span>
+                <h3 className="font-display font-bold text-lg uppercase">{title}</h3>
+                <p className="text-[#666] text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24 px-6 text-center">
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-6">
+          <Lock size={20} className="text-[#e8002d]" />
+          <h2 className="font-display font-extrabold text-3xl md:text-5xl uppercase leading-tight">
+            Your analysis.<br />Only yours.
+          </h2>
+          <p className="text-[#888] text-sm leading-relaxed max-w-md">
+            Results are private and saved to your browser. No account needed. Just enter your username and get your confidential hook analysis.
+          </p>
+          <Link href="/pro"
+            className="bg-[#e8002d] text-white font-bold text-sm px-10 py-4 rounded-full hover:opacity-90 transition-opacity flex items-center gap-2">
+            Analyze My Reels Free <ArrowRight size={16} />
+          </Link>
+          <Link href="/pricing" className="text-xs text-[#aaa] hover:text-black transition-colors">
+            See pricing plans →
+          </Link>
+        </div>
+      </section>
+
     </div>
   );
 }
