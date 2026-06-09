@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import ProAnalyzer from '@/components/ProAnalyzer';
 
 export const metadata = { title: 'HookedAI Pro — AI Hook Analyzer' };
@@ -8,6 +9,9 @@ export default async function ProPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
+  const cookieStore = await cookies();
+  const igUsername = cookieStore.get('ig_username')?.value;
+  const isConnected = !!cookieStore.get('ig_token')?.value;
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
@@ -17,17 +21,17 @@ export default async function ProPage({
           AI Hook<br />Analyzer
         </h1>
         <p className="text-[#888] text-sm mt-4 max-w-md">
-          Введи любой публичный Instagram username — ИИ проанализирует последние Reels и напишет готовый скрипт хука для каждого видео.
+          ИИ анализирует твои Reels и пишет готовый скрипт хука для каждого видео — чтобы зрители смотрели до конца.
         </p>
       </div>
 
       {error && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
-          Ошибка авторизации. Используй анализ по username ниже.
+          Ошибка авторизации. Попробуй ещё раз.
         </div>
       )}
 
-      <ProAnalyzer />
+      <ProAnalyzer isConnected={isConnected} username={igUsername} />
     </div>
   );
 }
