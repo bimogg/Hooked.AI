@@ -11,10 +11,10 @@ export function getAuthUrl() {
   const params = new URLSearchParams({
     client_id: APP_ID,
     redirect_uri: REDIRECT_URI,
-    scope: 'instagram_business_basic',
+    scope: 'public_profile,email',
     response_type: 'code',
   });
-  return `https://www.instagram.com/oauth/authorize?${params}`;
+  return `https://www.facebook.com/dialog/oauth?${params}`;
 }
 
 export async function exchangeCode(code: string) {

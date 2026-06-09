@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exchangeCode, getLongLivedToken, getMe } from '@/lib/instagram';
 
+const APP_ID = process.env.INSTAGRAM_APP_ID ?? '1620617545694436';
+const APP_SECRET = process.env.INSTAGRAM_APP_SECRET ?? '';
 const RAW = process.env.NEXT_PUBLIC_APP_URL ?? '';
 const APP_URL = RAW.startsWith('http://localhost') || !RAW
   ? 'https://hooked-ai-seven.vercel.app'
   : RAW;
+const REDIRECT_URI = `${APP_URL}/api/auth/callback`;
 const COOKIE_MAX = 60 * 60 * 24 * 60;
 
 export async function GET(req: NextRequest) {
@@ -17,23 +19,23 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const short = await exchangeCode(code);
-    if (!short.access_token) {
-      console.error('Token exchange failed:', short);
+    const tokenRes = await fetch(
+      `https://graph.facebook.com/v22.0/oauth/access_token?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&client_secret=${APP_SECRET}&code=${code}`
+    );
+    const tokenData = await tokenRes.json();
+    if (!tokenData.access_token) {
+      console.error('Token error:', tokenData);
       return NextResponse.redirect(`${APP_URL}/pro?error=token`);
     }
 
-    const long = await getLongLivedToken(short.access_token);
-    if (!long.access_token) {
-      return NextResponse.redirect(`${APP_URL}/pro?error=token`);
-    }
-
-    const me = await getMe(long.access_token);
+    const meRes = await fetch(
+      `https://graph.facebook.com/v22.0/me?fields=id,name&access_token=${tokenData.access_token}`
+    );
+    const me = await meRes.json();
 
     const res = NextResponse.redirect(`${APP_URL}/pro`);
-    res.cookies.set('ig_token', long.access_token, { httpOnly: true, secure: true, maxAge: COOKIE_MAX, path: '/' });
-    res.cookies.set('ig_user_id', me.id ?? '', { httpOnly: true, secure: true, maxAge: COOKIE_MAX, path: '/' });
-    res.cookies.set('ig_username', me.username ?? '', { httpOnly: false, secure: true, maxAge: COOKIE_MAX, path: '/' });
+    res.cookies.set('fb_token', tokenData.access_token, { httpOnly: true, secure: true, maxAge: COOKIE_MAX, path: '/' });
+    res.cookies.set('fb_name', me.name ?? '', { httpOnly: false, secure: true, maxAge: COOKIE_MAX, path: '/' });
     return res;
   } catch (e) {
     console.error('Auth callback error:', e);
