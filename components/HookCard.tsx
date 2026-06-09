@@ -57,12 +57,20 @@ const NICHE_TAG: Record<string, string> = {
   general: 'bg-gray-100 text-gray-600',
 };
 
+function idToShortcode(id: string): string {
+  const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  let n = BigInt(id);
+  let code = '';
+  while (n > 0n) { code = alpha[Number(n % 64n)] + code; n = n / 64n; }
+  return code;
+}
+
 export default function HookCard({ hook }: { hook: Hook }) {
   const [open, setOpen] = useState(false);
   const bg = NICHE_BG[hook.niche] ?? NICHE_BG.general;
   const tag = NICHE_TAG[hook.niche] ?? NICHE_TAG.general;
   const igUrl = hook.instagram_id
-    ? `https://www.instagram.com/reel/${hook.instagram_id}/`
+    ? `https://www.instagram.com/reel/${idToShortcode(hook.instagram_id)}/`
     : `https://www.instagram.com/${hook.creator_username}/`;
 
   return (
