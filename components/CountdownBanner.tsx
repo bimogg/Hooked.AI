@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'hooked_countdown_end';
-const DURATION_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+const DURATION_MS = 3 * 24 * 60 * 60 * 1000;
 
 function getEnd(): number {
   try {
@@ -39,14 +39,14 @@ export default function CountdownBanner() {
   if (!time) return null;
 
   return (
-    <div className="bg-[#0a0a0a] text-white text-center py-2.5 px-4 text-xs flex items-center justify-center gap-3 flex-wrap">
-      <span className="text-[#888] uppercase tracking-widest text-[9px] font-bold">Early Access</span>
-      <span className="text-white/90">Free Pro access ends in</span>
-      <span className="font-mono font-bold text-[#e8002d] tabular-nums">
+    <div className="inline-flex items-center gap-3 bg-black text-white rounded-full px-4 py-2 mb-6 flex-wrap">
+      <span className="text-[9px] uppercase tracking-widest text-[#888] font-bold">Early Access</span>
+      <span className="text-xs text-white/80">Free Pro ends in</span>
+      <span className="font-mono font-bold text-[#e8002d] tabular-nums text-sm">
         {time.h}:{time.m}:{time.s}
       </span>
       <a href="/pro" className="bg-[#e8002d] text-white text-[10px] font-bold px-3 py-1 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap">
-        Try Pro Free →
+        Try Pro →
       </a>
     </div>
   );

@@ -1,5 +1,6 @@
 import { supabaseAdmin as supabase, Hook } from '@/lib/supabase';
 import HookCard from '@/components/HookCard';
+import CountdownBanner from '@/components/CountdownBanner';
 
 const HOOK_TYPES = ['all', 'Hook Tutorial', 'Visual Hook', 'Question Hook', 'Tutorial Hook', 'Engagement Hook', 'Curiosity Hook', 'Warning Hook', 'Challenge Hook', 'Mistake Hook'];
 
@@ -39,7 +40,8 @@ export default async function LibraryPage({
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
-      <div className="mb-8">
+      <CountdownBanner />
+      <div className="mb-8 mt-6">
         <p className="text-[10px] uppercase tracking-[0.2em] text-[#888] mb-3">Free · 1000+ hooks</p>
         <h1 className="font-display font-extrabold text-4xl md:text-5xl uppercase leading-none">
           Hook<br />Library
