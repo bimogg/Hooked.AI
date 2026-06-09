@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Eye, Heart, Zap, Copy, Check, Loader2, ArrowRight, ExternalLink } from 'lucide-react';
 
 function fmt(n: number) {
@@ -21,9 +21,9 @@ const HOOK_COLORS: Record<string, string> = {
 };
 
 const PLACEMENT_LABEL: Record<string, string> = {
-  'Opening (first 3 sec)':         '🎬 0–3 сек — Вступление',
-  'Pattern interrupt (10-15 sec)':  '⚡ 10–15 сек — Удержание',
-  'Loop hook (last 5 sec)':         '🔄 Последние 5 сек — Петля',
+  'Opening (first 3 sec)':         '🎬 0–3 сек',
+  'Pattern interrupt (10-15 sec)':  '⚡ 10–15 сек',
+  'Loop hook (last 5 sec)':         '🔄 Финал',
 };
 
 interface Reel { shortCode: string; caption: string; views: number; likes: number; thumbnail: string | null; permalink: string; }
@@ -32,10 +32,8 @@ interface Analysis { reel: Reel; hookType: string; placement: string; hookScript
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <button
-      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-      className="flex items-center gap-1 text-[11px] text-[#888] hover:text-black transition-colors shrink-0"
-    >
+    <button onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+      className="flex items-center gap-1 text-[11px] text-[#888] hover:text-black transition-colors shrink-0">
       {copied ? <><Check size={12} className="text-emerald-600" />Скопировано</> : <><Copy size={12} />Копировать</>}
     </button>
   );
@@ -58,28 +56,22 @@ function AnalysisCard({ data }: { data: Analysis }) {
             <div className="bg-black/60 rounded-full p-2"><ExternalLink size={14} className="text-white" /></div>
           </div>
         </a>
-
         <div className="flex-1 p-4 flex flex-col gap-2.5 min-w-0">
           <div className="flex items-center gap-3 text-[11px] text-[#aaa]">
             <span className="flex items-center gap-1"><Eye size={10} />{fmt(reel.views)}</span>
             <span className="flex items-center gap-1"><Heart size={10} />{fmt(reel.likes)}</span>
           </div>
           <p className="text-[11px] text-[#666] leading-snug line-clamp-2">{reel.caption}</p>
-
           <div className="bg-[#f9f9f9] rounded-xl p-3 flex flex-col gap-2 border border-black/5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${tagClass}`}>
-                {hookType}
-              </span>
+              <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${tagClass}`}>{hookType}</span>
               <span className="text-[10px] text-[#999]">{PLACEMENT_LABEL[placement] ?? placement}</span>
               <span className="ml-auto text-[11px] font-bold text-emerald-600 shrink-0">+{viewsBoost}%</span>
             </div>
             <div className="bg-white border border-black/8 rounded-lg p-2.5">
               <div className="flex items-start gap-2">
                 <Zap size={12} className="text-[#e8002d] mt-0.5 shrink-0" />
-                <p className="text-[12px] font-medium leading-snug text-[#0a0a0a] flex-1 min-w-0">
-                  &ldquo;{hookScript}&rdquo;
-                </p>
+                <p className="text-[12px] font-medium leading-snug text-[#0a0a0a] flex-1 min-w-0">&ldquo;{hookScript}&rdquo;</p>
               </div>
               <div className="flex justify-end mt-2"><CopyButton text={hookScript} /></div>
             </div>
@@ -91,15 +83,13 @@ function AnalysisCard({ data }: { data: Analysis }) {
   );
 }
 
-export default function ProAnalyzer() {
-  const [username, setUsername] = useState('');
+export default function ProAnalyzer({ username }: { username: string }) {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Analysis[] | null>(null);
   const [error, setError] = useState('');
   const [step, setStep] = useState('');
 
   const analyze = async () => {
-    if (!username.trim()) return;
     setLoading(true); setError(''); setResults(null);
     setStep('Загружаем reels...');
     const timer = setTimeout(() => setStep('ИИ анализирует каждое видео...'), 20000);
@@ -119,55 +109,36 @@ export default function ProAnalyzer() {
     }
   };
 
-  return (
-    <div className="flex flex-col gap-5">
-      <div className="flex gap-2">
-        <div className="flex-1 flex items-center border border-black/20 rounded-full overflow-hidden focus-within:border-black transition-colors bg-white">
-          <span className="pl-5 text-[#aaa] text-sm select-none">@</span>
-          <input
-            type="text"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && !loading && analyze()}
-            placeholder="твой_instagram"
-            className="flex-1 px-2 py-3.5 text-sm outline-none bg-transparent"
-            autoFocus
-          />
-        </div>
-        <button
-          onClick={analyze}
-          disabled={loading || !username.trim()}
-          className="bg-[#e8002d] text-white font-bold text-sm px-6 py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center gap-2 whitespace-nowrap"
-        >
-          {loading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
-          {loading ? 'Анализ...' : 'Анализировать'}
-        </button>
-      </div>
-      <p className="text-[11px] text-[#bbb] -mt-2 pl-1">Аккаунт должен быть публичным · обычно 30–60 сек</p>
+  useEffect(() => { analyze(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  return (
+    <div className="flex flex-col gap-4">
       {loading && (
         <div className="text-center py-16 flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-2 border-[#e8002d] border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-[#888]">{step}</p>
+          <p className="text-[11px] text-[#bbb]">30–60 секунд</p>
         </div>
       )}
-
       {error && !loading && (
         <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 flex justify-between items-center">
           <span>{error}</span>
           <button onClick={analyze} className="text-xs font-bold underline ml-3 shrink-0">Повторить</button>
         </div>
       )}
-
       {results && !loading && (
         <div className="flex flex-col gap-3">
-          <p className="text-xs text-[#888]">{results.length} reels проанализировано · ИИ рекомендации готовы</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-[#888]">{results.length} reels · ИИ рекомендации готовы</p>
+            <button onClick={analyze} disabled={loading}
+              className="text-[11px] text-[#888] hover:text-black transition-colors flex items-center gap-1">
+              <ArrowRight size={11} />Обновить
+            </button>
+          </div>
           {results.map((r, i) => <AnalysisCard key={i} data={r} />)}
           <div className="border border-dashed border-black/15 rounded-2xl p-6 text-center mt-1">
             <p className="text-sm font-medium">Хочешь больше примеров таких хуков?</p>
-            <a href="/" className="inline-block mt-2 text-[#e8002d] text-sm font-bold hover:underline">
-              Смотреть Hook Library →
-            </a>
+            <a href="/" className="inline-block mt-2 text-[#e8002d] text-sm font-bold hover:underline">Смотреть Hook Library →</a>
           </div>
         </div>
       )}
