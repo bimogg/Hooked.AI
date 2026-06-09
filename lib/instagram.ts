@@ -1,16 +1,16 @@
 const APP_ID = process.env.INSTAGRAM_APP_ID ?? '1620617545694436';
-const APP_SECRET = process.env.INSTAGRAM_APP_SECRET!;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
-const REDIRECT_URI = `${APP_URL}/api/auth/callback`;
+const APP_SECRET = process.env.INSTAGRAM_APP_SECRET ?? '';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://hooked-ai-seven.vercel.app';
+export const REDIRECT_URI = `${APP_URL}/api/auth/callback`;
 
 export function getAuthUrl() {
   const params = new URLSearchParams({
     client_id: APP_ID,
     redirect_uri: REDIRECT_URI,
-    scope: 'instagram_basic,instagram_manage_insights,pages_read_engagement',
+    scope: 'instagram_business_basic,instagram_business_manage_insights',
     response_type: 'code',
   });
-  return `https://api.instagram.com/oauth/authorize?${params}`;
+  return `https://www.instagram.com/oauth/authorize?${params}`;
 }
 
 export async function exchangeCode(code: string) {
@@ -24,7 +24,7 @@ export async function exchangeCode(code: string) {
       code,
     }),
   });
-  return res.json() as Promise<{ access_token: string; user_id: number }>;
+  return res.json() as Promise<{ access_token: string; user_id: string; error_message?: string }>;
 }
 
 export async function getLongLivedToken(shortToken: string) {
@@ -37,18 +37,37 @@ export async function getLongLivedToken(shortToken: string) {
   return res.json() as Promise<{ access_token: string; token_type: string; expires_in: number }>;
 }
 
-export async function getUserReels(token: string, userId: string) {
-  const fields = 'id,caption,media_type,thumbnail_url,timestamp,like_count,comments_count';
+export async function getMe(token: string) {
   const res = await fetch(
-    `https://graph.instagram.com/${userId}/media?fields=${fields}&access_token=${token}`
+    `https://graph.instagram.com/v22.0/me?fields=id,username,profile_picture_url&access_token=${token}`
+  );
+  return res.json() as Promise<{ id: string; username: string; profile_picture_url?: string }>;
+}
+
+export async function getUserMedia(token: string) {
+  const fields = 'id,caption,media_type,thumbnail_url,timestamp,like_count,comments_count,media_url,permalink,video_views';
+  const res = await fetch(
+    `https://graph.instagram.com/v22.0/me/media?fields=${fields}&limit=9&access_token=${token}`
+  );
+  return res.json() as Promise<{ data: IgMedia[]; error?: { message: string } }>;
+}
+
+export async function getMediaInsights(token: string, mediaId: string) {
+  const res = await fetch(
+    `https://graph.instagram.com/v22.0/${mediaId}/insights?metric=reach,plays,saved,shares&access_token=${token}`
   );
   return res.json();
 }
 
-export async function getReelInsights(token: string, mediaId: string) {
-  const metrics = 'reach,impressions,video_views,avg_watch_time,completion_rate';
-  const res = await fetch(
-    `https://graph.instagram.com/${mediaId}/insights?metric=${metrics}&access_token=${token}`
-  );
-  return res.json();
+export interface IgMedia {
+  id: string;
+  caption?: string;
+  media_type: string;
+  thumbnail_url?: string;
+  media_url?: string;
+  timestamp: string;
+  like_count: number;
+  comments_count: number;
+  video_views?: number;
+  permalink: string;
 }

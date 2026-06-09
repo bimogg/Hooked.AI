@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { getUserMedia, IgMedia } from '@/lib/instagram';
 
 const APIFY_TOKEN = process.env.APIFY_API_TOKEN ?? '';
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY ?? '';
@@ -12,26 +13,55 @@ const HOOK_TYPES = [
 export const maxDuration = 120;
 
 export async function POST(req: NextRequest) {
-  const { username } = await req.json();
-  if (!username) return NextResponse.json({ error: 'username required' }, { status: 400 });
-
-  const clean = username.replace('@', '').trim();
+  const igToken = req.cookies.get('ig_token')?.value;
 
   let reels: Reel[] = [];
-  try {
-    reels = await scrapeReels(clean);
-  } catch {
-    return NextResponse.json({ error: 'Не удалось загрузить reels. Проверь username.' }, { status: 422 });
-  }
-  if (!reels.length) {
-    return NextResponse.json({ error: 'Reels не найдены. Убедись что аккаунт публичный.' }, { status: 404 });
+
+  if (igToken) {
+    // Authenticated: use Instagram Graph API
+    reels = await fetchFromInstagram(igToken);
+    if (!reels.length) {
+      return NextResponse.json({ error: 'Не найдено видео в аккаунте. Убедись что есть опубликованные Reels.' }, { status: 404 });
+    }
+  } else {
+    // Fallback: scrape by username (unauthenticated)
+    const { username } = await req.json().catch(() => ({}));
+    if (!username) return NextResponse.json({ error: 'Нет авторизации' }, { status: 401 });
+    try {
+      reels = await scrapeByUsername(username.replace('@', '').trim());
+    } catch {
+      return NextResponse.json({ error: 'Не удалось загрузить reels.' }, { status: 422 });
+    }
   }
 
   const analyses = await Promise.all(reels.map(r => analyzeReel(r)));
   return NextResponse.json({ reels: analyses });
 }
 
-async function scrapeReels(username: string): Promise<Reel[]> {
+async function fetchFromInstagram(token: string): Promise<Reel[]> {
+  const res = await getUserMedia(token);
+  if (res.error || !res.data) return [];
+  return res.data
+    .filter(m => m.media_type === 'VIDEO' && m.caption)
+    .slice(0, 6)
+    .map(m => ({
+      id: m.id,
+      shortCode: shortCodeFromPermalink(m.permalink),
+      caption: (m.caption ?? '').slice(0, 600),
+      views: m.video_views ?? 0,
+      likes: m.like_count,
+      comments: m.comments_count,
+      thumbnail: m.thumbnail_url ?? m.media_url ?? null,
+      permalink: m.permalink,
+    }));
+}
+
+function shortCodeFromPermalink(url: string) {
+  const m = url.match(/\/(reel|p)\/([^/]+)/);
+  return m?.[2] ?? '';
+}
+
+async function scrapeByUsername(username: string): Promise<Reel[]> {
   const run = await fetch(`https://api.apify.com/v2/acts/apify~instagram-scraper/runs?token=${APIFY_TOKEN}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -53,11 +83,12 @@ async function scrapeReels(username: string): Promise<Reel[]> {
   return posts.filter((p: Record<string, unknown>) => p.caption).map((p: Record<string, unknown>) => ({
     id: String(p.id ?? ''),
     shortCode: String(p.shortCode ?? ''),
-    caption: (String(p.caption ?? '')).slice(0, 600),
+    caption: String(p.caption ?? '').slice(0, 600),
     views: Number(p.videoViewCount ?? 0),
     likes: Number(p.likesCount ?? 0),
     comments: Number(p.commentsCount ?? 0),
     thumbnail: (p.displayUrl as string) ?? null,
+    permalink: `https://www.instagram.com/p/${p.shortCode}/`,
   }));
 }
 
@@ -68,19 +99,19 @@ async function analyzeReel(reel: Reel): Promise<ReelAnalysis> {
 
   const client = new Anthropic({ apiKey: ANTHROPIC_KEY });
   const lang = /[а-яёА-ЯЁ]/.test(reel.caption) ? 'Russian' : 'English';
-  const prompt = `You are an Instagram Reels growth expert. Analyze this reel and recommend a hook.
+  const prompt = `You are an Instagram Reels growth expert. Analyze this reel and recommend the best hook.
 
 Caption: "${reel.caption}"
 Views: ${reel.views.toLocaleString()}
 Likes: ${reel.likes.toLocaleString()}
 
-Respond ONLY with valid JSON, no markdown:
+Respond ONLY with valid JSON, no markdown fences:
 {
   "hookType": "<one of: ${HOOK_TYPES.join(' | ')}>",
   "placement": "<Opening (first 3 sec) | Pattern interrupt (10-15 sec) | Loop hook (last 5 sec)>",
-  "hookScript": "<exact hook text to say on camera, 1-2 sentences in ${lang}>",
-  "reason": "<why this increases watch time, 1 sentence in ${lang}>",
-  "viewsBoost": <estimated % boost as integer, 30-120>
+  "hookScript": "<exact hook script to record, 1-2 sentences in ${lang}>",
+  "reason": "<why this specific hook will increase watch time for THIS video, 1 sentence in ${lang}>",
+  "viewsBoost": <estimated % boost as integer 30-120>
 }`;
 
   try {
@@ -98,13 +129,18 @@ Respond ONLY with valid JSON, no markdown:
 }
 
 function mockAnalysis(reel: Reel): ReelAnalysis {
+  const scripts = [
+    'Подожди — ты точно упускаешь это. Смотри до конца.',
+    'Вот что произошло когда я попробовал это на своём аккаунте...',
+    'Ты знаешь почему 9 из 10 создателей теряют зрителей на первых 3 секундах?',
+  ];
   return {
     reel,
     hookType: 'Question Hook',
     placement: 'Opening (first 3 sec)',
-    hookScript: 'Ты знаешь почему 90% создателей теряют зрителей на первых 3 секундах? Сейчас покажу.',
-    reason: 'Вопрос создаёт незакрытую петлю — мозг вынужден досмотреть до ответа',
-    viewsBoost: 85,
+    hookScript: scripts[Math.floor(Math.random() * scripts.length)],
+    reason: 'Незакрытый вопрос вынуждает мозг досмотреть до ответа',
+    viewsBoost: 65 + Math.floor(Math.random() * 40),
   };
 }
 
@@ -118,6 +154,7 @@ interface Reel {
   likes: number;
   comments: number;
   thumbnail: string | null;
+  permalink: string;
 }
 
 interface ReelAnalysis {

@@ -1,26 +1,14 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
-import { getUserReels, getReelInsights } from '@/lib/instagram';
+import { getUserMedia, getMediaInsights } from '@/lib/instagram';
 import { findDropPoints } from '@/lib/analyze';
 import RetentionChart from '@/components/RetentionChart';
 import AnalyzeButton from '@/components/AnalyzeButton';
 
-async function getToken(igUserId: string) {
-  try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-    const { data } = await supabase
-      .from('instagram_accounts')
-      .select('access_token')
-      .eq('instagram_user_id', igUserId)
-      .single();
-    return data?.access_token ?? null;
-  } catch {
-    return null;
-  }
+async function getToken(_igUserId: string): Promise<string | null> {
+  const { cookies } = await import('next/headers');
+  const store = await cookies();
+  return store.get('ig_token')?.value ?? null;
 }
 
 export default async function DashboardPage() {
@@ -47,13 +35,13 @@ export default async function DashboardPage() {
   let fetchError = false;
 
   try {
-    const mediaRes = await getUserReels(token, igUserId);
+    const mediaRes = await getUserMedia(token);
     if (mediaRes.data) {
       const videos = mediaRes.data.filter((r: RawReel) => r.media_type === 'VIDEO').slice(0, 9);
       reels = await Promise.all(
         videos.map(async (r: RawReel) => {
           try {
-            const ins = await getReelInsights(token, r.id);
+            const ins = await getMediaInsights(token, r.id);
             return { ...r, insights: ins.data ?? [] };
           } catch {
             return { ...r, insights: [] };
