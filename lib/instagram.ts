@@ -6,7 +6,7 @@ export function getAuthUrl() {
   const params = new URLSearchParams({
     client_id: APP_ID,
     redirect_uri: REDIRECT_URI,
-    scope: 'public_profile,email',
+    scope: 'public_profile',
     response_type: 'code',
   });
   return `https://www.facebook.com/dialog/oauth?${params}`;
