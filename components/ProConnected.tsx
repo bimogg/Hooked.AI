@@ -8,7 +8,10 @@ export default function ProConnected({ name }: { name?: string }) {
     if (typeof window !== 'undefined') return localStorage.getItem('ig_username') ?? '';
     return '';
   });
-  const [confirmed, setConfirmed] = useState(false);
+  const [confirmed, setConfirmed] = useState(() => {
+    if (typeof window !== 'undefined') return !!localStorage.getItem('ig_username');
+    return false;
+  });
   const [input, setInput] = useState('');
 
   const logout = async () => {
@@ -34,7 +37,7 @@ export default function ProConnected({ name }: { name?: string }) {
           </div>
           <div>
             <p className="text-sm font-medium">{name ?? 'Пользователь'}</p>
-            <p className="text-[10px] text-[#888]">Вошёл через Facebook</p>
+            <p className="text-[10px] text-[#888]">Подключён · Instagram</p>
           </div>
         </div>
         <button onClick={logout}

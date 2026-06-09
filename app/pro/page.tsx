@@ -61,12 +61,12 @@ export default async function ProPage({
             </div>
             <Link
               href="/api/auth/instagram"
-              className="w-full bg-[#0866ff] text-white font-bold text-sm py-4 rounded-full hover:opacity-90 transition-opacity text-center"
+              className="w-full bg-gradient-to-r from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white font-bold text-sm py-4 rounded-full hover:opacity-90 transition-opacity text-center"
             >
-              Войти через Facebook →
+              Войти через Instagram →
             </Link>
             <p className="text-[10px] text-[#bbb]">
-              Переходишь на facebook.com → авторизуешься → возвращаешься сюда автоматически
+              Переходишь на instagram.com → авторизуешься → возвращаешься сюда автоматически
             </p>
           </div>
         </div>
