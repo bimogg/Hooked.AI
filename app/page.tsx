@@ -1,10 +1,7 @@
+'use client';
 import Link from 'next/link';
 import { ArrowRight, Zap, BookOpen, BarChart2 } from 'lucide-react';
 
-export const metadata = {
-  title: 'HookedAI — Stop The Drop',
-  description: 'AI hook analyzer for Instagram creators. Find winning hooks, decode why your Reels lose viewers.',
-};
 
 /* ── Linear design tokens (adapted) ── */
 // canvas:    #010102
@@ -199,9 +196,7 @@ export default function LandingPage() {
                   borderRadius: 12, padding: 24, height: '100%',
                   display: 'flex', flexDirection: 'column', gap: 16,
                   transition: 'border-color 0.2s',
-                }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = '#34343a')}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = '#23252a')}>
+                }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Icon size={18} color="#8a8f98" />
                     <span style={{
