@@ -1,86 +1,130 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { getReelInsights, getUserReels } from '@/lib/instagram';
-import { findDropPoints, getAIRecommendations } from '@/lib/analyze';
+import Anthropic from '@anthropic-ai/sdk';
+
+const APIFY_TOKEN = process.env.APIFY_API_TOKEN ?? '';
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY ?? '';
+
+const HOOK_TYPES = [
+  'Hook Tutorial', 'Visual Hook', 'Question Hook', 'Tutorial Hook',
+  'Engagement Hook', 'Curiosity Hook', 'Warning Hook', 'Challenge Hook', 'Mistake Hook',
+];
+
+export const maxDuration = 120;
 
 export async function POST(req: NextRequest) {
-  const igUserId = req.cookies.get('ig_user_id')?.value;
-  if (!igUserId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const { username } = await req.json();
+  if (!username) return NextResponse.json({ error: 'username required' }, { status: 400 });
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const clean = username.replace('@', '').trim();
 
-  const { data: account } = await supabase
-    .from('instagram_accounts')
-    .select('access_token')
-    .eq('instagram_user_id', igUserId)
-    .single();
-
-  if (!account?.access_token) {
-    return NextResponse.json({ error: 'Token not found' }, { status: 401 });
+  let reels: Reel[] = [];
+  try {
+    reels = await scrapeReels(clean);
+  } catch {
+    return NextResponse.json({ error: 'Не удалось загрузить reels. Проверь username.' }, { status: 422 });
+  }
+  if (!reels.length) {
+    return NextResponse.json({ error: 'Reels не найдены. Убедись что аккаунт публичный.' }, { status: 404 });
   }
 
-  const token = account.access_token;
-
-  // Fetch reels and insights
-  const mediaRes = await getUserReels(token, igUserId);
-  if (!mediaRes.data) return NextResponse.json({ error: 'No media found' }, { status: 404 });
-
-  const reels = mediaRes.data.filter((r: { media_type: string }) => r.media_type === 'VIDEO').slice(0, 9);
-
-  // Fetch top hooks from our library for context
-  const { data: topHooks } = await supabase
-    .from('hooks')
-    .select('caption')
-    .order('views', { ascending: false })
-    .limit(10);
-
-  const hookTexts = (topHooks ?? []).map((h: { caption: string }) => h.caption).filter(Boolean);
-
-  const results = await Promise.all(
-    reels.map(async (reel: { id: string; caption?: string }) => {
-      const insightsRes = await getReelInsights(token, reel.id);
-      const metrics = insightsRes.data ?? [];
-
-      const avgWatchTime = metrics.find((m: { name: string }) => m.name === 'avg_watch_time')?.values?.[0]?.value ?? 0;
-      const completionRate = metrics.find((m: { name: string }) => m.name === 'completion_rate')?.values?.[0]?.value ?? 0;
-
-      // Build synthetic retention curve from avg_watch_time + completion_rate
-      const retentionData = buildRetentionCurve(avgWatchTime, completionRate);
-      const dropPoints = findDropPoints(retentionData);
-      const recommendations = await getAIRecommendations(dropPoints, hookTexts);
-
-      // Cache in Supabase
-      await supabase.from('user_reels').upsert({
-        instagram_user_id: igUserId,
-        reel_id: reel.id,
-        caption: reel.caption,
-        avg_watch_time: avgWatchTime,
-        completion_rate: completionRate,
-        retention_data: retentionData,
-        drop_points: dropPoints,
-        recommendations,
-        analyzed_at: new Date().toISOString(),
-      }, { onConflict: 'instagram_user_id,reel_id' });
-
-      return { reel_id: reel.id, drop_points: dropPoints, recommendations };
-    })
-  );
-
-  return NextResponse.json({ results });
+  const analyses = await Promise.all(reels.map(r => analyzeReel(r)));
+  return NextResponse.json({ reels: analyses });
 }
 
-function buildRetentionCurve(avgWatchSec: number, completionRate: number) {
-  // Estimate a 30-second reel retention curve
-  const duration = avgWatchSec > 0 ? Math.round(avgWatchSec / Math.max(completionRate, 0.01)) : 30;
-  const steps = 12;
-  return Array.from({ length: steps }, (_, i) => {
-    const second = Math.round((i / (steps - 1)) * duration);
-    // Exponential decay model: heavier drop early, then plateau
-    const t = i / (steps - 1);
-    const retention = Math.exp(-2.5 * t) * (1 - completionRate) + completionRate;
-    return { second, viewers: Math.round(retention * 1000) };
+async function scrapeReels(username: string): Promise<Reel[]> {
+  const run = await fetch(`https://api.apify.com/v2/acts/apify~instagram-scraper/runs?token=${APIFY_TOKEN}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usernames: [username], resultsType: 'posts', resultsLimit: 6 }),
   });
+  const { data } = await run.json();
+  const runId: string = data.id;
+
+  for (let i = 0; i < 18; i++) {
+    await delay(5000);
+    const s = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${APIFY_TOKEN}`);
+    const { data: d } = await s.json();
+    if (d.status === 'SUCCEEDED') break;
+    if (d.status === 'FAILED' || d.status === 'ABORTED') throw new Error('Apify failed');
+  }
+
+  const items = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${APIFY_TOKEN}&limit=6`);
+  const posts = await items.json();
+  return posts.filter((p: Record<string, unknown>) => p.caption).map((p: Record<string, unknown>) => ({
+    id: String(p.id ?? ''),
+    shortCode: String(p.shortCode ?? ''),
+    caption: (String(p.caption ?? '')).slice(0, 600),
+    views: Number(p.videoViewCount ?? 0),
+    likes: Number(p.likesCount ?? 0),
+    comments: Number(p.commentsCount ?? 0),
+    thumbnail: (p.displayUrl as string) ?? null,
+  }));
+}
+
+async function analyzeReel(reel: Reel): Promise<ReelAnalysis> {
+  if (!ANTHROPIC_KEY || ANTHROPIC_KEY === 'placeholder') {
+    return mockAnalysis(reel);
+  }
+
+  const client = new Anthropic({ apiKey: ANTHROPIC_KEY });
+  const lang = /[а-яёА-ЯЁ]/.test(reel.caption) ? 'Russian' : 'English';
+  const prompt = `You are an Instagram Reels growth expert. Analyze this reel and recommend a hook.
+
+Caption: "${reel.caption}"
+Views: ${reel.views.toLocaleString()}
+Likes: ${reel.likes.toLocaleString()}
+
+Respond ONLY with valid JSON, no markdown:
+{
+  "hookType": "<one of: ${HOOK_TYPES.join(' | ')}>",
+  "placement": "<Opening (first 3 sec) | Pattern interrupt (10-15 sec) | Loop hook (last 5 sec)>",
+  "hookScript": "<exact hook text to say on camera, 1-2 sentences in ${lang}>",
+  "reason": "<why this increases watch time, 1 sentence in ${lang}>",
+  "viewsBoost": <estimated % boost as integer, 30-120>
+}`;
+
+  try {
+    const msg = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 400,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const text = (msg.content[0] as { type: string; text: string }).text;
+    const parsed = JSON.parse(text);
+    return { reel, ...parsed };
+  } catch {
+    return mockAnalysis(reel);
+  }
+}
+
+function mockAnalysis(reel: Reel): ReelAnalysis {
+  return {
+    reel,
+    hookType: 'Question Hook',
+    placement: 'Opening (first 3 sec)',
+    hookScript: 'Ты знаешь почему 90% создателей теряют зрителей на первых 3 секундах? Сейчас покажу.',
+    reason: 'Вопрос создаёт незакрытую петлю — мозг вынужден досмотреть до ответа',
+    viewsBoost: 85,
+  };
+}
+
+function delay(ms: number) { return new Promise(r => setTimeout(r, ms)); }
+
+interface Reel {
+  id: string;
+  shortCode: string;
+  caption: string;
+  views: number;
+  likes: number;
+  comments: number;
+  thumbnail: string | null;
+}
+
+interface ReelAnalysis {
+  reel: Reel;
+  hookType: string;
+  placement: string;
+  hookScript: string;
+  reason: string;
+  viewsBoost: number;
 }
