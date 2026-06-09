@@ -16,6 +16,7 @@
   --color-muted: var(--muted);
   --color-red: var(--red);
   --color-card: var(--card);
+  --font-display: 'Syne', system-ui, sans-serif;
 }
 
 body {
@@ -26,5 +27,5 @@ body {
 }
 
 .font-display {
-  font-family: 'Syne', system-ui, sans-serif;
+  font-family: 'Syne', system-ui, sans-serif !important;
 }

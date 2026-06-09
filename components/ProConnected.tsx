@@ -72,7 +72,7 @@ export default function ProConnected({ name }: { name?: string }) {
           </div>
         </div>
       ) : (
-        <ProAnalyzer username={igUsername} />
+        <ProAnalyzer />
       )}
     </div>
   );

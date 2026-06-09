@@ -193,7 +193,7 @@ export default function ProPage() {
           <p className="text-sm text-[#888]">
             Привет, <strong>{user?.email}</strong> · анализируем <strong>@{igUsername}</strong>
           </p>
-          <ProAnalyzer username={igUsername} />
+          <ProAnalyzer />
         </div>
       )}
     </div>
