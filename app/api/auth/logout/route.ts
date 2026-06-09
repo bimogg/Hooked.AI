@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://hooked-ai-seven.vercel.app';
+const RAW = process.env.NEXT_PUBLIC_APP_URL ?? '';
+const APP_URL = RAW.startsWith('http://localhost') || !RAW ? 'https://hooked-ai-seven.vercel.app' : RAW;
 
 export async function POST() {
   const res = NextResponse.redirect(`${APP_URL}/pro`);
