@@ -2,11 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const APP_ID = process.env.INSTAGRAM_APP_ID ?? '1620617545694436';
 const APP_SECRET = process.env.INSTAGRAM_APP_SECRET ?? '';
-const RAW = process.env.NEXT_PUBLIC_APP_URL ?? '';
-const APP_URL = RAW.startsWith('http://localhost') || !RAW
-  ? 'https://hooked-ai-seven.vercel.app'
-  : RAW;
-const REDIRECT_URI = `${APP_URL}/api/auth/callback`;
+const APP_URL = 'https://hooked-ai-seven.vercel.app';
+const REDIRECT_URI = 'https://hooked-ai-seven.vercel.app/api/auth/callback';
 const COOKIE_MAX = 60 * 60 * 24 * 60;
 
 export async function GET(req: NextRequest) {

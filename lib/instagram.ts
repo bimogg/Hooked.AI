@@ -1,11 +1,6 @@
 const APP_ID = process.env.INSTAGRAM_APP_ID ?? '1620617545694436';
 const APP_SECRET = process.env.INSTAGRAM_APP_SECRET ?? '';
-const RAW_URL = process.env.NEXT_PUBLIC_APP_URL ?? '';
-// Never use localhost as redirect URI in OAuth — fall back to production URL
-const APP_URL = RAW_URL.startsWith('http://localhost') || !RAW_URL
-  ? 'https://hooked-ai-seven.vercel.app'
-  : RAW_URL;
-export const REDIRECT_URI = `${APP_URL}/api/auth/callback`;
+export const REDIRECT_URI = 'https://hooked-ai-seven.vercel.app/api/auth/callback';
 
 export function getAuthUrl() {
   const params = new URLSearchParams({
