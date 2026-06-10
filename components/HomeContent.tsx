@@ -87,7 +87,7 @@ export default function HomeContent() {
     <div className="flex flex-col overflow-hidden">
 
       {/* ── HERO ── */}
-      <section className="relative min-h-[92vh] flex items-center px-6 md:px-12 py-16 border-b border-black/10">
+      <section className="relative min-h-[92vh] flex items-center px-6 md:px-12 py-16">
         <div className="w-full flex items-center justify-between gap-10">
 
           {/* LEFT: text centered vertically */}
