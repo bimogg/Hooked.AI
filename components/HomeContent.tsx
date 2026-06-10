@@ -40,7 +40,7 @@ function ScrollText({ text }: { text: string }) {
         const lit = progress > threshold + 0.02;
         return (
           <span key={i} style={{
-            color: lit ? '#e8002d' : 'rgba(0,0,0,0.12)',
+            color: lit ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.13)',
             transition: 'color 0.4s ease',
           }}>{word}{' '}</span>
         );
@@ -236,9 +236,9 @@ export default function HomeContent() {
 
 
       {/* ── ABOUT TEXT ── */}
-      <section className="bg-white px-6 md:px-12 py-24 md:py-36 border-t border-black/10">
+      <section className="bg-[#0a0a0a] px-6 md:px-12 py-24 md:py-36">
         <div className="max-w-3xl mx-auto">
-          <p className="text-[10px] text-black/20 uppercase tracking-[0.22em] mb-10">HookedAI</p>
+          <p className="text-[10px] text-white/20 uppercase tracking-[0.22em] mb-10">HookedAI</p>
           <ScrollText text="Your Reels lose 80% of viewers before your message even starts. HookedAI uploads your video, finds the exact second people leave, and shows you a hook that keeps them watching. Then writes you a script to replace your weak opening — ready to copy and post." />
         </div>
       </section>
