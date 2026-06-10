@@ -228,7 +228,7 @@ export default function HomeContent() {
                 data-reveal data-delay={String(i + 1)}
                 className={`p-8 flex flex-col gap-4 ${i < 2 ? 'md:border-r border-black/10' : ''} ${i > 0 ? 'border-t border-black/10 md:border-t-0' : ''}`}>
                 <span className="font-extrabold text-6xl text-black/8 leading-none">{n}</span>
-                <h3 className="font-light text-xl tracking-tight" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>{tr('home', tk, lang)}</h3>
+                <h3 className="font-display font-extrabold text-2xl uppercase leading-tight tracking-tight">{tr('home', tk, lang)}</h3>
                 <p className="text-[#666] text-sm leading-relaxed">{tr('home', dk, lang)}</p>
               </div>
             ))}
