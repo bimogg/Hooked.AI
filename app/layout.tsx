@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import Nav from '@/components/Nav';
-import Footer from '@/components/Footer';
 import { LanguageProvider } from '@/components/LanguageProvider';
 import { ClerkProvider } from '@clerk/nextjs';
 
@@ -23,7 +22,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <LanguageProvider>
             <Nav />
             <main className="flex-1">{children}</main>
-            <Footer />
           </LanguageProvider>
         </ClerkProvider>
       </body>
