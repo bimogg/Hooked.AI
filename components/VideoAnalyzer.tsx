@@ -206,7 +206,7 @@ export default function VideoAnalyzer() {
                     <span className="w-1.5 h-1.5 rounded-full bg-[#e8002d]" />
                     <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider">Твоё видео</span>
                   </div>
-                  <div className="aspect-[9/14] bg-black overflow-hidden">
+                  <div className="aspect-[3/4] bg-black overflow-hidden">
                     <UserVideoClip blobUrl={blobUrl} start={start} end={end} />
                   </div>
                 </div>
@@ -226,7 +226,7 @@ export default function VideoAnalyzer() {
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider">Как надо</span>
                   </div>
-                  <div className="aspect-[9/14] bg-black overflow-hidden relative">
+                  <div className="aspect-[3/4] bg-black overflow-hidden relative">
                     {zone.example ? (
                       <>
                         <HookPlayer
