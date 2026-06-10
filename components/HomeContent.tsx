@@ -113,18 +113,41 @@ export default function HomeContent() {
             <p className="text-[10px] text-[#bbb]">{tr('home', 'freeBadge', lang)}</p>
           </div>
 
-          {/* RIGHT: mockup */}
-          <div className="hidden md:block shrink-0 w-[240px] lg:w-[290px] xl:w-[340px]" data-reveal="right">
-            <div className="relative w-full aspect-[9/16] bg-[#f5f5f5] rounded-3xl overflow-hidden border border-black/10 shadow-2xl">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mockup.png" alt="HookedAI app" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#e8002d] flex items-center justify-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/logo.jpg" alt="" className="w-8 h-8 rounded-xl object-cover" />
+          {/* RIGHT: Mac browser mockup */}
+          <div className="hidden md:block shrink-0 w-[420px] lg:w-[520px] xl:w-[600px]" data-reveal="right">
+            <div style={{
+              borderRadius: 12,
+              overflow: 'hidden',
+              boxShadow: '0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.08)',
+              background: '#e8e8e8',
+            }}>
+              {/* Mac window chrome */}
+              <div style={{
+                background: 'linear-gradient(180deg, #ebebeb 0%, #d8d8d8 100%)',
+                padding: '10px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                borderBottom: '1px solid rgba(0,0,0,0.1)',
+              }}>
+                {/* Traffic lights */}
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f57' }} />
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#febc2e' }} />
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#28c840' }} />
                 </div>
-                <span className="text-xs text-[#bbb] font-medium">HookedAI</span>
+                {/* URL bar */}
+                <div style={{
+                  flex: 1, background: 'rgba(0,0,0,0.08)', borderRadius: 6,
+                  padding: '3px 10px', fontSize: 11, color: '#666',
+                  textAlign: 'center', fontFamily: 'system-ui',
+                }}>
+                  hookedai.com/library
+                </div>
               </div>
+              {/* Screenshot */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/app-screenshot.png" alt="HookedAI app" style={{ width: '100%', display: 'block' }} />
             </div>
           </div>
 
