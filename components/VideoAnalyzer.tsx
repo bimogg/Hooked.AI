@@ -5,9 +5,11 @@ import HookPlayer from './HookPlayer';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 
-const FREE_KEY = 'hooked_free_used';
-function hasUsedFree() { try { return localStorage.getItem(FREE_KEY) === '1'; } catch { return false; } }
-function markFreeUsed() { try { localStorage.setItem(FREE_KEY, '1'); } catch {} }
+const FREE_KEY = 'hooked_free_count';
+const FREE_LIMIT = 3;
+function getFreeCount() { try { return parseInt(localStorage.getItem(FREE_KEY) || '0', 10); } catch { return 0; } }
+function hasUsedFree() { return getFreeCount() >= FREE_LIMIT; }
+function markFreeUsed() { try { localStorage.setItem(FREE_KEY, String(getFreeCount() + 1)); } catch {} }
 
 async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> {
   return new Promise((resolve, reject) => {
