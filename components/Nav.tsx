@@ -15,6 +15,7 @@ export default function Nav() {
         <Link href="/" className="hover:text-black transition-colors">Home</Link>
         <Link href="/library" className="hover:text-black transition-colors">Library</Link>
         <Link href="/pricing" className="hover:text-black transition-colors">Pricing</Link>
+        <Link href="/privacy" className="hover:text-black transition-colors">Privacy</Link>
       </nav>
       <div className="hidden md:flex items-center gap-3">
         <Link href="/pro"
@@ -32,6 +33,7 @@ export default function Nav() {
           <Link href="/" onClick={() => setOpen(false)} className="text-sm text-[#888]">Home</Link>
           <Link href="/library" onClick={() => setOpen(false)} className="text-sm text-[#888]">Library</Link>
           <Link href="/pricing" onClick={() => setOpen(false)} className="text-sm text-[#888]">Pricing</Link>
+          <Link href="/privacy" onClick={() => setOpen(false)} className="text-sm text-[#888]">Privacy</Link>
           <Link href="/pro" onClick={() => setOpen(false)}
             className="bg-[#e8002d] text-white text-sm font-bold py-3 px-6 rounded-full text-center">
             Analyze My Video
