@@ -89,18 +89,28 @@ Respond ONLY with valid JSON in this exact format (no markdown, no extra text):
 
     if (hookType) {
       try {
-        const { data } = await supabaseAdmin
+        let { data } = await supabaseAdmin
           .from('hooks')
           .select('creator_username, caption, views, instagram_id, thumbnail_url, niche')
           .eq('niche', hookType)
           .not('caption', 'is', null)
           .neq('caption', '')
-          .gt('views', 100000)
           .order('views', { ascending: false })
-          .limit(20);
+          .limit(30);
+
+        // fallback: any hook type if no results for this type
+        if (!data || data.length === 0) {
+          const fallback = await supabaseAdmin
+            .from('hooks')
+            .select('creator_username, caption, views, instagram_id, thumbnail_url, niche')
+            .not('caption', 'is', null)
+            .neq('caption', '')
+            .order('views', { ascending: false })
+            .limit(30);
+          data = fallback.data;
+        }
 
         if (data && data.length > 0) {
-          // pick 3 random from top 20 so it varies
           const shuffled = data.sort(() => Math.random() - 0.5).slice(0, 3);
           referenceHooks = shuffled.map(h => ({
             ...h,
