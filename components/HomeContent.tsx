@@ -88,7 +88,7 @@ export default function HomeContent() {
 
       {/* ── HERO ── */}
       <section className="relative min-h-[92vh] flex items-center px-6 md:px-12 py-16">
-        <div className="w-full flex items-center justify-between gap-10">
+        <div className="w-full max-w-6xl mx-auto flex items-center justify-between gap-10">
 
           {/* LEFT: text centered vertically */}
           <div className="flex flex-col gap-6 max-w-xl md:pl-10 lg:pl-20" data-reveal="left">
