@@ -60,12 +60,12 @@ Hook types: Visual Hook, Question Hook, Tutorial Hook, Curiosity Hook, Warning H
     if (!bestTypes.length) bestTypes.push('Visual Hook');
 
     // ── Step 2: Pull hooks from library ───────────────────────────────────
-    const rawHooks: { creator_username: string; caption: string | null; views: number; instagram_id: string | null; thumbnail_url: string | null; niche: string }[] = [];
+    const rawHooks: { creator_username: string; caption: string | null; views: number; instagram_id: string | null; video_url: string | null; thumbnail_url: string | null; niche: string }[] = [];
 
     for (const hookType of bestTypes) {
       const { data } = await supabaseAdmin
         .from('hooks')
-        .select('creator_username, caption, views, instagram_id, thumbnail_url, niche')
+        .select('creator_username, caption, views, instagram_id, video_url, thumbnail_url, niche')
         .eq('niche', hookType)
         .not('caption', 'is', null)
         .neq('caption', '')
@@ -77,7 +77,7 @@ Hook types: Visual Hook, Question Hook, Tutorial Hook, Curiosity Hook, Warning H
     // fallback
     if (!rawHooks.length) {
       const { data } = await supabaseAdmin
-        .from('hooks').select('creator_username, caption, views, instagram_id, thumbnail_url, niche')
+        .from('hooks').select('creator_username, caption, views, instagram_id, video_url, thumbnail_url, niche')
         .not('caption', 'is', null).neq('caption', '').order('views', { ascending: false }).limit(30);
       if (data) rawHooks.push(...data.sort(() => Math.random() - 0.5).slice(0, 4));
     }
@@ -123,6 +123,7 @@ Return ONLY a valid JSON array with exactly ${picked.length} objects:
       caption: h.caption,
       views: h.views,
       thumbnail_url: h.thumbnail_url,
+      video_url: h.video_url ?? null,
       niche: h.niche,
       reelUrl: h.instagram_id
         ? `https://www.instagram.com/reel/${idToShortcode(h.instagram_id)}/`

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useCallback } from 'react';
-import { Upload, AlertCircle, Lock, ExternalLink, Eye, Play, Copy, Check } from 'lucide-react';
+import { Upload, AlertCircle, Lock, Eye, Copy, Check } from 'lucide-react';
+import HookPlayer from './HookPlayer';
 
 const FREE_KEY = 'hooked_free_used';
 function hasUsedFree() { try { return localStorage.getItem(FREE_KEY) === '1'; } catch { return false; } }
@@ -69,7 +70,7 @@ const NICHE_COLOR: Record<string, string> = {
 
 interface ReferenceHook {
   creator_username: string; caption: string | null; views: number;
-  thumbnail_url: string | null; niche: string; reelUrl: string;
+  thumbnail_url: string | null; video_url: string | null; niche: string; reelUrl: string;
   technique: string; scriptToCopy: string;
 }
 interface Result {
@@ -157,22 +158,17 @@ export default function VideoAnalyzer() {
               {/* Top: video thumbnail + info side by side */}
               <div className="flex gap-0">
 
-                {/* Thumbnail — clickable */}
-                <a href={h.reelUrl} target="_blank" rel="noopener noreferrer"
-                  className="group relative shrink-0 w-28 aspect-[9/14] bg-[#f0f0f0] block">
-                  {h.thumbnail_url
-                    ? <img src={h.thumbnail_url} alt="" className="w-full h-full object-cover" /> // eslint-disable-line @next/next/no-img-element
-                    : <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
-                  }
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-9 h-9 bg-black/50 group-hover:bg-[#e8002d] rounded-full flex items-center justify-center transition-colors">
-                      <Play size={14} className="text-white ml-0.5" fill="white" />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 bg-black/60 text-white text-[8px] px-1 py-0.5 rounded">
+                {/* Video player — shows hook (first 4s) */}
+                <div className="relative shrink-0 w-28 aspect-[9/14] overflow-hidden">
+                  <HookPlayer
+                    videoUrl={h.video_url}
+                    thumbnailUrl={h.thumbnail_url}
+                    reelUrl={h.reelUrl}
+                  />
+                  <div className="absolute bottom-1.5 left-1.5 flex items-center gap-0.5 bg-black/60 text-white text-[8px] px-1 py-0.5 rounded pointer-events-none">
                     <Eye size={7} />{fmt(h.views)}
                   </div>
-                </a>
+                </div>
 
                 {/* Right side */}
                 <div className="flex-1 p-3 flex flex-col gap-2 min-w-0">
@@ -181,8 +177,8 @@ export default function VideoAnalyzer() {
                       {h.niche}
                     </span>
                     <a href={h.reelUrl} target="_blank" rel="noopener noreferrer"
-                      className="text-[10px] text-[#888] hover:text-[#e8002d] flex items-center gap-0.5 transition-colors">
-                      @{h.creator_username}<ExternalLink size={9} />
+                      className="text-[10px] text-[#888] hover:text-[#e8002d] transition-colors">
+                      @{h.creator_username}
                     </a>
                   </div>
 
