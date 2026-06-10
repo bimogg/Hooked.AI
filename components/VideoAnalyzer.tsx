@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useCallback } from 'react';
-import { Upload, Copy, Check, AlertCircle, Lock, ExternalLink, Eye, Play, Mic } from 'lucide-react';
+import { Upload, AlertCircle, Lock, ExternalLink, Eye, Play } from 'lucide-react';
 
 const FREE_KEY = 'hooked_free_used';
 function hasUsedFree() { try { return localStorage.getItem(FREE_KEY) === '1'; } catch { return false; } }
@@ -18,17 +18,12 @@ async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> 
       canvas.width = Math.round(video.videoWidth * scale);
       canvas.height = Math.round(video.videoHeight * scale);
       const ctx = canvas.getContext('2d')!;
-
-      // spread up to 12 frames evenly across entire video
       const MAX = 12;
       const count = Math.min(MAX, Math.max(4, Math.floor(dur)));
-      const times: number[] = [];
-      for (let i = 0; i < count; i++) {
-        times.push(Math.min((dur / (count - 1)) * i, dur - 0.05));
-      }
-      // always include 0
+      const times: number[] = Array.from({ length: count }, (_, i) =>
+        Math.min((dur / (count - 1)) * i, dur - 0.05)
+      );
       if (times[0] > 0.1) times.unshift(0);
-
       const frames: { b64: string; t: number }[] = [];
       for (const t of times.slice(0, MAX)) {
         await new Promise<void>(res => {
@@ -52,26 +47,30 @@ function fmt(n: number) {
   return String(n);
 }
 
-function CopyBtn({ text }: { text: string }) {
-  const [done, setDone] = useState(false);
-  return (
-    <button onClick={() => { navigator.clipboard.writeText(text); setDone(true); setTimeout(() => setDone(false), 2000); }}
-      className="flex items-center gap-1.5 text-xs text-[#888] hover:text-black transition-colors">
-      {done ? <><Check size={11} className="text-emerald-600" />Скопировано</> : <><Copy size={11} />Копировать</>}
-    </button>
-  );
+interface ReferenceHook {
+  creator_username: string; caption: string | null; views: number;
+  thumbnail_url: string | null; niche: string; reelUrl: string;
 }
-
-interface ReferenceHook { creator_username: string; caption: string | null; views: number; thumbnail_url: string | null; niche: string; reelUrl: string; }
-interface HookMoment { label: string; timestamp: string; status: 'weak' | 'ok' | 'strong'; problem: string; fix: string; script: string; }
 interface Result {
-  hookScore: number; verdict: string;
-  hookMoments: HookMoment[];
-  hookType: string; hookDelivery: string; why: string;
+  hookScore: number;
+  mainProblem: string;
+  whyHookTypes: string;
+  bestHookTypes: string[];
   referenceHooks: ReferenceHook[];
 }
 
-const STEPS = ['Извлекаем кадры из видео...', 'ИИ анализирует весь ролик...', 'Ищет слабые хуки...', 'Пишет скрипты...'];
+const STEPS = ['Читаем видео...', 'ИИ смотрит весь ролик...', 'Подбираем хуки из библиотеки...'];
+
+const NICHE_COLOR: Record<string, string> = {
+  'Visual Hook': 'bg-pink-100 text-pink-700',
+  'Question Hook': 'bg-sky-100 text-sky-700',
+  'Tutorial Hook': 'bg-teal-100 text-teal-700',
+  'Curiosity Hook': 'bg-amber-100 text-amber-700',
+  'Warning Hook': 'bg-red-100 text-red-700',
+  'Challenge Hook': 'bg-indigo-100 text-indigo-700',
+  'Engagement Hook': 'bg-orange-100 text-orange-700',
+  'Mistake Hook': 'bg-slate-100 text-slate-700',
+};
 
 export default function VideoAnalyzer() {
   const [dragging, setDragging] = useState(false);
@@ -87,15 +86,16 @@ export default function VideoAnalyzer() {
     if (file.size > 300 * 1024 * 1024) { setError('Максимум 300MB'); return; }
     // TODO: re-enable before launch
     // if (hasUsedFree()) { setLocked(true); return; }
+    void hasUsedFree();
     setLoading(true); setError(''); setResult(null); setStepIdx(0);
     try {
       const frameData = await extractFrames(file);
-      setStepIdx(1); await new Promise(r => setTimeout(r, 300)); setStepIdx(2);
+      setStepIdx(1);
       const res = await fetch('/api/analyze-video', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t) }),
       });
-      setStepIdx(3);
+      setStepIdx(2);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Ошибка');
       // markFreeUsed(); // TODO: re-enable before launch
@@ -117,129 +117,92 @@ export default function VideoAnalyzer() {
       <p className="font-bold text-lg">Бесплатный анализ использован</p>
       <p className="text-sm text-[#666] max-w-xs">Купи Pro чтобы анализировать без ограничений</p>
       <a href="/pricing" className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90">Купить Pro →</a>
-      <button onClick={() => { try { localStorage.removeItem(FREE_KEY); } catch {} setLocked(false); }} className="text-xs text-[#ccc] hover:text-black">сбросить (demo)</button>
     </div>
   );
 
   /* ── RESULT ── */
   if (result) {
-    const scoreColor = result.hookScore >= 8 ? '#16a34a' : result.hookScore >= 6 ? '#d97706' : '#e8002d';
-    const statusColor = (s: string) => s === 'strong' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : s === 'ok' ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-red-50 border-red-200 text-[#e8002d]';
-    const statusLabel = (s: string) => s === 'strong' ? 'Сильный' : s === 'ok' ? 'Средний' : 'Слабый';
-
+    const scoreColor = result.hookScore >= 8 ? '#16a34a' : result.hookScore >= 5 ? '#d97706' : '#e8002d';
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
 
-        {/* Score */}
-        <div className="flex items-center gap-5 border border-black/10 rounded-2xl p-5">
-          <p className="font-display font-extrabold text-6xl leading-none shrink-0" style={{ color: scoreColor }}>
+        {/* Score + problem — compact */}
+        <div className="flex items-center gap-4 border border-black/10 rounded-2xl p-4">
+          <p className="font-display font-extrabold text-5xl leading-none shrink-0" style={{ color: scoreColor }}>
             {result.hookScore}
           </p>
-          <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#aaa] mb-1">из 10 · весь ролик</p>
-            <p className="text-sm font-semibold text-[#111] leading-snug">{result.verdict}</p>
+          <div className="flex flex-col gap-1">
+            <p className="text-[10px] text-[#aaa] uppercase tracking-widest">из 10</p>
+            <div className="flex items-start gap-1.5">
+              <AlertCircle size={12} className="text-[#e8002d] mt-0.5 shrink-0" />
+              <p className="text-sm text-[#333] leading-snug">{result.mainProblem}</p>
+            </div>
           </div>
         </div>
 
-        {/* Hook moments across video */}
-        {result.hookMoments?.length > 0 && (
-          <div className="flex flex-col gap-3">
-            {result.hookMoments.map((m, i) => (
-              <div key={i} className="border border-black/10 rounded-2xl overflow-hidden">
-                {/* Header */}
-                <div className="flex items-center justify-between px-4 py-3 bg-[#fafafa] border-b border-black/8">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm">{m.label}</span>
-                    <span className="text-[10px] text-[#aaa]">{m.timestamp}</span>
+        {/* Why these hooks — short */}
+        {result.whyHookTypes && (
+          <div className="px-4 py-3 bg-[#fffbeb] border border-amber-200 rounded-xl">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 mb-1">Почему именно эти хуки</p>
+            <p className="text-xs text-[#555] leading-relaxed">{result.whyHookTypes}</p>
+          </div>
+        )}
+
+        {/* MAIN: video cards */}
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-[#333] mb-3">
+            Попробуй такой хук — нажми и посмотри как сделано
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            {result.referenceHooks.map((h, i) => (
+              <a key={i} href={h.reelUrl} target="_blank" rel="noopener noreferrer"
+                className="group flex flex-col rounded-2xl overflow-hidden border border-black/10 hover:border-[#e8002d]/40 hover:shadow-md transition-all">
+                {/* Thumbnail */}
+                <div className="relative aspect-[9/14] bg-[#f0f0f0]">
+                  {h.thumbnail_url
+                    ? <img src={h.thumbnail_url} alt="" className="w-full h-full object-cover" /> // eslint-disable-line @next/next/no-img-element
+                    : <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
+                  }
+                  {/* Play button */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-12 h-12 bg-black/50 group-hover:bg-[#e8002d] rounded-full flex items-center justify-center transition-colors">
+                      <Play size={18} className="text-white ml-0.5" fill="white" />
+                    </div>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusColor(m.status)}`}>
-                    {statusLabel(m.status)}
-                  </span>
+                  {/* Hook type badge */}
+                  <div className="absolute top-2 left-2">
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${NICHE_COLOR[h.niche] ?? 'bg-gray-100 text-gray-700'}`}>
+                      {h.niche}
+                    </span>
+                  </div>
+                  {/* Views */}
+                  <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-md">
+                    <Eye size={8} />{fmt(h.views)}
+                  </div>
                 </div>
-                {/* Body */}
-                <div className="px-4 py-4 flex flex-col gap-3">
-                  {m.problem && (
-                    <div className="flex items-start gap-2">
-                      <AlertCircle size={12} className="text-[#e8002d] mt-0.5 shrink-0" />
-                      <p className="text-xs text-[#444] leading-snug">{m.problem}</p>
-                    </div>
-                  )}
-                  {m.fix && (
-                    <div className="flex items-start gap-2">
-                      <span className="text-emerald-600 text-xs font-bold shrink-0 mt-0.5">→</span>
-                      <p className="text-xs text-emerald-700 leading-snug font-medium">{m.fix}</p>
-                    </div>
-                  )}
-                  {m.script && (
-                    <div className="flex items-start justify-between gap-2 bg-black text-white rounded-xl px-3 py-2.5 mt-1">
-                      <p className="text-xs font-semibold leading-snug flex-1">"{m.script}"</p>
-                      <CopyBtn text={m.script} />
-                    </div>
-                  )}
+                {/* Info */}
+                <div className="p-3 flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-[#111]">@{h.creator_username}</p>
+                    <p className="text-[10px] text-[#888] mt-0.5 leading-snug line-clamp-2">{h.caption}</p>
+                  </div>
+                  <ExternalLink size={12} className="text-[#ccc] group-hover:text-[#e8002d] transition-colors shrink-0 mt-0.5" />
                 </div>
-              </div>
+              </a>
             ))}
           </div>
-        )}
+        </div>
 
-        {/* Delivery tip */}
-        {result.hookDelivery && (
-          <div className="flex items-start gap-2 px-4 py-3 bg-[#fafafa] border border-black/8 rounded-xl">
-            <Mic size={12} className="text-[#aaa] mt-0.5 shrink-0" />
-            <p className="text-xs text-[#555] leading-snug">{result.hookDelivery}</p>
-          </div>
-        )}
-
-        {/* Reference hooks — MAIN VISUAL BLOCK */}
-        {result.referenceHooks?.length > 0 && (
-          <div className="flex flex-col gap-3">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#555]">
-              Посмотри как делают — {result.hookType}
-            </p>
-            <div className="grid grid-cols-3 gap-3">
-              {result.referenceHooks.map((h, i) => (
-                <a key={i} href={h.reelUrl} target="_blank" rel="noopener noreferrer"
-                  className="group flex flex-col rounded-2xl overflow-hidden border border-black/10 hover:border-black/30 transition-colors">
-                  {/* Thumbnail */}
-                  <div className="relative aspect-[9/14] bg-[#f0f0f0]">
-                    {h.thumbnail_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={h.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
-                    )}
-                    {/* play overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
-                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                        <Play size={16} className="text-black ml-0.5" fill="black" />
-                      </div>
-                    </div>
-                    {/* views badge */}
-                    <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-md">
-                      <Eye size={8} />{fmt(h.views)}
-                    </div>
-                  </div>
-                  {/* Info */}
-                  <div className="p-2.5 flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] font-bold text-[#111]">@{h.creator_username}</p>
-                      <p className="text-[9px] text-[#888] mt-0.5 line-clamp-1">{h.caption?.slice(0, 40)}</p>
-                    </div>
-                    <ExternalLink size={11} className="text-[#ccc] group-hover:text-[#e8002d] transition-colors shrink-0" />
-                  </div>
-                </a>
-              ))}
-            </div>
-            <a href="/library" className="text-xs text-[#aaa] hover:text-black transition-colors text-center pt-1">
-              Смотреть все хуки в библиотеке →
-            </a>
-          </div>
-        )}
+        {/* Library link */}
+        <a href={`/library?type=${encodeURIComponent(result.bestHookTypes[0] ?? '')}`}
+          className="flex items-center justify-center gap-2 py-3 border border-black/10 rounded-xl text-xs font-bold hover:border-black transition-colors">
+          Смотреть больше {result.bestHookTypes[0]} в библиотеке →
+        </a>
 
         {/* Upsell */}
-        <div className="border border-dashed border-black/15 rounded-2xl p-5 text-center">
-          <p className="text-sm font-semibold">Хочешь анализировать все свои видео?</p>
-          <a href="/pricing" className="inline-block mt-2 bg-black text-white text-xs font-bold px-6 py-2.5 rounded-full hover:opacity-80 transition-opacity">
+        <div className="border border-dashed border-black/15 rounded-2xl p-4 text-center">
+          <p className="text-sm font-semibold">Хочешь анализировать все видео?</p>
+          <a href="/pricing" className="inline-block mt-2 bg-black text-white text-xs font-bold px-6 py-2 rounded-full hover:opacity-80">
             Смотреть Pro →
           </a>
         </div>
@@ -276,7 +239,7 @@ export default function VideoAnalyzer() {
               <p className="text-sm font-medium">{STEPS[stepIdx]}</p>
               <div className="flex justify-center gap-1 mt-2">
                 {STEPS.map((_, i) => (
-                  <div key={i} className={`w-1.5 h-1.5 rounded-full ${i <= stepIdx ? 'bg-[#e8002d]' : 'bg-black/15'}`} />
+                  <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i <= stepIdx ? 'bg-[#e8002d]' : 'bg-black/15'}`} />
                 ))}
               </div>
             </div>
@@ -288,7 +251,7 @@ export default function VideoAnalyzer() {
             </div>
             <div>
               <p className="font-semibold text-sm">Загрузи своё видео</p>
-              <p className="text-[#888] text-xs mt-1">MP4, MOV · до 300MB · анализ всего ролика</p>
+              <p className="text-[#888] text-xs mt-1">MP4, MOV · до 300MB</p>
             </div>
             <span className="text-[10px] bg-black text-white px-4 py-1.5 rounded-full font-bold uppercase tracking-wider">
               1 анализ бесплатно
