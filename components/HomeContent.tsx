@@ -196,7 +196,7 @@ export default function HomeContent() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start gap-16">
           <div className="md:w-1/2" data-reveal="left">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#555] mb-6">{tr('home', 'problemBadge', lang)}</p>
-            <h2 className="font-extrabold text-4xl md:text-6xl uppercase leading-[0.9] tracking-tight">
+            <h2 className="font-display font-extrabold text-4xl md:text-6xl uppercase leading-[0.9] tracking-tight">
               {tr('home', 'problemTitle', lang).split('.').filter(Boolean).map((line, i) => (
                 <span key={i}>{line.trim()}.<br /></span>
               ))}
@@ -219,7 +219,7 @@ export default function HomeContent() {
           <div className="flex items-end justify-between mb-16" data-reveal>
             <div>
               <p className="text-[10px] uppercase tracking-[0.25em] text-[#888] mb-3">{tr('home', 'howItWorks', lang)}</p>
-              <h2 className="font-extrabold text-4xl md:text-6xl uppercase leading-[0.9] tracking-tight">
+              <h2 className="font-display font-extrabold text-4xl md:text-6xl uppercase leading-[0.9] tracking-tight">
                 {tr('home', 'threeSteps', lang).split('.').filter(Boolean).map((part, i) => (
                   <span key={i}>{part.trim()}.<br /></span>
                 ))}
@@ -249,14 +249,14 @@ export default function HomeContent() {
         <div className="max-w-6xl mx-auto">
           <div data-reveal className="text-center mb-16">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#888] mb-3">{tr('home', 'whatYouGet', lang)}</p>
-            <h2 className="font-extrabold text-4xl md:text-6xl uppercase leading-[0.9] tracking-tight">
+            <h2 className="font-display font-extrabold text-4xl md:text-6xl uppercase leading-[0.9] tracking-tight">
               {tr('home', 'twoTools', lang)}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div data-reveal="left" className="bg-white border border-black/10 rounded-3xl p-10 flex flex-col gap-5">
               <p className="text-[10px] uppercase tracking-widest text-[#888] font-bold">Free</p>
-              <h3 className="font-extrabold text-3xl uppercase">Hook Library</h3>
+              <h3 className="font-display font-extrabold text-3xl uppercase">Hook Library</h3>
               <p className="text-[#666] text-sm leading-relaxed flex-1">{tr('home', 'libDesc', lang)}</p>
               <Link href="/library" className="inline-flex items-center gap-2 text-sm font-bold hover:gap-3 transition-all">
                 {tr('home', 'browseLib', lang)} <ArrowRight size={14} />
@@ -264,7 +264,7 @@ export default function HomeContent() {
             </div>
             <div data-reveal="right" className="bg-[#0a0a0a] text-white border border-black rounded-3xl p-10 flex flex-col gap-5">
               <p className="text-[10px] uppercase tracking-widest text-[#e8002d] font-bold">Pro</p>
-              <h3 className="font-extrabold text-3xl uppercase">AI Hook Analyzer</h3>
+              <h3 className="font-display font-extrabold text-3xl uppercase">AI Hook Analyzer</h3>
               <p className="text-[#888] text-sm leading-relaxed flex-1">{tr('home', 'analyzerDesc', lang)}</p>
               <Link href="/pro" className="inline-flex items-center gap-2 text-sm font-bold text-[#e8002d] hover:gap-3 transition-all">
                 {tr('home', 'tryFree', lang)} <ArrowRight size={14} />
@@ -277,7 +277,7 @@ export default function HomeContent() {
       {/* ── BIG CTA ── */}
       <section className="px-6 md:px-12 py-24 border-b border-black/10">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
-          <h2 data-reveal="left" className="font-extrabold uppercase leading-[0.85] tracking-tighter text-[clamp(3rem,8vw,7rem)]">
+          <h2 data-reveal="left" className="font-display font-extrabold uppercase leading-[0.85] tracking-tighter text-[clamp(3rem,8vw,7rem)]">
             YOUR<br />
             <span className="text-[#e8002d]">ANALYSIS.</span><br />
             ONLY YOURS.
