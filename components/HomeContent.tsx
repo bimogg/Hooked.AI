@@ -236,35 +236,6 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* ── TWO TOOLS ── */}
-      <section className="px-6 md:px-12 py-20 border-b border-black/10 bg-[#fafafa]">
-        <div className="max-w-6xl mx-auto">
-          <div data-reveal className="text-center mb-16">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-[#888] mb-3">{tr('home', 'whatYouGet', lang)}</p>
-            <h2 className="font-display font-extrabold text-3xl md:text-5xl uppercase leading-[0.9] tracking-tight">
-              {tr('home', 'twoTools', lang)}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div data-reveal="left" className="bg-white border border-black/10 rounded-3xl p-10 flex flex-col gap-5">
-              <p className="text-[10px] uppercase tracking-widest text-[#888] font-bold">Free</p>
-              <h3 className="font-display font-extrabold text-3xl uppercase">Hook Library</h3>
-              <p className="text-[#666] text-sm leading-relaxed flex-1 font-light">{tr('home', 'libDesc', lang)}</p>
-              <Link href="/library" className="inline-flex items-center gap-2 text-sm font-bold hover:gap-3 transition-all">
-                {tr('home', 'browseLib', lang)} <ArrowRight size={14} />
-              </Link>
-            </div>
-            <div data-reveal="right" className="bg-[#0a0a0a] text-white border border-black rounded-3xl p-10 flex flex-col gap-5">
-              <p className="text-[10px] uppercase tracking-widest text-[#e8002d] font-bold">Pro</p>
-              <h3 className="font-display font-extrabold text-3xl uppercase">AI Hook Analyzer</h3>
-              <p className="text-[#888] text-sm leading-relaxed flex-1 font-light">{tr('home', 'analyzerDesc', lang)}</p>
-              <Link href="/pro" className="inline-flex items-center gap-2 text-sm font-bold text-[#e8002d] hover:gap-3 transition-all">
-                {tr('home', 'tryFree', lang)} <ArrowRight size={14} />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ── ABOUT TEXT ── */}
       <section className="bg-[#0a0a0a] px-6 md:px-12 py-24 md:py-36">
