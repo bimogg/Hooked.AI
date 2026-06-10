@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useState } from 'react';
+import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
@@ -8,6 +9,8 @@ import { tr } from '@/lib/translations';
 export default function Nav() {
   const [open, setOpen] = useState(false);
   const { lang } = useLang();
+  const { isSignedIn } = useUser();
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-black/10 h-14 flex items-center px-6 justify-between">
       <Link href="/" className="font-display font-bold text-sm tracking-tight flex items-center gap-2">
@@ -23,6 +26,15 @@ export default function Nav() {
       </nav>
       <div className="hidden md:flex items-center gap-3">
         <LanguageSwitcher />
+        {isSignedIn ? (
+          <UserButton />
+        ) : (
+          <SignInButton mode="modal">
+            <button className="text-xs text-[#888] hover:text-black transition-colors font-medium px-3 py-1.5">
+              Sign In
+            </button>
+          </SignInButton>
+        )}
         <Link href="/pro"
           className="bg-[#e8002d] text-white text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
           {tr('nav', 'cta', lang)}
@@ -39,9 +51,16 @@ export default function Nav() {
           <Link href="/library" onClick={() => setOpen(false)} className="text-sm text-[#888]">Library</Link>
           <Link href="/pricing" onClick={() => setOpen(false)} className="text-sm text-[#888]">Pricing</Link>
           <Link href="/privacy" onClick={() => setOpen(false)} className="text-sm text-[#888]">Privacy</Link>
+          {isSignedIn ? (
+            <UserButton />
+          ) : (
+            <SignInButton mode="modal">
+              <button className="text-sm text-[#888] text-left">Sign In</button>
+            </SignInButton>
+          )}
           <Link href="/pro" onClick={() => setOpen(false)}
             className="bg-[#e8002d] text-white text-sm font-bold py-3 px-6 rounded-full text-center">
-            Analyze My Video
+            {tr('nav', 'cta', lang)}
           </Link>
         </div>
       )}
