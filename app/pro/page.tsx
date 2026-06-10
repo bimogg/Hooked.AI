@@ -1,8 +1,10 @@
+'use client';
 import VideoAnalyzer from '@/components/VideoAnalyzer';
-
-export const metadata = { title: 'HookedAI Pro — AI Hook Analyzer' };
+import { useLang } from '@/components/LanguageProvider';
+import { tr } from '@/lib/translations';
 
 export default function ProPage() {
+  const { lang } = useLang();
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       <div className="mb-10">
@@ -11,11 +13,11 @@ export default function ProPage() {
           AI Hook<br />Analyzer
         </h1>
         <p className="text-[#888] text-sm mt-3 max-w-md">
-          Загрузи Reel — ИИ скажет почему зрители уходят в первые секунды и покажет реальные видео с хуками которые работают. Скопируй и сними так же.
+          {tr('pro', 'desc', lang)}
         </p>
         <div className="flex items-center gap-2 mt-3">
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span className="text-xs text-[#888]">1 видео бесплатно · без регистрации</span>
+          <span className="text-xs text-[#888]">{tr('pro', 'freeBadge', lang)}</span>
         </div>
       </div>
       <VideoAnalyzer />
