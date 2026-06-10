@@ -32,12 +32,13 @@ export async function POST(req: NextRequest) {
       content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } });
       content.push({ type: 'text', text: `↑ ${ts[i] ?? i}s` });
     });
-    content.push({ type: 'text', text: `You are an Instagram Reels hook expert. Analyze these frames.
+    content.push({ type: 'text', text: `You are an Instagram Reels hook expert. Analyze these frames carefully.
 
 Return ONLY valid JSON:
 {
   "hookScore": <1-10>,
-  "niche": "<one word topic: fitness | comedy | beauty | food | business | travel | education | lifestyle | other>",
+  "niche": "<one word: fitness | comedy | beauty | food | business | travel | education | lifestyle | other>",
+  "videoTopic": "<describe SPECIFICALLY what this video is about — what activity, product, topic, or situation is shown. Be concrete, e.g. 'home workout without equipment', 'making espresso at home', 'skincare morning routine', 'freelance pricing mistakes'. 1 sentence max>",
   "mainProblem": "<the single biggest hook problem — 1 short sentence in Russian>",
   "bestHookTypes": ["<type1>", "<type2>"]
 }
@@ -90,22 +91,23 @@ Hook types: Visual Hook, Question Hook, Tutorial Hook, Curiosity Hook, Warning H
 
     const r2 = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 600,
+      max_tokens: 700,
       messages: [{
         role: 'user',
-        content: `A creator makes ${analysis.niche} content. Their main hook problem: "${analysis.mainProblem}"
+        content: `A creator made a video specifically about: "${analysis.videoTopic}".
+Their hook problem: "${analysis.mainProblem}"
 
 Below are ${picked.length} viral hooks from Instagram. For each hook:
-1. Extract the EXACT hook technique (what makes it work) in 1 sentence in Russian
-2. Write the EXACT script to copy/adapt for ${analysis.niche} content — make it concrete and ready to record
+1. "technique" — what hook technique this video uses (1 sentence in Russian)
+2. "scriptToCopy" — write an OPENING LINE the creator can say/show at the very start of THEIR video about "${analysis.videoTopic}". Make it specific to their topic — mention the actual subject, not a generic example. Punchy, 1-2 sentences in Russian, ready to record.
 
 ${hooksListText}
 
-Return ONLY valid JSON array with exactly ${picked.length} items:
+Return ONLY a valid JSON array with exactly ${picked.length} objects:
 [
   {
-    "technique": "<what the hook technique is — 1 sentence in Russian>",
-    "scriptToCopy": "<exact script to record — in Russian, punchy, 1-2 sentences>"
+    "technique": "<hook technique in Russian — 1 sentence>",
+    "scriptToCopy": "<opening line specifically about '${analysis.videoTopic}' — in Russian>"
   }
 ]`,
       }],
