@@ -7,6 +7,7 @@ import { tr } from '@/lib/translations';
 
 const FREE_KEY = 'hooked_free_used';
 function hasUsedFree() { try { return localStorage.getItem(FREE_KEY) === '1'; } catch { return false; } }
+function markFreeUsed() { try { localStorage.setItem(FREE_KEY, '1'); } catch {} }
 
 async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> {
   return new Promise((resolve, reject) => {
@@ -125,8 +126,16 @@ export default function VideoAnalyzer() {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [locked, setLocked] = useState(false);
+  const [isPro, setIsPro] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { lang } = useLang();
+
+  useEffect(() => {
+    fetch('/api/check-subscription')
+      .then(r => r.json())
+      .then(d => { if (d.pro) setIsPro(true); })
+      .catch(() => {});
+  }, []);
 
   // cleanup blob on unmount / new upload
   useEffect(() => () => { if (blobUrl) URL.revokeObjectURL(blobUrl); }, [blobUrl]);
@@ -134,7 +143,7 @@ export default function VideoAnalyzer() {
   const analyze = useCallback(async (file: File) => {
     if (!file.type.startsWith('video/')) { setError('Загрузи видео (MP4, MOV)'); return; }
     if (file.size > 300 * 1024 * 1024) { setError('Максимум 300MB'); return; }
-    void hasUsedFree();
+    if (!isPro && hasUsedFree()) { setLocked(true); return; }
     // keep blob URL for left panel
     if (blobUrl) URL.revokeObjectURL(blobUrl);
     const newBlob = URL.createObjectURL(file);
@@ -151,11 +160,12 @@ export default function VideoAnalyzer() {
       setStepIdx(2);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Ошибка');
+      if (!isPro) markFreeUsed();
       setResult(data);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Ошибка. Попробуй ещё раз.');
     } finally { setLoading(false); }
-  }, [blobUrl]);
+  }, [blobUrl, isPro]);
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault(); setDragging(false);
@@ -168,7 +178,7 @@ export default function VideoAnalyzer() {
       <Lock size={28} />
       <p className="font-bold text-lg">{tr('result', 'locked', lang)}</p>
       <p className="text-sm text-[#666] max-w-xs">{tr('result', 'lockedSub', lang)}</p>
-      <a href="/pricing" className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90">{tr('result', 'lockedCta', lang)}</a>
+      <a href="https://buy.polar.sh/polar_cl_6KgaItKzKLgclHCPVxC9YIRwK7ITxCvAcRXVs3R4kxf" target="_blank" rel="noopener noreferrer" className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90">{tr('result', 'lockedCta', lang)}</a>
     </div>
   );
 
