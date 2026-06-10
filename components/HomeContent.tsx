@@ -206,7 +206,7 @@ export default function HomeContent() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="px-6 md:px-12 py-20 border-b border-black/10">
+      <section className="px-6 md:px-12 pt-20 pb-40 border-b border-black/10">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-end justify-between mb-16" data-reveal>
             <div>
