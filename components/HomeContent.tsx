@@ -44,7 +44,7 @@ export default function HomeContent() {
     <div className="flex flex-col overflow-hidden">
 
       {/* ── HERO ── */}
-      <section className="relative min-h-[92vh] flex items-center px-6 md:px-12 py-16 border-b border-black/10">
+      <section className="relative min-h-[92vh] flex items-center pl-6 md:pl-12 pr-0 py-16 border-b border-black/10">
         <div className="w-full flex items-center justify-between gap-10">
 
           {/* LEFT: text centered vertically */}
@@ -71,7 +71,7 @@ export default function HomeContent() {
           </div>
 
           {/* RIGHT: mockup */}
-          <div className="hidden md:block shrink-0 w-[220px] lg:w-[260px] xl:w-[300px]" data-reveal="right">
+          <div className="hidden md:block shrink-0 w-[240px] lg:w-[290px] xl:w-[340px]" data-reveal="right">
             <div className="relative w-full aspect-[9/16] bg-[#f5f5f5] rounded-3xl overflow-hidden border border-black/10 shadow-2xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/mockup.png" alt="HookedAI app" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
