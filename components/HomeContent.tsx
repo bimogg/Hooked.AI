@@ -45,10 +45,6 @@ export default function HomeContent() {
 
       {/* ── HERO ── */}
       <section className="relative min-h-[92vh] flex flex-col justify-between px-6 md:px-12 pt-12 pb-10 border-b border-black/10">
-        <div className="flex items-center justify-between" data-reveal data-delay="1">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#888]">{tr('home', 'earlyAccess', lang)}</span>
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#888]">AI · Instagram · Reels</span>
-        </div>
 
         <div className="flex items-end justify-between gap-6 mt-8">
           <h1 data-reveal="left" className="font-display font-extrabold uppercase leading-[0.85] tracking-tighter text-[clamp(4rem,13vw,11rem)]">
