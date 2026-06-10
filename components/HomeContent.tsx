@@ -161,17 +161,21 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* ── STATS ── */}
-      <section ref={statRef} className="bg-white border-b border-black/10">
-        <div className="grid grid-cols-1 md:grid-cols-3">
+      {/* ── TRUSTED BY (dot matrix stats) ── */}
+      <section ref={statRef} className="bg-white px-6 md:px-12 py-20">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-[#aaa] text-center mb-2">By the numbers</p>
+        <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-12 tracking-tight">
+          Trusted by creators worldwide
+        </h2>
+        <div className="stats-grid">
           {[
-            { label: 'Hooks in Library',     value: '1000+', bars: [3,5,4,6,7,5,8,6,7,8,7,8,6,8] },
-            { label: 'Avg Retention Boost',  value: '80%',   bars: [2,4,3,5,4,6,5,7,6,8,7,8,8,7] },
-            { label: 'Critical Hook Window', value: '3 sec', bars: [8,7,7,6,5,5,4,4,3,3,2,2,1,1] },
-          ].map(({ label, value, bars }, i) => (
-            <div key={label} className={`px-10 py-14 flex flex-col gap-3 ${i < 2 ? 'md:border-r border-black/10' : ''} ${i > 0 ? 'border-t border-black/10 md:border-t-0' : ''}`}>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#aaa]">{label}</p>
-              <p className="font-display font-extrabold text-[clamp(3rem,6vw,5rem)] leading-none tracking-tight">{value}</p>
+            { label: 'Hooks in Library',      value: '1000+', bars: [3,5,4,6,7,5,8,6,7,8,7,8,6,8] },
+            { label: 'Avg Retention Boost',   value: '80%',   bars: [2,4,3,5,4,6,5,7,6,8,7,8,8,7] },
+            { label: 'Critical Hook Window',  value: '3 sec', bars: [8,7,7,6,5,5,4,4,3,3,2,2,1,1] },
+          ].map(({ label, value, bars }) => (
+            <div key={label} className="bg-[#f5f5f5] rounded-2xl p-6 md:p-7">
+              <p className="text-[9px] uppercase tracking-[0.16em] text-[#aaa] mb-2 leading-snug">{label}</p>
+              <p className="font-display font-extrabold text-4xl md:text-5xl leading-none">{value}</p>
               <DotMatrix bars={bars} on={statsOn} />
             </div>
           ))}
