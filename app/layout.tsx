@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import Nav from '@/components/Nav';
+import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'HookedAI — Stop The Drop',
@@ -18,9 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen flex flex-col bg-white text-[#0a0a0a]">
         <Nav />
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-black/10 px-6 py-6 text-center text-xs text-[#888]">
-          © 2026 HookedAI
-        </footer>
+        <Footer />
       </body>
     </html>
   );
