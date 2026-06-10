@@ -164,7 +164,7 @@ export default function HomeContent() {
       {/* ── TRUSTED BY (dot matrix stats) ── */}
       <section ref={statRef} className="bg-white px-6 md:px-12 py-20">
         <p className="text-[10px] uppercase tracking-[0.18em] text-[#aaa] text-center mb-2">By the numbers</p>
-        <h2 className="font-extrabold text-3xl md:text-5xl text-center mb-12 tracking-tight">
+        <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-12 tracking-tight">
           Trusted by creators worldwide
         </h2>
         <div className="stats-grid">
@@ -175,7 +175,7 @@ export default function HomeContent() {
           ].map(({ label, value, bars }) => (
             <div key={label} className="bg-[#f5f5f5] rounded-2xl p-6 md:p-7">
               <p className="text-[9px] uppercase tracking-[0.16em] text-[#aaa] mb-2 leading-snug">{label}</p>
-              <p className="font-extrabold text-4xl md:text-5xl leading-none">{value}</p>
+              <p className="font-display font-extrabold text-4xl md:text-5xl leading-none">{value}</p>
               <DotMatrix bars={bars} on={statsOn} />
             </div>
           ))}
