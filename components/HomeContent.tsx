@@ -110,6 +110,20 @@ export default function HomeContent() {
       </section>
 
 
+      {/* ── ABOUT TEXT ── */}
+      <section className="bg-[#0a0a0a] px-6 md:px-12 py-20 md:py-28">
+        <div className="max-w-2xl mx-auto">
+          <p className="text-[10px] text-white/20 uppercase tracking-[0.22em] mb-7">HookedAI</p>
+          <p className="text-white/80 leading-[1.78] font-light" style={{ fontSize: 'clamp(15px,1.8vw,19px)' }}>
+            Most creators lose their audience in the first 3 seconds without ever
+            knowing why. HookedAI watches your video the way an algorithm does —
+            spotting the exact frame where attention drops, matching it to hooks
+            that retain, and giving you a script to fix it. No guesswork. No vanity
+            metrics. Just the data that matters, and the words that work.
+          </p>
+        </div>
+      </section>
+
       {/* ── PROBLEM ── */}
       <section className="bg-[#0a0a0a] text-white px-6 md:px-12 py-20 border-b border-white/5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start gap-16">
@@ -214,19 +228,6 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* ── ABOUT TEXT ── */}
-      <section className="bg-[#0a0a0a] px-6 md:px-12 py-20 md:py-28">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-[10px] text-white/20 uppercase tracking-[0.22em] mb-7">HookedAI</p>
-          <p className="text-white/80 leading-[1.78] font-light" style={{ fontSize: 'clamp(15px,1.8vw,19px)' }}>
-            Most creators lose their audience in the first 3 seconds without ever
-            knowing why. HookedAI watches your video the way an algorithm does —
-            spotting the exact frame where attention drops, matching it to hooks
-            that retain, and giving you a script to fix it. No guesswork. No vanity
-            metrics. Just the data that matters, and the words that work.
-          </p>
-        </div>
-      </section>
 
       {/* ── GIANT BRAND FOOTER ── */}
       <section className="bg-white px-6 md:px-12 pt-12 pb-0 overflow-hidden">
