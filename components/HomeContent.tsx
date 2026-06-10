@@ -109,24 +109,6 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* ── STATS ROW ── */}
-      <section className="border-b border-black/10">
-        <div className="grid grid-cols-2 md:grid-cols-4">
-          {[
-            { stat: '80%', label: tr('home', 'stat1', lang) },
-            { stat: '3 sec', label: tr('home', 'stat2', lang) },
-            { stat: '1000+', label: 'hooks in library' },
-            { stat: '0', label: tr('home', 'stat3', lang) },
-          ].map(({ stat, label }, i) => (
-            <div key={i}
-              data-reveal data-delay={String(i + 1)}
-              className={`px-8 py-10 flex flex-col gap-2 ${i < 3 ? 'border-r border-black/10' : ''} ${i >= 2 ? 'border-t border-black/10 md:border-t-0' : ''}`}>
-              <p className="font-display font-extrabold text-4xl md:text-5xl leading-none">{stat}</p>
-              <p className="text-xs text-[#888] leading-snug max-w-[140px]">{label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* ── PROBLEM ── */}
       <section className="bg-[#0a0a0a] text-white px-6 md:px-12 py-20 border-b border-white/5">
