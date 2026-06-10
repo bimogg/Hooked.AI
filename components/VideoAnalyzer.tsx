@@ -1,29 +1,43 @@
 'use client';
 import { useState, useRef, useCallback } from 'react';
-import { Upload, Copy, Check, AlertCircle, Lock, ExternalLink, Eye, Play } from 'lucide-react';
+import { Upload, Copy, Check, AlertCircle, Lock, ExternalLink, Eye, Play, Mic } from 'lucide-react';
 
 const FREE_KEY = 'hooked_free_used';
 function hasUsedFree() { try { return localStorage.getItem(FREE_KEY) === '1'; } catch { return false; } }
 function markFreeUsed() { try { localStorage.setItem(FREE_KEY, '1'); } catch {} }
 
-async function extractFrames(file: File): Promise<string[]> {
+async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> {
   return new Promise((resolve, reject) => {
     const video = document.createElement('video');
     const url = URL.createObjectURL(file);
     video.src = url; video.muted = true; video.playsInline = true; video.crossOrigin = 'anonymous';
     video.onloadedmetadata = async () => {
+      const dur = video.duration;
       const canvas = document.createElement('canvas');
       const scale = Math.min(1, 720 / Math.max(video.videoWidth, video.videoHeight));
       canvas.width = Math.round(video.videoWidth * scale);
       canvas.height = Math.round(video.videoHeight * scale);
       const ctx = canvas.getContext('2d')!;
-      const times = [0, 1, 2, 3].filter(t => t <= video.duration - 0.05);
-      if (!times.length) times.push(0);
-      const frames: string[] = [];
-      for (const t of times) {
+
+      // spread up to 12 frames evenly across entire video
+      const MAX = 12;
+      const count = Math.min(MAX, Math.max(4, Math.floor(dur)));
+      const times: number[] = [];
+      for (let i = 0; i < count; i++) {
+        times.push(Math.min((dur / (count - 1)) * i, dur - 0.05));
+      }
+      // always include 0
+      if (times[0] > 0.1) times.unshift(0);
+
+      const frames: { b64: string; t: number }[] = [];
+      for (const t of times.slice(0, MAX)) {
         await new Promise<void>(res => {
           video.currentTime = t;
-          video.onseeked = () => { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); frames.push(canvas.toDataURL('image/jpeg', 0.75).split(',')[1]); res(); };
+          video.onseeked = () => {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            frames.push({ b64: canvas.toDataURL('image/jpeg', 0.7).split(',')[1], t: Math.round(t) });
+            res();
+          };
         });
       }
       URL.revokeObjectURL(url); resolve(frames);
@@ -49,15 +63,15 @@ function CopyBtn({ text }: { text: string }) {
 }
 
 interface ReferenceHook { creator_username: string; caption: string | null; views: number; thumbnail_url: string | null; niche: string; reelUrl: string; }
+interface HookMoment { label: string; timestamp: string; status: 'weak' | 'ok' | 'strong'; problem: string; fix: string; script: string; }
 interface Result {
   hookScore: number; verdict: string;
-  timeline: { second: number; what: string; problem: string; fix: string }[];
-  problems: string[]; hookType: string; hookScript: string;
-  hookDelivery: string; placement: string; why: string;
+  hookMoments: HookMoment[];
+  hookType: string; hookDelivery: string; why: string;
   referenceHooks: ReferenceHook[];
 }
 
-const STEPS = ['Извлекаем кадры...', 'ИИ смотрит первые 3 секунды...', 'Анализирует хук...', 'Пишет скрипт...'];
+const STEPS = ['Извлекаем кадры из видео...', 'ИИ анализирует весь ролик...', 'Ищет слабые хуки...', 'Пишет скрипты...'];
 
 export default function VideoAnalyzer() {
   const [dragging, setDragging] = useState(false);
@@ -75,11 +89,11 @@ export default function VideoAnalyzer() {
     // if (hasUsedFree()) { setLocked(true); return; }
     setLoading(true); setError(''); setResult(null); setStepIdx(0);
     try {
-      const frames = await extractFrames(file);
+      const frameData = await extractFrames(file);
       setStepIdx(1); await new Promise(r => setTimeout(r, 300)); setStepIdx(2);
       const res = await fetch('/api/analyze-video', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ frames }),
+        body: JSON.stringify({ frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t) }),
       });
       setStepIdx(3);
       const data = await res.json();
@@ -110,6 +124,8 @@ export default function VideoAnalyzer() {
   /* ── RESULT ── */
   if (result) {
     const scoreColor = result.hookScore >= 8 ? '#16a34a' : result.hookScore >= 6 ? '#d97706' : '#e8002d';
+    const statusColor = (s: string) => s === 'strong' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : s === 'ok' ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-red-50 border-red-200 text-[#e8002d]';
+    const statusLabel = (s: string) => s === 'strong' ? 'Сильный' : s === 'ok' ? 'Средний' : 'Слабый';
 
     return (
       <div className="flex flex-col gap-4">
@@ -120,34 +136,59 @@ export default function VideoAnalyzer() {
             {result.hookScore}
           </p>
           <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#aaa] mb-1">из 10</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[#aaa] mb-1">из 10 · весь ролик</p>
             <p className="text-sm font-semibold text-[#111] leading-snug">{result.verdict}</p>
           </div>
         </div>
 
-        {/* Problems — short */}
-        {result.problems?.length > 0 && (
-          <div className="flex flex-col gap-2">
-            {result.problems.slice(0, 3).map((p, i) => (
-              <div key={i} className="flex items-start gap-2.5 px-4 py-3 bg-[#fff8f8] border border-[#e8002d]/15 rounded-xl">
-                <AlertCircle size={13} className="text-[#e8002d] mt-0.5 shrink-0" />
-                <p className="text-xs text-[#333] leading-snug">{p}</p>
+        {/* Hook moments across video */}
+        {result.hookMoments?.length > 0 && (
+          <div className="flex flex-col gap-3">
+            {result.hookMoments.map((m, i) => (
+              <div key={i} className="border border-black/10 rounded-2xl overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3 bg-[#fafafa] border-b border-black/8">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-sm">{m.label}</span>
+                    <span className="text-[10px] text-[#aaa]">{m.timestamp}</span>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusColor(m.status)}`}>
+                    {statusLabel(m.status)}
+                  </span>
+                </div>
+                {/* Body */}
+                <div className="px-4 py-4 flex flex-col gap-3">
+                  {m.problem && (
+                    <div className="flex items-start gap-2">
+                      <AlertCircle size={12} className="text-[#e8002d] mt-0.5 shrink-0" />
+                      <p className="text-xs text-[#444] leading-snug">{m.problem}</p>
+                    </div>
+                  )}
+                  {m.fix && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-emerald-600 text-xs font-bold shrink-0 mt-0.5">→</span>
+                      <p className="text-xs text-emerald-700 leading-snug font-medium">{m.fix}</p>
+                    </div>
+                  )}
+                  {m.script && (
+                    <div className="flex items-start justify-between gap-2 bg-black text-white rounded-xl px-3 py-2.5 mt-1">
+                      <p className="text-xs font-semibold leading-snug flex-1">"{m.script}"</p>
+                      <CopyBtn text={m.script} />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* New hook script */}
-        <div className="border-2 border-black rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Новый хук · {result.hookType}</span>
-            <CopyBtn text={result.hookScript} />
+        {/* Delivery tip */}
+        {result.hookDelivery && (
+          <div className="flex items-start gap-2 px-4 py-3 bg-[#fafafa] border border-black/8 rounded-xl">
+            <Mic size={12} className="text-[#aaa] mt-0.5 shrink-0" />
+            <p className="text-xs text-[#555] leading-snug">{result.hookDelivery}</p>
           </div>
-          <p className="text-base font-bold leading-snug">"{result.hookScript}"</p>
-          {result.hookDelivery && (
-            <p className="text-xs text-[#888] mt-3 leading-relaxed">{result.hookDelivery}</p>
-          )}
-        </div>
+        )}
 
         {/* Reference hooks — MAIN VISUAL BLOCK */}
         {result.referenceHooks?.length > 0 && (
@@ -247,7 +288,7 @@ export default function VideoAnalyzer() {
             </div>
             <div>
               <p className="font-semibold text-sm">Загрузи своё видео</p>
-              <p className="text-[#888] text-xs mt-1">MP4, MOV · до 300MB</p>
+              <p className="text-[#888] text-xs mt-1">MP4, MOV · до 300MB · анализ всего ролика</p>
             </div>
             <span className="text-[10px] bg-black text-white px-4 py-1.5 rounded-full font-bold uppercase tracking-wider">
               1 анализ бесплатно

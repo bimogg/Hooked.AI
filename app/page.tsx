@@ -105,7 +105,7 @@ export default function LandingPage() {
                 <h3 className="font-display font-extrabold text-2xl uppercase">AI Hook Analyzer</h3>
               </div>
               <p className="text-[#666] text-sm leading-relaxed">
-                Upload your Reel — AI watches the first 3 seconds, scores your hook, and writes a custom script. Exact type, exact placement, ready to copy.
+                Upload your Reel — AI analyzes the entire video, finds every weak hook moment, and writes custom scripts for opening, mid-video, and loop hooks. Ready to copy.
               </p>
               <Link href="/pro"
                 className="mt-auto inline-flex items-center gap-2 text-sm font-bold text-[#e8002d] hover:gap-3 transition-all">
@@ -126,9 +126,9 @@ export default function LandingPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { n: '01', title: 'Upload your Reel', desc: 'Drop any MP4 or MOV file. No account needed, works instantly.' },
-              { n: '02', title: 'AI watches first 3s', desc: 'Claude AI analyzes every frame of your opening hook and scores it 1–10.' },
-              { n: '03', title: 'Get your script', desc: 'Receive a custom hook script — type, placement, and copy-ready text.' },
+              { n: '01', title: 'Upload your Reel', desc: 'Drop any MP4 or MOV. No account needed, works instantly.' },
+              { n: '02', title: 'AI reads the whole video', desc: 'Claude analyzes frames across the entire video — opening, middle, and loop hook.' },
+              { n: '03', title: 'Get hook scripts', desc: 'Custom scripts for each weak moment — type, placement, copy-ready.' },
             ].map(({ n, title, desc }) => (
               <div key={n} className="flex flex-col gap-3">
                 <span className="font-display font-extrabold text-5xl text-black/10">{n}</span>

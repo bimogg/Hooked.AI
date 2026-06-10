@@ -21,52 +21,77 @@ function idToShortcode(id: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { frames, caption } = await req.json() as { frames: string[]; caption?: string };
+    const { frames, timestamps, caption } = await req.json() as {
+      frames: string[];
+      timestamps?: number[];
+      caption?: string;
+    };
     if (!frames?.length) return NextResponse.json({ error: 'No frames provided' }, { status: 400 });
 
-    const imageContent = frames.slice(0, 4).map((b64) => ({
+    const ts = timestamps ?? frames.map((_, i) => i);
+
+    const imageContent = frames.slice(0, 12).map((b64, i) => ({
       type: 'image' as const,
       source: { type: 'base64' as const, media_type: 'image/jpeg' as const, data: b64 },
+      // label injected via text block below
+      _ts: ts[i] ?? i,
     }));
 
-    const frameCount = frames.length;
-    const prompt = `You are the world's top Instagram Reels hook analyst. You've studied 10,000+ viral videos and know exactly what makes people stop scrolling vs. swipe away.
+    // build content: alternate image + timestamp label
+    const content: Anthropic.MessageParam['content'] = [];
+    imageContent.forEach((img, i) => {
+      content.push({ type: 'image', source: img.source });
+      content.push({ type: 'text', text: `↑ Frame at ${img._ts}s` });
+    });
 
-You are looking at ${frameCount} frames from the FIRST 3 SECONDS of an Instagram Reel.${caption ? `\n\nVideo caption: "${caption}"` : ''}
+    const videoDuration = ts[ts.length - 1] ?? frames.length;
+    const prompt = `You are the world's top Instagram Reels hook analyst. You have analyzed 10,000+ viral videos.
 
-Frame timestamps: ${[0,1,2,3].slice(0, frameCount).map(t => `${t}s`).join(', ')}.
+Above are ${frames.length} frames from a Reel spread across ${videoDuration} seconds — the ENTIRE video.${caption ? `\nCaption: "${caption}"` : ''}
 
-Analyze these frames with brutal honesty and actionable depth. Give SPECIFIC, DETAILED feedback — not generic advice.
+Your job: analyze the FULL video for hook quality at every stage — opening hook, mid-video retention hooks, and loop hook (end that makes people rewatch).
 
-Respond ONLY with valid JSON in this exact format (no markdown, no extra text):
+Respond ONLY with valid JSON, no markdown:
 {
-  "hookScore": <integer 1-10>,
-  "verdict": "<2 sentences: what's the core hook problem and what's the immediate consequence for retention>",
-  "timeline": [
-    { "second": 0, "what": "<what ACTUALLY happens in this frame — be specific>", "problem": "<what's wrong here>", "fix": "<exactly what should happen instead>" },
-    { "second": 1, "what": "<what ACTUALLY happens>", "problem": "<what's wrong>", "fix": "<exactly what should be different>" },
-    { "second": 2, "what": "<what ACTUALLY happens>", "problem": "<what's wrong>", "fix": "<exactly what should be different>" },
-    { "second": 3, "what": "<what ACTUALLY happens>", "problem": "<decision point for viewer — why they leave or stay>" , "fix": "<what would make them stay>" }
+  "hookScore": <integer 1-10, overall hook quality across the whole video>,
+  "verdict": "<2 sentences: what's the core hook problem across this video and the consequence>",
+  "hookMoments": [
+    {
+      "label": "Opening Hook",
+      "timestamp": "<e.g. 0–3s>",
+      "status": "weak" | "ok" | "strong",
+      "problem": "<what's wrong at this moment — be specific, 1 sentence>",
+      "fix": "<exactly what to do instead — actionable, 1 sentence>",
+      "script": "<ready-to-use line to say or show at this moment>"
+    },
+    {
+      "label": "Mid-Video Hook",
+      "timestamp": "<e.g. 10–15s>",
+      "status": "weak" | "ok" | "strong",
+      "problem": "<what's wrong>",
+      "fix": "<what to do>",
+      "script": "<ready script>"
+    },
+    {
+      "label": "Loop Hook",
+      "timestamp": "<e.g. last 3s>",
+      "status": "weak" | "ok" | "strong",
+      "problem": "<what's wrong>",
+      "fix": "<what to do>",
+      "script": "<ready script>"
+    }
   ],
-  "problems": [
-    "<specific problem 1 — include the second it happens, e.g. 'At 0s: no visual contrast...' >",
-    "<specific problem 2>",
-    "<specific problem 3>"
-  ],
-  "hookType": "<best hook type from: Visual Hook | Question Hook | Tutorial Hook | Curiosity Hook | Warning Hook | Challenge Hook | Engagement Hook | Mistake Hook>",
-  "hookScript": "<the exact hook script — 1-2 punchy sentences, written to be SPOKEN. Include stage directions in brackets like [look into camera] [show product] if needed>",
-  "hookDelivery": "<how to deliver it: tone, speed, energy, what to do with body/hands/face, camera angle>",
-  "placement": "Opening (first 3 sec)",
-  "why": "<one sentence: WHY this specific hook will perform better based on what's failing in the original>"
+  "hookType": "<best hook type for this content: Visual Hook | Question Hook | Tutorial Hook | Curiosity Hook | Warning Hook | Challenge Hook | Engagement Hook | Mistake Hook>",
+  "hookDelivery": "<how to deliver the opening hook: tone, energy, camera angle, pacing — 1 sentence>",
+  "why": "<one sentence: why fixing these hooks specifically will increase retention>"
 }`;
+
+    content.push({ type: 'text', text: prompt });
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1200,
-      messages: [{
-        role: 'user',
-        content: [...imageContent, { type: 'text', text: prompt }],
-      }],
+      max_tokens: 1400,
+      messages: [{ role: 'user', content }],
     });
 
     const text = response.content[0].type === 'text' ? response.content[0].text : '';
@@ -75,54 +100,43 @@ Respond ONLY with valid JSON in this exact format (no markdown, no extra text):
 
     const analysis = JSON.parse(jsonMatch[0]);
 
-    // Pull matching reference hooks from library
+    // Pull reference hooks from library
     const hookType = HOOK_TYPES.includes(analysis.hookType) ? analysis.hookType : null;
     let referenceHooks: {
-      creator_username: string;
-      caption: string | null;
-      views: number;
-      instagram_id: string | null;
-      thumbnail_url: string | null;
-      niche: string;
-      reelUrl: string;
+      creator_username: string; caption: string | null; views: number;
+      instagram_id: string | null; thumbnail_url: string | null; niche: string; reelUrl: string;
     }[] = [];
 
-    if (hookType) {
-      try {
-        let { data } = await supabaseAdmin
+    try {
+      let { data } = await supabaseAdmin
+        .from('hooks')
+        .select('creator_username, caption, views, instagram_id, thumbnail_url, niche')
+        .eq('niche', hookType ?? 'Visual Hook')
+        .not('caption', 'is', null)
+        .neq('caption', '')
+        .order('views', { ascending: false })
+        .limit(30);
+
+      if (!data || data.length === 0) {
+        const fallback = await supabaseAdmin
           .from('hooks')
           .select('creator_username, caption, views, instagram_id, thumbnail_url, niche')
-          .eq('niche', hookType)
           .not('caption', 'is', null)
           .neq('caption', '')
           .order('views', { ascending: false })
           .limit(30);
-
-        // fallback: any hook type if no results for this type
-        if (!data || data.length === 0) {
-          const fallback = await supabaseAdmin
-            .from('hooks')
-            .select('creator_username, caption, views, instagram_id, thumbnail_url, niche')
-            .not('caption', 'is', null)
-            .neq('caption', '')
-            .order('views', { ascending: false })
-            .limit(30);
-          data = fallback.data;
-        }
-
-        if (data && data.length > 0) {
-          const shuffled = data.sort(() => Math.random() - 0.5).slice(0, 3);
-          referenceHooks = shuffled.map(h => ({
-            ...h,
-            reelUrl: h.instagram_id
-              ? `https://www.instagram.com/reel/${idToShortcode(h.instagram_id)}/`
-              : `https://www.instagram.com/${h.creator_username}/`,
-          }));
-        }
-      } catch {
-        // silently skip if DB unavailable
+        data = fallback.data;
       }
-    }
+
+      if (data && data.length > 0) {
+        referenceHooks = data.sort(() => Math.random() - 0.5).slice(0, 3).map(h => ({
+          ...h,
+          reelUrl: h.instagram_id
+            ? `https://www.instagram.com/reel/${idToShortcode(h.instagram_id)}/`
+            : `https://www.instagram.com/${h.creator_username}/`,
+        }));
+      }
+    } catch { /* silently skip */ }
 
     return NextResponse.json({ ...analysis, referenceHooks });
   } catch (e) {

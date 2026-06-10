@@ -11,7 +11,7 @@ export default function ProPage() {
           AI Hook<br />Analyzer
         </h1>
         <p className="text-[#888] text-sm mt-3 max-w-md">
-          Загрузи своё видео — ИИ посмотрит первые 3 секунды и скажет что не так с хуком и как его исправить.
+          Загрузи своё Reel — ИИ разберёт весь ролик, найдёт слабые места по хукам и напишет готовые скрипты для каждого момента.
         </p>
         <div className="flex items-center gap-2 mt-3">
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
