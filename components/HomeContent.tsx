@@ -183,14 +183,6 @@ export default function HomeContent() {
       </section>
 
 
-      {/* ── ABOUT TEXT ── */}
-      <section className="bg-[#0a0a0a] px-6 md:px-12 py-24 md:py-36">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-[10px] text-white/20 uppercase tracking-[0.22em] mb-10">HookedAI</p>
-          <ScrollText text="Your Reels lose 80% of viewers before your message even starts. HookedAI uploads your video, finds the exact second people leave, and shows you a hook that keeps them watching. Then writes you a script to replace your weak opening — ready to copy and post." />
-        </div>
-      </section>
-
       {/* ── PROBLEM ── */}
       <section className="bg-[#0a0a0a] text-white px-6 md:px-12 py-20 border-b border-white/5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-16">
@@ -274,7 +266,13 @@ export default function HomeContent() {
         </div>
       </section>
 
-
+      {/* ── ABOUT TEXT ── */}
+      <section className="bg-[#0a0a0a] px-6 md:px-12 py-24 md:py-36">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-[10px] text-white/20 uppercase tracking-[0.22em] mb-10">HookedAI</p>
+          <ScrollText text="Your Reels lose 80% of viewers before your message even starts. HookedAI uploads your video, finds the exact second people leave, and shows you a hook that keeps them watching. Then writes you a script to replace your weak opening — ready to copy and post." />
+        </div>
+      </section>
 
     </div>
   );
