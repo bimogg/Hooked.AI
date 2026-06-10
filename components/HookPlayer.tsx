@@ -23,9 +23,9 @@ export default function HookPlayer({ videoUrl, thumbnailUrl, reelUrl, hookDurati
   const play = (e: React.MouseEvent) => {
     e.preventDefault();
     const v = videoRef.current;
-    if (!v || failed) { window.open(reelUrl, '_blank'); return; }
+    if (!v || failed) return;
     v.currentTime = 0;
-    v.play().then(() => setPlaying(true)).catch(() => { setFailed(true); window.open(reelUrl, '_blank'); });
+    v.play().then(() => setPlaying(true)).catch(() => setFailed(true));
   };
 
   const onTimeUpdate = () => {
@@ -61,12 +61,18 @@ export default function HookPlayer({ videoUrl, thumbnailUrl, reelUrl, hookDurati
         <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900" />
       )}
 
-      {/* Play button */}
-      {!playing && (
+      {/* Play button or failed state */}
+      {!playing && !failed && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-12 h-12 bg-black/60 hover:bg-[#e8002d] rounded-full flex items-center justify-center transition-colors">
             <Play size={18} className="text-white ml-1" fill="white" />
           </div>
+        </div>
+      )}
+      {failed && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/70">
+          <p className="text-white/60 text-[10px] text-center px-4">Нет превью</p>
+          <button onClick={openReel} className="text-[10px] text-[#e8002d] underline">Смотреть в Instagram</button>
         </div>
       )}
 
