@@ -221,7 +221,7 @@ export default function HomeContent() {
               <p className="text-[10px] uppercase tracking-[0.25em] text-[#888] mb-3">{tr('home', 'howItWorks', lang)}</p>
               <h2 className="font-display font-extrabold text-3xl md:text-5xl uppercase leading-[0.9] tracking-tight">
                 {tr('home', 'threeSteps', lang).split('.').filter(Boolean).map((part, i) => (
-                  <span key={i}>{part.trim()}. </span>
+                  <span key={i} className={i === 1 ? 'text-[#e8002d]' : ''}>{part.trim()}. </span>
                 ))}
               </h2>
             </div>
