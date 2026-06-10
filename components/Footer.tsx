@@ -44,13 +44,6 @@ export default function Footer() {
 
         </div>
 
-        <div className="border-t border-black/8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-[#aaa]">{tr('footer', 'rights', lang)}</p>
-          <a href="/pro"
-            className="text-xs bg-[#e8002d] text-white font-bold px-5 py-2 rounded-full hover:opacity-90 transition-opacity">
-            {tr('footer', 'analyzeBtn', lang)}
-          </a>
-        </div>
       </div>
     </footer>
   );
