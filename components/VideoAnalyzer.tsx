@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Upload, AlertCircle, Lock, Eye, Copy, Check } from 'lucide-react';
 import HookPlayer from './HookPlayer';
 
@@ -39,6 +39,12 @@ async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> 
   });
 }
 
+// parse "0–3 сек" or "10–15 сек" → { start, end }
+function parseTimestamp(ts: string): { start: number; end: number } {
+  const nums = ts.match(/\d+/g)?.map(Number) ?? [0];
+  return { start: nums[0] ?? 0, end: nums[1] ?? (nums[0] ?? 0) + 4 };
+}
+
 function fmt(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K`;
@@ -54,6 +60,33 @@ function CopyBtn({ text }: { text: string }) {
     >
       {done ? <><Check size={10} />Скопировано</> : <><Copy size={10} />Скопировать</>}
     </button>
+  );
+}
+
+// Left: user's own video seeked to the weak zone, looping that segment
+function UserVideoClip({ blobUrl, start, end }: { blobUrl: string; start: number; end: number }) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = ref.current; if (!v) return;
+    v.currentTime = start;
+    v.play().catch(() => {});
+  }, [start]);
+
+  const onTimeUpdate = () => {
+    const v = ref.current; if (!v) return;
+    if (v.currentTime >= end) { v.currentTime = start; v.play().catch(() => {}); }
+  };
+
+  return (
+    <video
+      ref={ref}
+      src={blobUrl}
+      className="w-full h-full object-cover"
+      muted playsInline autoPlay loop={false}
+      onTimeUpdate={onTimeUpdate}
+      onLoadedMetadata={e => { (e.target as HTMLVideoElement).currentTime = start; }}
+    />
   );
 }
 
@@ -85,16 +118,23 @@ export default function VideoAnalyzer() {
   const [loading, setLoading] = useState(false);
   const [stepIdx, setStepIdx] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [locked, setLocked] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // cleanup blob on unmount / new upload
+  useEffect(() => () => { if (blobUrl) URL.revokeObjectURL(blobUrl); }, [blobUrl]);
+
   const analyze = useCallback(async (file: File) => {
     if (!file.type.startsWith('video/')) { setError('Загрузи видео (MP4, MOV)'); return; }
     if (file.size > 300 * 1024 * 1024) { setError('Максимум 300MB'); return; }
-    // TODO: re-enable before launch
-    // if (hasUsedFree()) { setLocked(true); return; }
     void hasUsedFree();
+    // keep blob URL for left panel
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+    const newBlob = URL.createObjectURL(file);
+    setBlobUrl(newBlob);
+
     setLoading(true); setError(''); setResult(null); setStepIdx(0);
     try {
       const frameData = await extractFrames(file);
@@ -110,7 +150,7 @@ export default function VideoAnalyzer() {
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Ошибка. Попробуй ещё раз.');
     } finally { setLoading(false); }
-  }, []);
+  }, [blobUrl]);
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault(); setDragging(false);
@@ -128,7 +168,7 @@ export default function VideoAnalyzer() {
   );
 
   /* ── RESULT ── */
-  if (result) {
+  if (result && blobUrl) {
     const scoreColor = result.hookScore >= 8 ? '#16a34a' : result.hookScore >= 5 ? '#d97706' : '#e8002d';
     return (
       <div className="flex flex-col gap-6">
@@ -139,84 +179,90 @@ export default function VideoAnalyzer() {
             {result.hookScore}
           </p>
           <div>
-            <p className="text-[10px] text-[#aaa] uppercase tracking-widest">из 10</p>
-            {result.videoTopic && (
-              <p className="text-xs text-[#888] mt-0.5">Тема: {result.videoTopic}</p>
-            )}
+            <p className="text-[10px] text-[#aaa] uppercase tracking-widest mb-0.5">из 10</p>
+            {result.videoTopic && <p className="text-xs text-[#666]">{result.videoTopic}</p>}
           </div>
         </div>
 
         {/* Weak zones */}
-        {result.weakZones?.map((zone, i) => (
-          <div key={i} className="flex flex-col gap-0 rounded-2xl overflow-hidden border border-black/10">
+        {result.weakZones?.map((zone, i) => {
+          const { start, end } = parseTimestamp(zone.timestamp);
+          return (
+            <div key={i} className="flex flex-col rounded-2xl overflow-hidden border border-black/10">
 
-            {/* СЛАБАЯ ЗОНА */}
-            <div className="bg-[#fff3f3] border-b border-[#e8002d]/15 px-4 py-3 flex items-start gap-2.5">
-              <div className="shrink-0 mt-0.5">
-                <span className="flex items-center justify-center w-5 h-5 bg-[#e8002d] rounded-full text-white text-[10px] font-bold">{i + 1}</span>
+              {/* Header */}
+              <div className="bg-[#fff3f3] border-b border-[#e8002d]/15 px-4 py-2.5 flex items-center gap-2">
+                <span className="flex items-center justify-center w-5 h-5 bg-[#e8002d] rounded-full text-white text-[10px] font-bold shrink-0">{i + 1}</span>
+                <span className="text-[11px] font-bold text-[#e8002d] uppercase tracking-wider">{zone.timestamp}</span>
+                <span className="text-sm text-[#333] font-medium leading-snug">{zone.whatIsWrong}</span>
               </div>
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-[#e8002d] uppercase tracking-wider">Слабая зона · {zone.timestamp}</span>
+
+              {/* Split: left = their video, right = example */}
+              <div className="grid grid-cols-2 divide-x divide-black/10">
+
+                {/* LEFT — user's video at weak zone */}
+                <div className="flex flex-col">
+                  <div className="px-3 py-1.5 bg-[#fafafa] border-b border-black/8 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#e8002d]" />
+                    <span className="text-[10px] font-bold text-[#555] uppercase tracking-wider">Твоё видео</span>
+                  </div>
+                  <div className="aspect-[9/14] bg-black overflow-hidden">
+                    <UserVideoClip blobUrl={blobUrl} start={start} end={end} />
+                  </div>
                 </div>
-                <p className="text-sm text-[#333] leading-snug font-medium">{zone.whatIsWrong}</p>
-              </div>
-            </div>
 
-            {/* ЗАМЕНИ НА ЭТОТ ХУК */}
-            <div className="px-4 py-2.5 bg-[#f7f7f7] border-b border-black/8 flex items-center gap-2">
-              <span className="text-emerald-600 font-bold text-sm">↓</span>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#555]">
-                Замени на {zone.hookType}
-              </span>
-              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${NICHE_COLOR[zone.hookType] ?? 'bg-gray-100 text-gray-600'}`}>
-                {zone.hookType}
-              </span>
-            </div>
-
-            {/* Video example */}
-            {zone.example && (
-              <div className="relative w-full aspect-[4/5] overflow-hidden bg-black">
-                <HookPlayer
-                  videoUrl={zone.example.video_url}
-                  thumbnailUrl={zone.example.thumbnail_url}
-                  reelUrl={zone.example.reelUrl}
-                />
-                <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-md pointer-events-none">
-                  <Eye size={9} />{fmt(zone.example.views)}
-                </div>
-                <div className="absolute bottom-2 right-10 text-[10px] text-white/80 pointer-events-none">
-                  @{zone.example.creator_username}
+                {/* RIGHT — library hook example */}
+                <div className="flex flex-col">
+                  <div className="px-3 py-1.5 bg-[#f0fdf4] border-b border-black/8 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="text-[10px] font-bold text-[#555] uppercase tracking-wider">Как надо</span>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto ${NICHE_COLOR[zone.hookType] ?? 'bg-gray-100 text-gray-600'}`}>
+                      {zone.hookType}
+                    </span>
+                  </div>
+                  <div className="aspect-[9/14] bg-black overflow-hidden relative">
+                    {zone.example ? (
+                      <>
+                        <HookPlayer
+                          videoUrl={zone.example.video_url}
+                          thumbnailUrl={zone.example.thumbnail_url}
+                          reelUrl={zone.example.reelUrl}
+                        />
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded pointer-events-none">
+                          <Eye size={8} />{fmt(zone.example.views)}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white/30 text-xs">нет примера</div>
+                    )}
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* Script */}
-            <div className="bg-black px-4 py-3 flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[9px] text-white/40 uppercase tracking-wider mb-1">Твой скрипт для этого места</p>
-                <p className="text-sm font-bold text-white leading-snug">"{zone.script}"</p>
+              {/* Script */}
+              <div className="bg-black px-4 py-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[9px] text-white/40 uppercase tracking-wider mb-1">Скрипт — скажи так вместо этого</p>
+                  <p className="text-sm font-bold text-white leading-snug">"{zone.script}"</p>
+                </div>
+                <CopyBtn text={zone.script} />
               </div>
-              <CopyBtn text={zone.script} />
+
             </div>
+          );
+        })}
 
-          </div>
-        ))}
-
-        {/* Library */}
+        {/* Library + upsell */}
         <a href="/library" className="text-center text-xs text-[#aaa] hover:text-black transition-colors">
           Смотреть все хуки в библиотеке →
         </a>
-
-        {/* Upsell */}
         <div className="border border-dashed border-black/15 rounded-2xl p-4 text-center">
           <p className="text-sm font-semibold">Хочешь анализировать все видео?</p>
           <a href="/pricing" className="inline-block mt-2 bg-black text-white text-xs font-bold px-6 py-2 rounded-full hover:opacity-80">
             Смотреть Pro →
           </a>
         </div>
-
-        <button onClick={() => setResult(null)} className="text-xs text-[#ccc] hover:text-black transition-colors text-center">
+        <button onClick={() => { setResult(null); setBlobUrl(null); }} className="text-xs text-[#ccc] hover:text-black transition-colors text-center">
           ← Загрузить другое видео
         </button>
       </div>
