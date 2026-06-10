@@ -17,9 +17,9 @@ export default function HookPlayer({ videoUrl, thumbnailUrl, reelUrl, hookDurati
   const play = (e: React.MouseEvent) => {
     e.preventDefault();
     const v = videoRef.current;
-    if (!v || failed) return;
+    if (!v || failed) { window.open(reelUrl, '_blank'); return; }
     v.currentTime = 0;
-    v.play().then(() => setPlaying(true)).catch(() => setFailed(true));
+    v.play().then(() => setPlaying(true)).catch(() => { setFailed(true); window.open(reelUrl, '_blank'); });
   };
 
   const onTimeUpdate = () => {
@@ -29,10 +29,8 @@ export default function HookPlayer({ videoUrl, thumbnailUrl, reelUrl, hookDurati
 
   const openReel = (e: React.MouseEvent) => { e.stopPropagation(); window.open(reelUrl, '_blank'); };
 
-  const canPlay = videoUrl && !failed;
-
   return (
-    <div className={`relative w-full h-full bg-black ${canPlay ? 'cursor-pointer' : ''}`} onClick={canPlay ? play : undefined}>
+    <div className="relative w-full h-full bg-black cursor-pointer" onClick={play}>
       {/* Video */}
       {videoUrl && !failed && (
         <video
@@ -57,8 +55,8 @@ export default function HookPlayer({ videoUrl, thumbnailUrl, reelUrl, hookDurati
         <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900" />
       )}
 
-      {/* Play button (only when video is available) */}
-      {canPlay && !playing && (
+      {/* Play button */}
+      {!playing && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-12 h-12 bg-black/60 hover:bg-[#e8002d] rounded-full flex items-center justify-center transition-colors">
             <Play size={18} className="text-white ml-1" fill="white" />
