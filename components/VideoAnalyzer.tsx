@@ -50,12 +50,24 @@ function CopyBtn({ text }: { text: string }) {
   return (
     <button
       onClick={e => { e.preventDefault(); navigator.clipboard.writeText(text); setDone(true); setTimeout(() => setDone(false), 2000); }}
-      className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/30 text-white hover:bg-white hover:text-black transition-all shrink-0"
+      className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/30 text-white hover:bg-white hover:text-black transition-all shrink-0 whitespace-nowrap"
     >
       {done ? <><Check size={10} />Скопировано</> : <><Copy size={10} />Скопировать</>}
     </button>
   );
 }
+
+interface HookExample {
+  creator_username: string; caption: string | null; views: number;
+  thumbnail_url: string | null; video_url: string | null; niche: string; reelUrl: string;
+}
+interface WeakZone {
+  timestamp: string; whatIsWrong: string; hookType: string; script: string;
+  example: HookExample | null;
+}
+interface Result { hookScore: number; videoTopic: string; weakZones: WeakZone[]; }
+
+const STEPS = ['Читаем видео...', 'ИИ ищет слабые места...', 'Подбираем примеры хуков...'];
 
 const NICHE_COLOR: Record<string, string> = {
   'Visual Hook': 'bg-pink-100 text-pink-700',
@@ -67,18 +79,6 @@ const NICHE_COLOR: Record<string, string> = {
   'Engagement Hook': 'bg-orange-100 text-orange-700',
   'Mistake Hook': 'bg-slate-100 text-slate-700',
 };
-
-interface ReferenceHook {
-  creator_username: string; caption: string | null; views: number;
-  thumbnail_url: string | null; video_url: string | null; niche: string; reelUrl: string;
-  technique: string; scriptToCopy: string;
-}
-interface Result {
-  hookScore: number; mainProblem: string;
-  bestHookTypes: string[]; referenceHooks: ReferenceHook[];
-}
-
-const STEPS = ['Читаем видео...', 'ИИ смотрит весь ролик...', 'Подбираем хуки из библиотеки...'];
 
 export default function VideoAnalyzer() {
   const [dragging, setDragging] = useState(false);
@@ -131,81 +131,81 @@ export default function VideoAnalyzer() {
   if (result) {
     const scoreColor = result.hookScore >= 8 ? '#16a34a' : result.hookScore >= 5 ? '#d97706' : '#e8002d';
     return (
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-6">
 
-        {/* Score + problem */}
+        {/* Score */}
         <div className="flex items-center gap-4 border border-black/10 rounded-2xl p-4">
           <p className="font-display font-extrabold text-5xl leading-none shrink-0" style={{ color: scoreColor }}>
             {result.hookScore}
           </p>
-          <div className="flex flex-col gap-1 min-w-0">
+          <div>
             <p className="text-[10px] text-[#aaa] uppercase tracking-widest">из 10</p>
-            <div className="flex items-start gap-1.5">
-              <AlertCircle size={12} className="text-[#e8002d] mt-0.5 shrink-0" />
-              <p className="text-sm text-[#333] leading-snug">{result.mainProblem}</p>
-            </div>
+            {result.videoTopic && (
+              <p className="text-xs text-[#888] mt-0.5">Тема: {result.videoTopic}</p>
+            )}
           </div>
         </div>
 
-        {/* Hook video cards */}
-        <div className="flex flex-col gap-4">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#333]">
-            Попробуй такой хук — нажми посмотреть, скопируй скрипт
-          </p>
+        {/* Weak zones */}
+        {result.weakZones?.map((zone, i) => (
+          <div key={i} className="flex flex-col gap-0 rounded-2xl overflow-hidden border border-black/10">
 
-          {result.referenceHooks.map((h, i) => (
-            <div key={i} className="border border-black/10 rounded-2xl overflow-hidden">
+            {/* СЛАБАЯ ЗОНА */}
+            <div className="bg-[#fff3f3] border-b border-[#e8002d]/15 px-4 py-3 flex items-start gap-2.5">
+              <div className="shrink-0 mt-0.5">
+                <span className="flex items-center justify-center w-5 h-5 bg-[#e8002d] rounded-full text-white text-[10px] font-bold">{i + 1}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-[#e8002d] uppercase tracking-wider">Слабая зона · {zone.timestamp}</span>
+                </div>
+                <p className="text-sm text-[#333] leading-snug font-medium">{zone.whatIsWrong}</p>
+              </div>
+            </div>
 
-              {/* Video — full width, tall */}
+            {/* ЗАМЕНИ НА ЭТОТ ХУК */}
+            <div className="px-4 py-2.5 bg-[#f7f7f7] border-b border-black/8 flex items-center gap-2">
+              <span className="text-emerald-600 font-bold text-sm">↓</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#555]">
+                Замени на {zone.hookType}
+              </span>
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${NICHE_COLOR[zone.hookType] ?? 'bg-gray-100 text-gray-600'}`}>
+                {zone.hookType}
+              </span>
+            </div>
+
+            {/* Video example */}
+            {zone.example && (
               <div className="relative w-full aspect-[4/5] overflow-hidden bg-black">
                 <HookPlayer
-                  videoUrl={h.video_url}
-                  thumbnailUrl={h.thumbnail_url}
-                  reelUrl={h.reelUrl}
+                  videoUrl={zone.example.video_url}
+                  thumbnailUrl={zone.example.thumbnail_url}
+                  reelUrl={zone.example.reelUrl}
                 />
-                {/* views */}
                 <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-md pointer-events-none">
-                  <Eye size={9} />{fmt(h.views)}
+                  <Eye size={9} />{fmt(zone.example.views)}
+                </div>
+                <div className="absolute bottom-2 right-10 text-[10px] text-white/80 pointer-events-none">
+                  @{zone.example.creator_username}
                 </div>
               </div>
+            )}
 
-              {/* Info */}
-              <div className="p-3 flex items-center gap-2 border-b border-black/8">
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${NICHE_COLOR[h.niche] ?? 'bg-gray-100 text-gray-700'}`}>
-                  {h.niche}
-                </span>
-                <a href={h.reelUrl} target="_blank" rel="noopener noreferrer"
-                  className="text-[11px] text-[#888] hover:text-[#e8002d] transition-colors font-medium">
-                  @{h.creator_username}
-                </a>
+            {/* Script */}
+            <div className="bg-black px-4 py-3 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[9px] text-white/40 uppercase tracking-wider mb-1">Твой скрипт для этого места</p>
+                <p className="text-sm font-bold text-white leading-snug">"{zone.script}"</p>
               </div>
-
-              {/* Technique */}
-              {h.technique && (
-                <div className="px-3 py-2.5 border-b border-black/8">
-                  <p className="text-[9px] font-bold uppercase tracking-wider text-[#bbb] mb-1">Техника хука</p>
-                  <p className="text-xs text-[#444] leading-snug">{h.technique}</p>
-                </div>
-              )}
-
-              {/* Script */}
-              {h.scriptToCopy && (
-                <div className="bg-black px-4 py-3 flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[9px] text-white/40 uppercase tracking-wider mb-1">Скрипт для записи</p>
-                    <p className="text-sm font-bold text-white leading-snug">"{h.scriptToCopy}"</p>
-                  </div>
-                  <CopyBtn text={h.scriptToCopy} />
-                </div>
-              )}
+              <CopyBtn text={zone.script} />
             </div>
-          ))}
-        </div>
 
-        {/* Library link */}
-        <a href={`/library?type=${encodeURIComponent(result.bestHookTypes[0] ?? '')}`}
-          className="text-center text-xs text-[#888] hover:text-black transition-colors py-2">
-          Смотреть больше {result.bestHookTypes[0]} в библиотеке →
+          </div>
+        ))}
+
+        {/* Library */}
+        <a href="/library" className="text-center text-xs text-[#aaa] hover:text-black transition-colors">
+          Смотреть все хуки в библиотеке →
         </a>
 
         {/* Upsell */}
@@ -260,7 +260,7 @@ export default function VideoAnalyzer() {
             </div>
             <div>
               <p className="font-semibold text-sm">Загрузи своё видео</p>
-              <p className="text-[#888] text-xs mt-1">MP4, MOV · до 300MB · анализ всего ролика</p>
+              <p className="text-[#888] text-xs mt-1">MP4, MOV · до 300MB</p>
             </div>
             <span className="text-[10px] bg-black text-white px-4 py-1.5 rounded-full font-bold uppercase tracking-wider">
               1 анализ бесплатно
