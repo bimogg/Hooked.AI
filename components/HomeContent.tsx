@@ -88,6 +88,27 @@ export default function HomeContent() {
         </div>
       </section>
 
+      {/* ── TRUSTED BY (dot matrix stats) ── */}
+      <section ref={statRef} className="bg-white px-6 md:px-12 py-20">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-[#aaa] text-center mb-2">By the numbers</p>
+        <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-12 tracking-tight">
+          Trusted by creators worldwide
+        </h2>
+        <div className="stats-grid">
+          {[
+            { label: 'Hooks in Library',      value: '1000+', bars: [3,5,4,6,7,5,8,6,7,8,7,8,6,8] },
+            { label: 'Avg Retention Boost',   value: '80%',   bars: [2,4,3,5,4,6,5,7,6,8,7,8,8,7] },
+            { label: 'Critical Hook Window',  value: '3 sec', bars: [8,7,7,6,5,5,4,4,3,3,2,2,1,1] },
+          ].map(({ label, value, bars }) => (
+            <div key={label} className="bg-[#f5f5f5] rounded-2xl p-6 md:p-7">
+              <p className="text-[9px] uppercase tracking-[0.16em] text-[#aaa] mb-2 leading-snug">{label}</p>
+              <p className="font-display font-extrabold text-4xl md:text-5xl leading-none">{value}</p>
+              <DotMatrix bars={bars} on={statsOn} />
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── STATS ROW ── */}
       <section className="border-b border-black/10">
         <div className="grid grid-cols-2 md:grid-cols-4">
@@ -208,27 +229,6 @@ export default function HomeContent() {
               {tr('home', 'ctaLink', lang)}
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* ── TRUSTED BY (dot matrix stats) ── */}
-      <section ref={statRef} className="bg-white px-6 md:px-12 py-20">
-        <p className="text-[10px] uppercase tracking-[0.18em] text-[#aaa] text-center mb-2">By the numbers</p>
-        <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-12 tracking-tight">
-          Trusted by creators worldwide
-        </h2>
-        <div className="stats-grid">
-          {[
-            { label: 'Hooks in Library',      value: '1000+', bars: [3,5,4,6,7,5,8,6,7,8,7,8,6,8] },
-            { label: 'Avg Retention Boost',   value: '80%',   bars: [2,4,3,5,4,6,5,7,6,8,7,8,8,7] },
-            { label: 'Critical Hook Window',  value: '3 sec', bars: [8,7,7,6,5,5,4,4,3,3,2,2,1,1] },
-          ].map(({ label, value, bars }) => (
-            <div key={label} className="bg-[#f5f5f5] rounded-2xl p-6 md:p-7">
-              <p className="text-[9px] uppercase tracking-[0.16em] text-[#aaa] mb-2 leading-snug">{label}</p>
-              <p className="font-display font-extrabold text-4xl md:text-5xl leading-none">{value}</p>
-              <DotMatrix bars={bars} on={statsOn} />
-            </div>
-          ))}
         </div>
       </section>
 
