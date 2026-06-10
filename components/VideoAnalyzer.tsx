@@ -71,7 +71,8 @@ export default function VideoAnalyzer() {
   const analyze = useCallback(async (file: File) => {
     if (!file.type.startsWith('video/')) { setError('Загрузи видео (MP4, MOV)'); return; }
     if (file.size > 300 * 1024 * 1024) { setError('Максимум 300MB'); return; }
-    if (hasUsedFree()) { setLocked(true); return; }
+    // TODO: re-enable before launch
+    // if (hasUsedFree()) { setLocked(true); return; }
     setLoading(true); setError(''); setResult(null); setStepIdx(0);
     try {
       const frames = await extractFrames(file);
@@ -83,7 +84,8 @@ export default function VideoAnalyzer() {
       setStepIdx(3);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Ошибка');
-      markFreeUsed(); setResult(data);
+      // markFreeUsed(); // TODO: re-enable before launch
+      setResult(data);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Ошибка. Попробуй ещё раз.');
     } finally { setLoading(false); }
