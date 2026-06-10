@@ -17,7 +17,7 @@ function ScrollText({ text }: { text: string }) {
       const rect = ref.current.getBoundingClientRect();
       const vh = window.innerHeight;
       // 0 when top of el hits bottom of viewport, 1 when bottom of el hits top
-      const raw = (vh - rect.top) / (vh + rect.height);
+      const raw = (vh * 0.8 - rect.top) / (rect.height * 0.6);
       setProgress(Math.max(0, Math.min(1, raw)));
     };
     window.addEventListener('scroll', onScroll, { passive: true });
