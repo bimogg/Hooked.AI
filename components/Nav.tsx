@@ -14,7 +14,6 @@ export default function Nav() {
         <Link href="/library" className="hover:text-black transition-colors">Library</Link>
         <Link href="/pro" className="hover:text-black transition-colors">Pro</Link>
         <Link href="/pricing" className="hover:text-black transition-colors">Pricing</Link>
-        <Link href="/dashboard" className="hover:text-black transition-colors">Dashboard</Link>
       </nav>
       <div className="hidden md:flex items-center gap-3">
         <Link href="/connect"
@@ -32,7 +31,6 @@ export default function Nav() {
           <Link href="/library" onClick={() => setOpen(false)} className="text-sm text-[#888]">Library</Link>
           <Link href="/pro" onClick={() => setOpen(false)} className="text-sm font-bold text-[#e8002d]">Pro — AI Analyzer</Link>
           <Link href="/pricing" onClick={() => setOpen(false)} className="text-sm text-[#888]">Pricing</Link>
-          <Link href="/dashboard" onClick={() => setOpen(false)} className="text-sm text-[#888]">Dashboard</Link>
           <Link href="/connect" onClick={() => setOpen(false)}
             className="bg-[#e8002d] text-white text-sm font-bold py-3 px-6 rounded-full text-center">
             Connect Instagram
