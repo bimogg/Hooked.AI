@@ -22,7 +22,6 @@ export default function LanguageSwitcher() {
         onClick={() => setOpen(o => !o)}
         className="flex items-center gap-1 text-[11px] uppercase tracking-widest text-[#888] hover:text-black transition-colors px-2 py-1"
       >
-        <span>{current.flag}</span>
         <span className="font-bold">{current.label}</span>
         <ChevronDown size={10} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -35,7 +34,6 @@ export default function LanguageSwitcher() {
               onClick={() => { setLang(l.code as LangCode); setOpen(false); }}
               className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-[#fafafa] transition-colors text-left ${lang === l.code ? 'font-bold text-black bg-[#f5f5f5]' : 'text-[#555]'}`}
             >
-              <span className="text-sm">{l.flag}</span>
               <span>{l.name}</span>
               {lang === l.code && <span className="ml-auto text-[#e8002d] text-[10px]">✓</span>}
             </button>
