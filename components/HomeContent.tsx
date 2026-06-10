@@ -274,26 +274,6 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* ── BIG CTA ── */}
-      <section className="px-6 md:px-12 py-24 border-b border-black/10">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
-          <h2 data-reveal="left" className="font-display font-extrabold uppercase leading-[0.85] tracking-tighter text-[clamp(3rem,8vw,7rem)]">
-            YOUR<br />
-            <span className="text-[#e8002d]">ANALYSIS.</span><br />
-            ONLY YOURS.
-          </h2>
-          <div data-reveal="right" className="flex flex-col gap-5 max-w-sm">
-            <p className="text-[#888] text-sm leading-relaxed">{tr('home', 'ctaSub', lang)}</p>
-            <Link href="/pro"
-              className="bg-[#e8002d] text-white font-bold text-sm px-10 py-4 rounded-full hover:opacity-90 transition-opacity flex items-center gap-2 w-fit">
-              {tr('home', 'ctaBtn', lang)} <ArrowRight size={16} />
-            </Link>
-            <Link href="/pricing" className="text-xs text-[#aaa] hover:text-black transition-colors">
-              {tr('home', 'ctaLink', lang)}
-            </Link>
-          </div>
-        </div>
-      </section>
 
 
     </div>
