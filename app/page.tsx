@@ -105,7 +105,7 @@ export default function LandingPage() {
                 <h3 className="font-display font-extrabold text-2xl uppercase">AI Hook Analyzer</h3>
               </div>
               <p className="text-[#666] text-sm leading-relaxed">
-                Enter your Instagram username — AI scrapes your latest Reels, analyzes each one, and writes a custom hook script. Exact type, exact placement, ready to copy.
+                Upload your Reel — AI watches the first 3 seconds, scores your hook, and writes a custom script. Exact type, exact placement, ready to copy.
               </p>
               <Link href="/pro"
                 className="mt-auto inline-flex items-center gap-2 text-sm font-bold text-[#e8002d] hover:gap-3 transition-all">
@@ -126,9 +126,9 @@ export default function LandingPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { n: '01', title: 'Enter username', desc: 'Type your Instagram @username. Account must be public.' },
-              { n: '02', title: 'AI analyzes', desc: 'We pull your latest Reels and Claude AI analyzes each hook in detail.' },
-              { n: '03', title: 'Get your scripts', desc: 'Receive custom hook scripts per video — type, placement, copy-ready text.' },
+              { n: '01', title: 'Upload your Reel', desc: 'Drop any MP4 or MOV file. No account needed, works instantly.' },
+              { n: '02', title: 'AI watches first 3s', desc: 'Claude AI analyzes every frame of your opening hook and scores it 1–10.' },
+              { n: '03', title: 'Get your script', desc: 'Receive a custom hook script — type, placement, and copy-ready text.' },
             ].map(({ n, title, desc }) => (
               <div key={n} className="flex flex-col gap-3">
                 <span className="font-display font-extrabold text-5xl text-black/10">{n}</span>
@@ -148,7 +148,7 @@ export default function LandingPage() {
             Your analysis.<br />Only yours.
           </h2>
           <p className="text-[#888] text-sm leading-relaxed max-w-md">
-            Results are private and saved to your browser. No account needed. Just enter your username and get your confidential hook analysis.
+            Results are private and saved to your browser. No account needed. Just upload your video and get your confidential hook analysis.
           </p>
           <Link href="/pro"
             className="bg-[#e8002d] text-white font-bold text-sm px-10 py-4 rounded-full hover:opacity-90 transition-opacity flex items-center gap-2">

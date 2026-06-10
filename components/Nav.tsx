@@ -17,9 +17,9 @@ export default function Nav() {
         <Link href="/pricing" className="hover:text-black transition-colors">Pricing</Link>
       </nav>
       <div className="hidden md:flex items-center gap-3">
-        <Link href="/connect"
+        <Link href="/pro"
           className="bg-[#e8002d] text-white text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
-          Connect Instagram
+          Analyze My Video
         </Link>
       </div>
       <button className="md:hidden p-2" onClick={() => setOpen(!open)}>
@@ -32,9 +32,9 @@ export default function Nav() {
           <Link href="/" onClick={() => setOpen(false)} className="text-sm text-[#888]">Home</Link>
           <Link href="/library" onClick={() => setOpen(false)} className="text-sm text-[#888]">Library</Link>
           <Link href="/pricing" onClick={() => setOpen(false)} className="text-sm text-[#888]">Pricing</Link>
-          <Link href="/connect" onClick={() => setOpen(false)}
+          <Link href="/pro" onClick={() => setOpen(false)}
             className="bg-[#e8002d] text-white text-sm font-bold py-3 px-6 rounded-full text-center">
-            Connect Instagram
+            Analyze My Video
           </Link>
         </div>
       )}
