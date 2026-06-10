@@ -6,7 +6,7 @@ import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 
 const FREE_KEY = 'hooked_free_count';
-const FREE_LIMIT = 3;
+const FREE_LIMIT = 10;
 function getFreeCount() { try { return parseInt(localStorage.getItem(FREE_KEY) || '0', 10); } catch { return 0; } }
 function hasUsedFree() { return getFreeCount() >= FREE_LIMIT; }
 function markFreeUsed() { try { localStorage.setItem(FREE_KEY, String(getFreeCount() + 1)); } catch {} }
