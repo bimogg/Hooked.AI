@@ -23,23 +23,23 @@ export default function Footer() {
 
           <div className="flex flex-col gap-3">
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">{tr('footer', 'product', lang)}</p>
-            <Link href="/" className="text-sm text-white/50 hover:text-white transition-colors">Home</Link>
-            <Link href="/pro" className="text-sm text-white/50 hover:text-white transition-colors">AI Analyzer</Link>
-            <Link href="/library" className="text-sm text-white/50 hover:text-white transition-colors">Hook Library</Link>
-            <Link href="/pricing" className="text-sm text-white/50 hover:text-white transition-colors">Pricing</Link>
+            <Link href="/" className="text-sm text-white/50 hover:text-white transition-colors">{tr('footer', 'navHome', lang)}</Link>
+            <Link href="/pro" className="text-sm text-white/50 hover:text-white transition-colors">{tr('footer', 'navAnalyzer', lang)}</Link>
+            <Link href="/library" className="text-sm text-white/50 hover:text-white transition-colors">{tr('footer', 'navLibrary', lang)}</Link>
+            <Link href="/pricing" className="text-sm text-white/50 hover:text-white transition-colors">{tr('footer', 'navPricing', lang)}</Link>
           </div>
 
           <div className="flex flex-col gap-3">
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">{tr('footer', 'resources', lang)}</p>
-            <Link href="/library?type=Visual+Hook" className="text-sm text-white/50 hover:text-white transition-colors">Visual Hooks</Link>
-            <Link href="/library?type=Question+Hook" className="text-sm text-white/50 hover:text-white transition-colors">Question Hooks</Link>
-            <Link href="/library?type=Warning+Hook" className="text-sm text-white/50 hover:text-white transition-colors">Warning Hooks</Link>
-            <Link href="/library?type=Tutorial+Hook" className="text-sm text-white/50 hover:text-white transition-colors">Tutorial Hooks</Link>
+            <Link href="/library?type=Visual+Hook" className="text-sm text-white/50 hover:text-white transition-colors">{tr('footer', 'navVisualHooks', lang)}</Link>
+            <Link href="/library?type=Question+Hook" className="text-sm text-white/50 hover:text-white transition-colors">{tr('footer', 'navQuestionHooks', lang)}</Link>
+            <Link href="/library?type=Warning+Hook" className="text-sm text-white/50 hover:text-white transition-colors">{tr('footer', 'navWarningHooks', lang)}</Link>
+            <Link href="/library?type=Tutorial+Hook" className="text-sm text-white/50 hover:text-white transition-colors">{tr('footer', 'navTutorialHooks', lang)}</Link>
           </div>
 
           <div className="flex flex-col gap-3">
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">{tr('footer', 'legal', lang)}</p>
-            <Link href="/privacy" className="text-sm text-white/50 hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/privacy" className="text-sm text-white/50 hover:text-white transition-colors">{tr('footer', 'navPrivacy', lang)}</Link>
           </div>
 
         </div>

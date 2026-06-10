@@ -98,7 +98,7 @@ export default function HomeContent() {
               LOSE
             </h1>
             <p className="text-[#666] text-sm md:text-base max-w-xs leading-relaxed font-light">
-              Upload your video. AI finds where you lose viewers. Get a script to fix it.
+              {tr('home', 'heroSubShort', lang)}
             </p>
             <div className="flex items-center gap-3">
               <Link href="/pro"
@@ -163,18 +163,18 @@ export default function HomeContent() {
 
       {/* ── TRUSTED BY (dot matrix stats) ── */}
       <section ref={statRef} className="bg-white px-6 md:px-12 py-20">
-        <p className="text-[10px] uppercase tracking-[0.18em] text-[#aaa] text-center mb-2">By the numbers</p>
+        <p className="text-[10px] uppercase tracking-[0.18em] text-[#aaa] text-center mb-2">{tr('home', 'byNumbers', lang)}</p>
         <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-12 tracking-tight">
-          Trusted by creators worldwide
+          {tr('home', 'trustedBy', lang)}
         </h2>
         <div className="stats-grid">
           {[
-            { label: 'Hooks in Library',      value: '1000+', bars: [3,5,4,6,7,5,8,6,7,8,7,8,6,8] },
-            { label: 'Avg Retention Boost',   value: '80%',   bars: [2,4,3,5,4,6,5,7,6,8,7,8,8,7] },
-            { label: 'Critical Hook Window',  value: '3 sec', bars: [8,7,7,6,5,5,4,4,3,3,2,2,1,1] },
-          ].map(({ label, value, bars }) => (
-            <div key={label} className="bg-[#f5f5f5] rounded-2xl p-6 md:p-7">
-              <p className="text-[9px] uppercase tracking-[0.16em] text-[#aaa] mb-2 leading-snug">{label}</p>
+            { labelKey: 'statLabel1', value: '1000+', bars: [3,5,4,6,7,5,8,6,7,8,7,8,6,8] },
+            { labelKey: 'statLabel2', value: '80%',   bars: [2,4,3,5,4,6,5,7,6,8,7,8,8,7] },
+            { labelKey: 'statLabel3', value: '3 sec', bars: [8,7,7,6,5,5,4,4,3,3,2,2,1,1] },
+          ].map(({ labelKey, value, bars }) => (
+            <div key={labelKey} className="bg-[#f5f5f5] rounded-2xl p-6 md:p-7">
+              <p className="text-[9px] uppercase tracking-[0.16em] text-[#aaa] mb-2 leading-snug">{tr('home', labelKey, lang)}</p>
               <p className="font-display font-extrabold text-4xl md:text-5xl leading-none">{value}</p>
               <DotMatrix bars={bars} on={statsOn} />
             </div>
@@ -239,7 +239,7 @@ export default function HomeContent() {
       <section className="bg-[#0a0a0a] px-6 md:px-12 py-24 md:py-36">
         <div className="max-w-3xl mx-auto">
           <p className="text-[10px] text-white/20 uppercase tracking-[0.22em] mb-10">HookedAI</p>
-          <ScrollText text="Your Reels lose 80% of viewers before your message even starts. HookedAI uploads your video, finds the exact second people leave, and shows you a hook that keeps them watching. Then writes you a script to replace your weak opening — ready to copy and post." />
+          <ScrollText text={tr('home', 'aboutText', lang)} />
         </div>
       </section>
 
