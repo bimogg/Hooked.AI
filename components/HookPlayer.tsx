@@ -9,10 +9,16 @@ interface Props {
   hookDuration?: number;
 }
 
+function proxied(url: string | null) {
+  if (!url) return null;
+  return `/api/proxy-video?url=${encodeURIComponent(url)}`;
+}
+
 export default function HookPlayer({ videoUrl, thumbnailUrl, reelUrl, hookDuration = 4 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [failed, setFailed] = useState(false);
+  const src = proxied(videoUrl);
 
   const play = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -32,10 +38,10 @@ export default function HookPlayer({ videoUrl, thumbnailUrl, reelUrl, hookDurati
   return (
     <div className="relative w-full h-full bg-black cursor-pointer" onClick={play}>
       {/* Video */}
-      {videoUrl && !failed && (
+      {src && !failed && (
         <video
           ref={videoRef}
-          src={videoUrl}
+          src={src}
           className={`w-full h-full object-cover transition-opacity duration-300 ${playing ? 'opacity-100' : 'opacity-0'}`}
           muted playsInline preload="none"
           onTimeUpdate={onTimeUpdate}
