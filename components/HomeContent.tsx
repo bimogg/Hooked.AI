@@ -175,7 +175,7 @@ export default function HomeContent() {
           ].map(({ label, value, bars }) => (
             <div key={label} className="bg-[#f5f5f5] rounded-2xl p-6 md:p-7">
               <p className="text-[9px] uppercase tracking-[0.16em] text-[#aaa] mb-2 leading-snug">{label}</p>
-              <p className="font-display font-extrabold text-4xl md:text-5xl leading-none">{value}</p>
+              <p className="font-light text-4xl md:text-5xl leading-none">{value}</p>
               <DotMatrix bars={bars} on={statsOn} />
             </div>
           ))}
