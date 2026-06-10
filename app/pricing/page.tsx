@@ -61,7 +61,7 @@ export default function PricingPage() {
     <div className="max-w-6xl mx-auto px-6 py-16">
       <div className="text-center mb-14">
         <p className="text-[10px] uppercase tracking-[0.2em] text-[#e8002d] font-bold mb-3">Pricing</p>
-        <h1 className="font-display font-extrabold text-4xl md:text-6xl uppercase leading-none">
+        <h1 className="font-display font-extrabold text-3xl md:text-4xl uppercase leading-none">
           Stop Guessing.<br />Start Hooking.
         </h1>
         <p className="text-[#888] text-sm mt-5 max-w-md mx-auto">
