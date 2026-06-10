@@ -59,7 +59,7 @@ function DotMatrix({ bars, on }: { bars: number[]; on: boolean }) {
           {Array.from({ length: H }).map((_, r) => (
             <div key={r} style={{
               width: 7, height: 7, borderRadius: '50%',
-              background: r < h ? '#0a0a0a' : 'rgba(10,10,10,0.08)',
+              background: r < h ? '#e8002d' : 'rgba(10,10,10,0.08)',
               opacity: on ? 1 : 0,
               transform: on ? 'scale(1)' : 'scale(0)',
               transition: `opacity .25s ${(c * H + r) * 16}ms, transform .25s ${(c * H + r) * 16}ms`,
