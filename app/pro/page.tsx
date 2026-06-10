@@ -11,7 +11,7 @@ export default function ProPage() {
           AI Hook<br />Analyzer
         </h1>
         <p className="text-[#888] text-sm mt-3 max-w-md">
-          Загрузи своё Reel — ИИ разберёт весь ролик, найдёт слабые места по хукам и напишет готовые скрипты для каждого момента.
+          Загрузи Reel — ИИ скажет почему зрители уходят в первые секунды и покажет реальные видео с хуками которые работают. Скопируй и сними так же.
         </p>
         <div className="flex items-center gap-2 mt-3">
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
