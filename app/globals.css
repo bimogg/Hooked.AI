@@ -59,6 +59,35 @@ body {
   to   { opacity: 1; transform: scale(1); }
 }
 
+/* Feature grid – responsive */
+.feat-grid {
+  display: grid;
+  grid-template-columns: minmax(160px,1fr) auto minmax(160px,1fr);
+  gap: clamp(16px, 3vw, 56px);
+  align-items: center;
+  width: 100%;
+}
+@media (max-width: 768px) {
+  .feat-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .feat-phone { order: -1; display: flex; justify-content: center; }
+  .feat-words { text-align: left !important; }
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: 1fr; }
+}
+
 /* Scroll animations */
 [data-reveal] {
   opacity: 0;
