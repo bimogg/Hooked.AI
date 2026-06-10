@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { supabaseAdmin } from '@/lib/supabase';
+import { langForPrompt } from '@/lib/translations';
 
 export const maxDuration = 60;
 
@@ -72,7 +73,8 @@ async function getFallbackHook() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { frames, timestamps } = await req.json() as { frames: string[]; timestamps?: number[] };
+    const { frames, timestamps, lang = 'ru' } = await req.json() as { frames: string[]; timestamps?: number[]; lang?: string };
+    const outputLang = langForPrompt(lang);
     if (!frames?.length) return NextResponse.json({ error: 'No frames provided' }, { status: 400 });
 
     const ts = timestamps ?? frames.map((_, i) => i);
@@ -93,18 +95,20 @@ STEP 1 — Understand the video deeply:
 
 STEP 2 — Find 2-3 WEAK ZONES where viewers would swipe away.
 
-CRITICAL RULE FOR SCRIPTS: Every script MUST be directly about the specific thing shown in this video. If the video is about making coffee — the script is about coffee. If it's about a workout — it's about that workout. NEVER write generic scripts. The script must sound like it was written only for THIS video.
+CRITICAL RULE FOR SCRIPTS: Every script MUST be directly about the specific thing shown in this video. NEVER write generic scripts. The script must sound like it was written only for THIS video.
+
+IMPORTANT: Write ALL text fields (videoTopic, whatIsWrong, script) in ${outputLang}. hookType must stay in English.
 
 Return ONLY valid JSON:
 {
   "hookScore": <1-10>,
-  "videoTopic": "<very specific: what exactly is shown — person, action, product, topic. E.g. 'девушка показывает утреннюю скинкер-рутину с кремом для лица' NOT just 'beauty'>",
+  "videoTopic": "<very specific in ${outputLang}: what exactly is shown — person, action, product, topic>",
   "weakZones": [
     {
-      "timestamp": "<e.g. '0–3 сек'>",
-      "whatIsWrong": "<what specifically happens on screen at this moment that kills interest — visual, concrete, in Russian>",
+      "timestamp": "<e.g. '0–3s'>",
+      "whatIsWrong": "<in ${outputLang}: what specifically happens on screen that kills interest — visual, concrete, 1-2 sentences>",
       "hookType": "<Visual Hook | Question Hook | Tutorial Hook | Curiosity Hook | Warning Hook | Challenge Hook | Engagement Hook | Mistake Hook>",
-      "script": "<opening line that MUST mention the exact topic/product/action from this video — in Russian, 1-2 punchy sentences. NO generic phrases like 'смотри до конца' or 'ты делаешь это неправильно' without saying WHAT specifically>"
+      "script": "<in ${outputLang}: opening line that MUST mention the exact topic/product/action from this video — punchy, 1-2 sentences. NO generic phrases without saying WHAT specifically>"
     }
   ]
 }` });

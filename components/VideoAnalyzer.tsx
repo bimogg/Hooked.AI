@@ -2,6 +2,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Upload, AlertCircle, Lock, Eye, Copy, Check } from 'lucide-react';
 import HookPlayer from './HookPlayer';
+import { useLang } from './LanguageProvider';
+import { tr } from '@/lib/translations';
 
 const FREE_KEY = 'hooked_free_used';
 function hasUsedFree() { try { return localStorage.getItem(FREE_KEY) === '1'; } catch { return false; } }
@@ -51,14 +53,16 @@ function fmt(n: number) {
   return String(n);
 }
 
-function CopyBtn({ text }: { text: string }) {
+function CopyBtn({ text, lang }: { text: string; lang: string }) {
   const [done, setDone] = useState(false);
   return (
     <button
       onClick={e => { e.preventDefault(); navigator.clipboard.writeText(text); setDone(true); setTimeout(() => setDone(false), 2000); }}
       className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/30 text-white hover:bg-white hover:text-black transition-all shrink-0 whitespace-nowrap"
     >
-      {done ? <><Check size={10} />Скопировано</> : <><Copy size={10} />Скопировать</>}
+      {done
+        ? <><Check size={10} />{tr('result', 'copied', lang)}</>
+        : <><Copy size={10} />{tr('result', 'copy', lang)}</>}
     </button>
   );
 }
@@ -100,7 +104,7 @@ interface WeakZone {
 }
 interface Result { hookScore: number; videoTopic: string; weakZones: WeakZone[]; }
 
-const STEPS = ['Читаем видео...', 'ИИ ищет слабые места...', 'Подбираем примеры хуков...'];
+const STEP_KEYS = ['frames', 'analyzing', 'hooks'] as const;
 
 const NICHE_COLOR: Record<string, string> = {
   'Visual Hook': 'bg-pink-100 text-pink-700',
@@ -122,6 +126,7 @@ export default function VideoAnalyzer() {
   const [error, setError] = useState('');
   const [locked, setLocked] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { lang } = useLang();
 
   // cleanup blob on unmount / new upload
   useEffect(() => () => { if (blobUrl) URL.revokeObjectURL(blobUrl); }, [blobUrl]);
@@ -141,7 +146,7 @@ export default function VideoAnalyzer() {
       setStepIdx(1);
       const res = await fetch('/api/analyze-video', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t) }),
+        body: JSON.stringify({ frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t), lang }),
       });
       setStepIdx(2);
       const data = await res.json();
@@ -161,9 +166,9 @@ export default function VideoAnalyzer() {
   if (locked) return (
     <div className="border border-black/10 rounded-2xl p-10 flex flex-col items-center gap-4 text-center">
       <Lock size={28} />
-      <p className="font-bold text-lg">Бесплатный анализ использован</p>
-      <p className="text-sm text-[#666] max-w-xs">Купи Pro чтобы анализировать без ограничений</p>
-      <a href="/pricing" className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90">Купить Pro →</a>
+      <p className="font-bold text-lg">{tr('result', 'locked', lang)}</p>
+      <p className="text-sm text-[#666] max-w-xs">{tr('result', 'lockedSub', lang)}</p>
+      <a href="/pricing" className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90">{tr('result', 'lockedCta', lang)}</a>
     </div>
   );
 
@@ -179,7 +184,7 @@ export default function VideoAnalyzer() {
             {result.hookScore}
           </p>
           <div>
-            <p className="text-[10px] text-[#aaa] uppercase tracking-widest mb-0.5">из 10</p>
+            <p className="text-[10px] text-[#aaa] uppercase tracking-widest mb-0.5">{tr('result', 'outOf', lang)}</p>
             {result.videoTopic && <p className="text-xs text-[#666]">{result.videoTopic}</p>}
           </div>
         </div>
@@ -204,7 +209,7 @@ export default function VideoAnalyzer() {
                 <div className="flex flex-col flex-1 rounded-xl overflow-hidden border border-black/10">
                   <div className="px-2.5 py-1.5 bg-[#fafafa] border-b border-black/8 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#e8002d]" />
-                    <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider">Твоё видео</span>
+                    <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider">{tr('result', 'yourVideo', lang)}</span>
                   </div>
                   <div className="aspect-[3/4] bg-black overflow-hidden">
                     <UserVideoClip blobUrl={blobUrl} start={start} end={end} />
@@ -212,19 +217,18 @@ export default function VideoAnalyzer() {
                 </div>
 
                 {/* CENTER label */}
-                <div className="flex flex-col items-center justify-center px-2 gap-1 shrink-0">
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-[9px] text-[#bbb] font-medium">Try</span>
-                    <span className="text-[9px] text-[#bbb] font-medium">this</span>
-                    <span className="text-[#bbb] text-sm">→</span>
-                  </div>
+                <div className="flex flex-col items-center justify-center px-2 gap-0.5 shrink-0">
+                  {tr('result', 'tryThis', lang).split(' ').map((w, i) => (
+                    <span key={i} className="text-[9px] text-[#bbb] font-medium">{w}</span>
+                  ))}
+                  <span className="text-[#bbb] text-sm mt-0.5">→</span>
                 </div>
 
                 {/* RIGHT — library hook example */}
                 <div className="flex flex-col flex-1 rounded-xl overflow-hidden border border-emerald-200">
                   <div className="px-2.5 py-1.5 bg-[#f0fdf4] border-b border-emerald-100 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider">Как надо</span>
+                    <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider">{tr('result', 'howTo', lang)}</span>
                   </div>
                   <div className="aspect-[3/4] bg-black overflow-hidden relative">
                     {zone.example ? (
@@ -248,10 +252,10 @@ export default function VideoAnalyzer() {
               {/* Script */}
               <div className="bg-black px-4 py-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[9px] text-white/40 uppercase tracking-wider mb-1">Скрипт — скажи так вместо этого</p>
+                  <p className="text-[9px] text-white/40 uppercase tracking-wider mb-1">{tr('result', 'script', lang)}</p>
                   <p className="text-sm font-bold text-white leading-snug">"{zone.script}"</p>
                 </div>
-                <CopyBtn text={zone.script} />
+                <CopyBtn text={zone.script} lang={lang} />
               </div>
 
             </div>
@@ -260,16 +264,16 @@ export default function VideoAnalyzer() {
 
         {/* Library + upsell */}
         <a href="/library" className="text-center text-xs text-[#aaa] hover:text-black transition-colors">
-          Смотреть все хуки в библиотеке →
+          {tr('result', 'library', lang)}
         </a>
         <div className="border border-dashed border-black/15 rounded-2xl p-4 text-center">
-          <p className="text-sm font-semibold">Хочешь анализировать все видео?</p>
+          <p className="text-sm font-semibold">{tr('result', 'upsellTitle', lang)}</p>
           <a href="/pricing" className="inline-block mt-2 bg-black text-white text-xs font-bold px-6 py-2 rounded-full hover:opacity-80">
-            Смотреть Pro →
+            {tr('result', 'upsellCta', lang)}
           </a>
         </div>
         <button onClick={() => { setResult(null); setBlobUrl(null); }} className="text-xs text-[#ccc] hover:text-black transition-colors text-center">
-          ← Загрузить другое видео
+          {tr('result', 'another', lang)}
         </button>
       </div>
     );
@@ -297,9 +301,9 @@ export default function VideoAnalyzer() {
               <div className="absolute inset-0 border-2 border-[#e8002d] border-t-transparent rounded-full animate-spin" />
             </div>
             <div>
-              <p className="text-sm font-medium">{STEPS[stepIdx]}</p>
+              <p className="text-sm font-medium">{tr('loading', STEP_KEYS[stepIdx], lang)}</p>
               <div className="flex justify-center gap-1 mt-2">
-                {STEPS.map((_, i) => (
+                {STEP_KEYS.map((_, i) => (
                   <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i <= stepIdx ? 'bg-[#e8002d]' : 'bg-black/15'}`} />
                 ))}
               </div>
@@ -311,11 +315,11 @@ export default function VideoAnalyzer() {
               <Upload size={24} className="text-white" />
             </div>
             <div>
-              <p className="font-semibold text-sm">Загрузи своё видео</p>
-              <p className="text-[#888] text-xs mt-1">MP4, MOV · до 300MB</p>
+              <p className="font-semibold text-sm">{tr('upload', 'title', lang)}</p>
+              <p className="text-[#888] text-xs mt-1">{tr('upload', 'subtitle', lang)}</p>
             </div>
             <span className="text-[10px] bg-black text-white px-4 py-1.5 rounded-full font-bold uppercase tracking-wider">
-              1 анализ бесплатно
+              {tr('upload', 'badge', lang)}
             </span>
           </>
         )}

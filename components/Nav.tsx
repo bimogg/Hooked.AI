@@ -1,9 +1,13 @@
 'use client';
 import Link from 'next/link';
 import { useState } from 'react';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useLang } from './LanguageProvider';
+import { tr } from '@/lib/translations';
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
+  const { lang } = useLang();
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-black/10 h-14 flex items-center px-6 justify-between">
       <Link href="/" className="font-display font-bold text-sm tracking-tight flex items-center gap-2">
@@ -18,9 +22,10 @@ export default function Nav() {
         <Link href="/privacy" className="hover:text-black transition-colors">Privacy</Link>
       </nav>
       <div className="hidden md:flex items-center gap-3">
+        <LanguageSwitcher />
         <Link href="/pro"
           className="bg-[#e8002d] text-white text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
-          Analyze My Video
+          {tr('nav', 'cta', lang)}
         </Link>
       </div>
       <button className="md:hidden p-2" onClick={() => setOpen(!open)}>
