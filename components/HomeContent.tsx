@@ -184,7 +184,7 @@ export default function HomeContent() {
 
 
       {/* ── PROBLEM ── */}
-      <section className="bg-[#0a0a0a] text-white px-6 md:px-12 pb-20 border-b border-white/5" style={{ clipPath: 'polygon(0 80px, 100% 0, 100% 100%, 0 100%)', marginTop: -2, paddingTop: 'calc(80px + 5rem)' }}>
+      <section className="bg-[#0a0a0a] text-white px-6 md:px-12 pb-20 border-b border-white/5" style={{ clipPath: 'polygon(0 80px, 100% 0, 100% calc(100% - 80px), 0 100%)', marginTop: -2, paddingTop: 'calc(80px + 5rem)', paddingBottom: 'calc(80px + 5rem)' }}>
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-16">
           <div className="md:w-1/2" data-reveal="left">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#555] mb-6">{tr('home', 'problemBadge', lang)}</p>
