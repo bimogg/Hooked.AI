@@ -36,7 +36,7 @@ const plans = [
     ctaStyle: 'bg-[#e8002d] text-white hover:opacity-90',
     features: [
       'Everything in Free',
-      '10 AI video analyses / month',
+      'Unlimited AI video analyses',
       'Upload video → get hook script',
       'Hook type + exact placement (0–3 sec)',
       'Copy-ready hook scripts',
