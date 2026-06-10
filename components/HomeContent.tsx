@@ -218,17 +218,16 @@ export default function HomeContent() {
               </h2>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-black/10 rounded-3xl overflow-hidden">
+          <div className="flex flex-col divide-y divide-black/10">
             {[
               { n: '01', tk: 'step1t', dk: 'step1d' },
               { n: '02', tk: 'step2t', dk: 'step2d' },
               { n: '03', tk: 'step3t', dk: 'step3d' },
             ].map(({ n, tk, dk }, i) => (
-              <div key={n}
-                data-reveal data-delay={String(i + 1)}
-                className={`p-8 flex flex-col gap-4 ${i < 2 ? 'md:border-r border-black/10' : ''} ${i > 0 ? 'border-t border-black/10 md:border-t-0' : ''}`}>
-                <span className="font-extrabold text-6xl text-black/8 leading-none">{n}</span>
-                <h3 className="font-display font-extrabold text-2xl uppercase leading-tight tracking-tight">{tr('home', tk, lang)}</h3>
+              <div key={n} data-reveal data-delay={String(i + 1)}
+                className="py-8 flex items-baseline gap-10">
+                <span className="text-[11px] uppercase tracking-widest text-[#aaa] w-6 shrink-0">{n}</span>
+                <h3 className="font-display font-extrabold text-xl md:text-2xl uppercase tracking-tight w-48 shrink-0">{tr('home', tk, lang)}</h3>
                 <p className="text-[#666] text-sm leading-relaxed font-light">{tr('home', dk, lang)}</p>
               </div>
             ))}
