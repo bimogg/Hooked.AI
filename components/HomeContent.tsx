@@ -44,16 +44,34 @@ export default function HomeContent() {
     <div className="flex flex-col overflow-hidden">
 
       {/* ── HERO ── */}
-      <section className="relative min-h-[92vh] flex flex-col justify-between px-6 md:px-12 pt-12 pb-10 border-b border-black/10">
+      <section className="relative min-h-[92vh] flex items-center px-6 md:px-12 py-16 border-b border-black/10">
+        <div className="w-full flex items-center justify-between gap-10">
 
-        <div className="flex items-end justify-between gap-6 mt-8">
-          <h1 data-reveal="left" className="font-display font-extrabold uppercase leading-[0.85] tracking-tighter text-[clamp(4rem,13vw,11rem)]">
-            STOP<br />
-            <span className="text-[#e8002d]">THE</span><br />
-            DROP
-          </h1>
+          {/* LEFT: text centered vertically */}
+          <div className="flex flex-col gap-6 max-w-xl" data-reveal="left">
+            <h1 className="font-display font-extrabold uppercase leading-[0.88] tracking-tighter text-[clamp(2.8rem,7vw,6rem)]">
+              STOP<br />
+              <span className="text-[#e8002d]">THE</span><br />
+              DROP
+            </h1>
+            <p className="text-[#666] text-sm md:text-base max-w-sm leading-relaxed">
+              {tr('home', 'heroSub', lang)}
+            </p>
+            <div className="flex items-center gap-3">
+              <Link href="/pro"
+                className="bg-[#e8002d] text-white font-bold text-sm px-7 py-3.5 rounded-full hover:opacity-90 transition-opacity flex items-center gap-2">
+                {tr('home', 'ctaAnalyze', lang)} <ArrowRight size={15} />
+              </Link>
+              <Link href="/library"
+                className="border border-black/20 text-black font-bold text-sm px-7 py-3.5 rounded-full hover:border-black transition-colors">
+                {tr('home', 'ctaBrowse', lang)}
+              </Link>
+            </div>
+            <p className="text-[10px] text-[#bbb]">{tr('home', 'freeBadge', lang)}</p>
+          </div>
 
-          <div className="hidden md:block shrink-0 w-[280px] lg:w-[340px] xl:w-[400px]" data-reveal="right">
+          {/* RIGHT: mockup */}
+          <div className="hidden md:block shrink-0 w-[220px] lg:w-[260px] xl:w-[300px]" data-reveal="right">
             <div className="relative w-full aspect-[9/16] bg-[#f5f5f5] rounded-3xl overflow-hidden border border-black/10 shadow-2xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/mockup.png" alt="HookedAI app" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -66,25 +84,8 @@ export default function HomeContent() {
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 mt-8" data-reveal data-delay="2">
-          <p className="text-[#666] text-sm md:text-base max-w-sm leading-relaxed">
-            {tr('home', 'heroSub', lang)}
-          </p>
-          <div className="flex items-center gap-3 shrink-0">
-            <Link href="/pro"
-              className="bg-[#e8002d] text-white font-bold text-sm px-7 py-3.5 rounded-full hover:opacity-90 transition-opacity flex items-center gap-2">
-              {tr('home', 'ctaAnalyze', lang)} <ArrowRight size={15} />
-            </Link>
-            <Link href="/library"
-              className="border border-black/20 text-black font-bold text-sm px-7 py-3.5 rounded-full hover:border-black transition-colors">
-              {tr('home', 'ctaBrowse', lang)}
-            </Link>
-          </div>
         </div>
-
-        <p className="text-[10px] text-[#bbb] mt-4" data-reveal data-delay="3">{tr('home', 'freeBadge', lang)}</p>
       </section>
 
       {/* ── STATS ROW ── */}
