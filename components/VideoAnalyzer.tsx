@@ -155,46 +155,42 @@ export default function VideoAnalyzer() {
 
           {result.referenceHooks.map((h, i) => (
             <div key={i} className="border border-black/10 rounded-2xl overflow-hidden">
-              {/* Top: video thumbnail + info side by side */}
-              <div className="flex gap-0">
 
-                {/* Video player — shows hook (first 4s) */}
-                <div className="relative shrink-0 w-28 aspect-[9/14] overflow-hidden">
-                  <HookPlayer
-                    videoUrl={h.video_url}
-                    thumbnailUrl={h.thumbnail_url}
-                    reelUrl={h.reelUrl}
-                  />
-                  <div className="absolute bottom-1.5 left-1.5 flex items-center gap-0.5 bg-black/60 text-white text-[8px] px-1 py-0.5 rounded pointer-events-none">
-                    <Eye size={7} />{fmt(h.views)}
-                  </div>
-                </div>
-
-                {/* Right side */}
-                <div className="flex-1 p-3 flex flex-col gap-2 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${NICHE_COLOR[h.niche] ?? 'bg-gray-100 text-gray-700'}`}>
-                      {h.niche}
-                    </span>
-                    <a href={h.reelUrl} target="_blank" rel="noopener noreferrer"
-                      className="text-[10px] text-[#888] hover:text-[#e8002d] transition-colors">
-                      @{h.creator_username}
-                    </a>
-                  </div>
-
-                  {/* Technique */}
-                  {h.technique && (
-                    <div>
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-[#aaa] mb-0.5">Техника</p>
-                      <p className="text-xs text-[#444] leading-snug">{h.technique}</p>
-                    </div>
-                  )}
+              {/* Video — full width, tall */}
+              <div className="relative w-full aspect-[4/5] overflow-hidden bg-black">
+                <HookPlayer
+                  videoUrl={h.video_url}
+                  thumbnailUrl={h.thumbnail_url}
+                  reelUrl={h.reelUrl}
+                />
+                {/* views */}
+                <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-md pointer-events-none">
+                  <Eye size={9} />{fmt(h.views)}
                 </div>
               </div>
 
-              {/* Script to copy — full width bottom */}
+              {/* Info */}
+              <div className="p-3 flex items-center gap-2 border-b border-black/8">
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${NICHE_COLOR[h.niche] ?? 'bg-gray-100 text-gray-700'}`}>
+                  {h.niche}
+                </span>
+                <a href={h.reelUrl} target="_blank" rel="noopener noreferrer"
+                  className="text-[11px] text-[#888] hover:text-[#e8002d] transition-colors font-medium">
+                  @{h.creator_username}
+                </a>
+              </div>
+
+              {/* Technique */}
+              {h.technique && (
+                <div className="px-3 py-2.5 border-b border-black/8">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-[#bbb] mb-1">Техника хука</p>
+                  <p className="text-xs text-[#444] leading-snug">{h.technique}</p>
+                </div>
+              )}
+
+              {/* Script */}
               {h.scriptToCopy && (
-                <div className="bg-black px-4 py-3 flex items-center justify-between gap-3">
+                <div className="bg-black px-4 py-3 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-[9px] text-white/40 uppercase tracking-wider mb-1">Скрипт для записи</p>
                     <p className="text-sm font-bold text-white leading-snug">"{h.scriptToCopy}"</p>
