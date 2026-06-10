@@ -6,6 +6,51 @@ import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 import { useReveal } from '@/hooks/useReveal';
 
+/* ── scroll-driven word reveal (Apple-style) ── */
+function ScrollText({ text }: { text: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!ref.current) return;
+      const rect = ref.current.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // 0 when top of el hits bottom of viewport, 1 when bottom of el hits top
+      const raw = (vh - rect.top) / (vh + rect.height);
+      setProgress(Math.max(0, Math.min(1, raw)));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const words = text.split(' ');
+  return (
+    <p ref={ref} style={{
+      fontFamily: 'Syne, system-ui, sans-serif',
+      fontWeight: 600,
+      fontSize: 'clamp(22px, 2.8vw, 36px)',
+      lineHeight: 1.5,
+      letterSpacing: '-0.01em',
+    }}>
+      {words.map((word, i) => {
+        const threshold = i / words.length;
+        // each word lights up when scroll progress passes its threshold
+        const lit = progress > threshold + 0.02;
+        return (
+          <span key={i} style={{
+            color: lit ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.13)',
+            transition: 'color 0.4s ease',
+            marginRight: '0.28em',
+            display: 'inline-block',
+          }}>{word}</span>
+        );
+      })}
+    </p>
+  );
+}
+
 /* ── dot matrix bar chart (kept from new design) ── */
 function DotMatrix({ bars, on }: { bars: number[]; on: boolean }) {
   const H = 10;
@@ -111,16 +156,10 @@ export default function HomeContent() {
 
 
       {/* ── ABOUT TEXT ── */}
-      <section className="bg-[#0a0a0a] px-6 md:px-12 py-20 md:py-28">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-[10px] text-white/20 uppercase tracking-[0.22em] mb-7">HookedAI</p>
-          <p className="text-white/80 leading-[1.78] font-light" style={{ fontSize: 'clamp(15px,1.8vw,19px)' }}>
-            Most creators lose their audience in the first 3 seconds without ever
-            knowing why. HookedAI watches your video the way an algorithm does —
-            spotting the exact frame where attention drops, matching it to hooks
-            that retain, and giving you a script to fix it. No guesswork. No vanity
-            metrics. Just the data that matters, and the words that work.
-          </p>
+      <section className="bg-[#0a0a0a] px-6 md:px-12 py-24 md:py-36">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-[10px] text-white/20 uppercase tracking-[0.22em] mb-10">HookedAI</p>
+          <ScrollText text="Most creators lose their audience in the first 3 seconds without ever knowing why. HookedAI watches your video the way an algorithm does — spotting the exact frame where attention drops, matching it to hooks that retain, and giving you a script to fix it. No guesswork. No vanity metrics. Just the data that matters, and the words that work." />
         </div>
       </section>
 
