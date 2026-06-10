@@ -110,7 +110,6 @@ export default function HomeContent() {
                 {tr('home', 'ctaBrowse', lang)}
               </Link>
             </div>
-            <p className="text-[10px] text-[#bbb]">{tr('home', 'freeBadge', lang)}</p>
           </div>
 
           {/* RIGHT: Mac browser mockup 3D */}
