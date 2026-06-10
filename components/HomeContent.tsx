@@ -193,16 +193,16 @@ export default function HomeContent() {
 
       {/* ── PROBLEM ── */}
       <section className="bg-[#0a0a0a] text-white px-6 md:px-12 py-20 border-b border-white/5">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start gap-16">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-16">
           <div className="md:w-1/2" data-reveal="left">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#555] mb-6">{tr('home', 'problemBadge', lang)}</p>
-            <h2 className="font-display font-extrabold text-4xl md:text-6xl uppercase leading-[0.9] tracking-tight">
+            <h2 className="font-display font-extrabold text-3xl md:text-5xl uppercase leading-[0.9] tracking-tight">
               {tr('home', 'problemTitle', lang).split('.').filter(Boolean).map((line, i) => (
                 <span key={i}>{line.trim()}.<br /></span>
               ))}
             </h2>
           </div>
-          <div className="md:w-1/2 pt-2" data-reveal="right">
+          <div className="md:w-1/2" data-reveal="right">
             <p className="text-[#888] text-sm md:text-base leading-relaxed mb-8">
               {tr('home', 'problemSub', lang)}
             </p>
@@ -219,9 +219,9 @@ export default function HomeContent() {
           <div className="flex items-end justify-between mb-16" data-reveal>
             <div>
               <p className="text-[10px] uppercase tracking-[0.25em] text-[#888] mb-3">{tr('home', 'howItWorks', lang)}</p>
-              <h2 className="font-display font-extrabold text-4xl md:text-6xl uppercase leading-[0.9] tracking-tight">
+              <h2 className="font-display font-extrabold text-3xl md:text-5xl uppercase leading-[0.9] tracking-tight">
                 {tr('home', 'threeSteps', lang).split('.').filter(Boolean).map((part, i) => (
-                  <span key={i}>{part.trim()}.<br /></span>
+                  <span key={i}>{part.trim()}. </span>
                 ))}
               </h2>
             </div>
@@ -249,7 +249,7 @@ export default function HomeContent() {
         <div className="max-w-6xl mx-auto">
           <div data-reveal className="text-center mb-16">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#888] mb-3">{tr('home', 'whatYouGet', lang)}</p>
-            <h2 className="font-display font-extrabold text-4xl md:text-6xl uppercase leading-[0.9] tracking-tight">
+            <h2 className="font-display font-extrabold text-3xl md:text-5xl uppercase leading-[0.9] tracking-tight">
               {tr('home', 'twoTools', lang)}
             </h2>
           </div>
