@@ -26,52 +26,40 @@ export async function POST(req: NextRequest) {
 
     const ts = timestamps ?? frames.map((_, i) => i);
 
-    // Build content with images + timestamps
+    // ── Step 1: Analyze video ──────────────────────────────────────────────
     const content: Anthropic.MessageParam['content'] = [];
     frames.slice(0, 12).forEach((b64, i) => {
       content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } });
       content.push({ type: 'text', text: `↑ ${ts[i] ?? i}s` });
     });
+    content.push({ type: 'text', text: `You are an Instagram Reels hook expert. Analyze these frames.
 
-    const prompt = `You are an Instagram Reels hook expert. Analyze these frames from a creator's video.
-
-Your job:
-1. Identify what NICHE/TOPIC this video is about (fitness, comedy, beauty, food, business, travel, etc.)
-2. Identify the #1 reason the hook is weak
-3. Pick the 2 BEST hook types that would make this specific content go viral
-
-Respond ONLY with valid JSON:
+Return ONLY valid JSON:
 {
   "hookScore": <1-10>,
-  "niche": "<one word: fitness | comedy | beauty | food | business | travel | education | lifestyle | other>",
-  "mainProblem": "<one short sentence — what's the single biggest hook problem in this video>",
-  "bestHookTypes": ["<type1>", "<type2>"],
-  "whyHookTypes": "<1-2 sentences: why these hook types specifically work for this niche/content>"
+  "niche": "<one word topic: fitness | comedy | beauty | food | business | travel | education | lifestyle | other>",
+  "mainProblem": "<the single biggest hook problem — 1 short sentence in Russian>",
+  "bestHookTypes": ["<type1>", "<type2>"]
 }
 
-Hook types to choose from: Visual Hook, Question Hook, Tutorial Hook, Curiosity Hook, Warning Hook, Challenge Hook, Engagement Hook, Mistake Hook`;
+Hook types: Visual Hook, Question Hook, Tutorial Hook, Curiosity Hook, Warning Hook, Challenge Hook, Engagement Hook, Mistake Hook` });
 
-    content.push({ type: 'text', text: prompt });
-
-    const response = await client.messages.create({
+    const r1 = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 400,
+      max_tokens: 300,
       messages: [{ role: 'user', content }],
     });
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
+    const t1 = r1.content[0].type === 'text' ? r1.content[0].text : '';
+    const j1 = t1.match(/\{[\s\S]*\}/);
+    if (!j1) return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
+    const analysis = JSON.parse(j1[0]);
 
-    const analysis = JSON.parse(jsonMatch[0]);
     const bestTypes: string[] = (analysis.bestHookTypes ?? []).filter((t: string) => HOOK_TYPES.includes(t));
     if (!bestTypes.length) bestTypes.push('Visual Hook');
 
-    // Pull hooks from library for each recommended type
-    const hookResults: {
-      creator_username: string; caption: string | null; views: number;
-      instagram_id: string | null; thumbnail_url: string | null; niche: string; reelUrl: string;
-    }[] = [];
+    // ── Step 2: Pull hooks from library ───────────────────────────────────
+    const rawHooks: { creator_username: string; caption: string | null; views: number; instagram_id: string | null; thumbnail_url: string | null; niche: string }[] = [];
 
     for (const hookType of bestTypes) {
       const { data } = await supabaseAdmin
@@ -82,44 +70,72 @@ Hook types to choose from: Visual Hook, Question Hook, Tutorial Hook, Curiosity 
         .neq('caption', '')
         .order('views', { ascending: false })
         .limit(30);
-
-      if (data && data.length > 0) {
-        const picked = data.sort(() => Math.random() - 0.5).slice(0, 2);
-        hookResults.push(...picked.map(h => ({
-          ...h,
-          reelUrl: h.instagram_id
-            ? `https://www.instagram.com/reel/${idToShortcode(h.instagram_id)}/`
-            : `https://www.instagram.com/${h.creator_username}/`,
-        })));
-      }
+      if (data?.length) rawHooks.push(...data.sort(() => Math.random() - 0.5).slice(0, 2));
     }
 
-    // fallback if DB empty
-    if (!hookResults.length) {
+    // fallback
+    if (!rawHooks.length) {
       const { data } = await supabaseAdmin
-        .from('hooks')
-        .select('creator_username, caption, views, instagram_id, thumbnail_url, niche')
-        .not('caption', 'is', null)
-        .neq('caption', '')
-        .order('views', { ascending: false })
-        .limit(30);
-      if (data) {
-        hookResults.push(...data.sort(() => Math.random() - 0.5).slice(0, 4).map(h => ({
-          ...h,
-          reelUrl: h.instagram_id
-            ? `https://www.instagram.com/reel/${idToShortcode(h.instagram_id)}/`
-            : `https://www.instagram.com/${h.creator_username}/`,
-        })));
-      }
+        .from('hooks').select('creator_username, caption, views, instagram_id, thumbnail_url, niche')
+        .not('caption', 'is', null).neq('caption', '').order('views', { ascending: false }).limit(30);
+      if (data) rawHooks.push(...data.sort(() => Math.random() - 0.5).slice(0, 4));
     }
+
+    const picked = rawHooks.slice(0, 4);
+
+    // ── Step 3: Explain each hook for THIS creator ─────────────────────────
+    const hooksListText = picked.map((h, i) =>
+      `Hook ${i + 1} (${h.niche}, ${(h.views / 1000).toFixed(0)}K views):\n"${h.caption}"`
+    ).join('\n\n');
+
+    const r2 = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 600,
+      messages: [{
+        role: 'user',
+        content: `A creator makes ${analysis.niche} content. Their main hook problem: "${analysis.mainProblem}"
+
+Below are ${picked.length} viral hooks from Instagram. For each hook:
+1. Extract the EXACT hook technique (what makes it work) in 1 sentence in Russian
+2. Write the EXACT script to copy/adapt for ${analysis.niche} content — make it concrete and ready to record
+
+${hooksListText}
+
+Return ONLY valid JSON array with exactly ${picked.length} items:
+[
+  {
+    "technique": "<what the hook technique is — 1 sentence in Russian>",
+    "scriptToCopy": "<exact script to record — in Russian, punchy, 1-2 sentences>"
+  }
+]`,
+      }],
+    });
+
+    const t2 = r2.content[0].type === 'text' ? r2.content[0].text : '';
+    const j2 = t2.match(/\[[\s\S]*\]/);
+    const explanations: { technique: string; scriptToCopy: string }[] = j2 ? JSON.parse(j2[0]) : [];
+
+    // ── Combine and return ─────────────────────────────────────────────────
+    const referenceHooks = picked.map((h, i) => ({
+      creator_username: h.creator_username,
+      caption: h.caption,
+      views: h.views,
+      thumbnail_url: h.thumbnail_url,
+      niche: h.niche,
+      reelUrl: h.instagram_id
+        ? `https://www.instagram.com/reel/${idToShortcode(h.instagram_id)}/`
+        : `https://www.instagram.com/${h.creator_username}/`,
+      technique: explanations[i]?.technique ?? '',
+      scriptToCopy: explanations[i]?.scriptToCopy ?? '',
+    }));
 
     return NextResponse.json({
       hookScore: analysis.hookScore,
       mainProblem: analysis.mainProblem,
-      whyHookTypes: analysis.whyHookTypes,
       bestHookTypes: bestTypes,
-      referenceHooks: hookResults.slice(0, 4),
+      referenceHooks,
     });
+
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

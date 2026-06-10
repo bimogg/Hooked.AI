@@ -1,10 +1,9 @@
 'use client';
 import { useState, useRef, useCallback } from 'react';
-import { Upload, AlertCircle, Lock, ExternalLink, Eye, Play } from 'lucide-react';
+import { Upload, AlertCircle, Lock, ExternalLink, Eye, Play, Copy, Check } from 'lucide-react';
 
 const FREE_KEY = 'hooked_free_used';
 function hasUsedFree() { try { return localStorage.getItem(FREE_KEY) === '1'; } catch { return false; } }
-function markFreeUsed() { try { localStorage.setItem(FREE_KEY, '1'); } catch {} }
 
 async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> {
   return new Promise((resolve, reject) => {
@@ -20,9 +19,7 @@ async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> 
       const ctx = canvas.getContext('2d')!;
       const MAX = 12;
       const count = Math.min(MAX, Math.max(4, Math.floor(dur)));
-      const times: number[] = Array.from({ length: count }, (_, i) =>
-        Math.min((dur / (count - 1)) * i, dur - 0.05)
-      );
+      const times = Array.from({ length: count }, (_, i) => Math.min((dur / (count - 1)) * i, dur - 0.05));
       if (times[0] > 0.1) times.unshift(0);
       const frames: { b64: string; t: number }[] = [];
       for (const t of times.slice(0, MAX)) {
@@ -47,19 +44,17 @@ function fmt(n: number) {
   return String(n);
 }
 
-interface ReferenceHook {
-  creator_username: string; caption: string | null; views: number;
-  thumbnail_url: string | null; niche: string; reelUrl: string;
+function CopyBtn({ text }: { text: string }) {
+  const [done, setDone] = useState(false);
+  return (
+    <button
+      onClick={e => { e.preventDefault(); navigator.clipboard.writeText(text); setDone(true); setTimeout(() => setDone(false), 2000); }}
+      className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/30 text-white hover:bg-white hover:text-black transition-all shrink-0"
+    >
+      {done ? <><Check size={10} />Скопировано</> : <><Copy size={10} />Скопировать</>}
+    </button>
+  );
 }
-interface Result {
-  hookScore: number;
-  mainProblem: string;
-  whyHookTypes: string;
-  bestHookTypes: string[];
-  referenceHooks: ReferenceHook[];
-}
-
-const STEPS = ['Читаем видео...', 'ИИ смотрит весь ролик...', 'Подбираем хуки из библиотеки...'];
 
 const NICHE_COLOR: Record<string, string> = {
   'Visual Hook': 'bg-pink-100 text-pink-700',
@@ -71,6 +66,18 @@ const NICHE_COLOR: Record<string, string> = {
   'Engagement Hook': 'bg-orange-100 text-orange-700',
   'Mistake Hook': 'bg-slate-100 text-slate-700',
 };
+
+interface ReferenceHook {
+  creator_username: string; caption: string | null; views: number;
+  thumbnail_url: string | null; niche: string; reelUrl: string;
+  technique: string; scriptToCopy: string;
+}
+interface Result {
+  hookScore: number; mainProblem: string;
+  bestHookTypes: string[]; referenceHooks: ReferenceHook[];
+}
+
+const STEPS = ['Читаем видео...', 'ИИ смотрит весь ролик...', 'Подбираем хуки из библиотеки...'];
 
 export default function VideoAnalyzer() {
   const [dragging, setDragging] = useState(false);
@@ -98,7 +105,6 @@ export default function VideoAnalyzer() {
       setStepIdx(2);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Ошибка');
-      // markFreeUsed(); // TODO: re-enable before launch
       setResult(data);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Ошибка. Попробуй ещё раз.');
@@ -126,12 +132,12 @@ export default function VideoAnalyzer() {
     return (
       <div className="flex flex-col gap-5">
 
-        {/* Score + problem — compact */}
+        {/* Score + problem */}
         <div className="flex items-center gap-4 border border-black/10 rounded-2xl p-4">
           <p className="font-display font-extrabold text-5xl leading-none shrink-0" style={{ color: scoreColor }}>
             {result.hookScore}
           </p>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 min-w-0">
             <p className="text-[10px] text-[#aaa] uppercase tracking-widest">из 10</p>
             <div className="flex items-start gap-1.5">
               <AlertCircle size={12} className="text-[#e8002d] mt-0.5 shrink-0" />
@@ -140,62 +146,73 @@ export default function VideoAnalyzer() {
           </div>
         </div>
 
-        {/* Why these hooks — short */}
-        {result.whyHookTypes && (
-          <div className="px-4 py-3 bg-[#fffbeb] border border-amber-200 rounded-xl">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 mb-1">Почему именно эти хуки</p>
-            <p className="text-xs text-[#555] leading-relaxed">{result.whyHookTypes}</p>
-          </div>
-        )}
-
-        {/* MAIN: video cards */}
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-[#333] mb-3">
-            Попробуй такой хук — нажми и посмотри как сделано
+        {/* Hook video cards */}
+        <div className="flex flex-col gap-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#333]">
+            Попробуй такой хук — нажми посмотреть, скопируй скрипт
           </p>
-          <div className="grid grid-cols-2 gap-3">
-            {result.referenceHooks.map((h, i) => (
-              <a key={i} href={h.reelUrl} target="_blank" rel="noopener noreferrer"
-                className="group flex flex-col rounded-2xl overflow-hidden border border-black/10 hover:border-[#e8002d]/40 hover:shadow-md transition-all">
-                {/* Thumbnail */}
-                <div className="relative aspect-[9/14] bg-[#f0f0f0]">
+
+          {result.referenceHooks.map((h, i) => (
+            <div key={i} className="border border-black/10 rounded-2xl overflow-hidden">
+              {/* Top: video thumbnail + info side by side */}
+              <div className="flex gap-0">
+
+                {/* Thumbnail — clickable */}
+                <a href={h.reelUrl} target="_blank" rel="noopener noreferrer"
+                  className="group relative shrink-0 w-28 aspect-[9/14] bg-[#f0f0f0] block">
                   {h.thumbnail_url
                     ? <img src={h.thumbnail_url} alt="" className="w-full h-full object-cover" /> // eslint-disable-line @next/next/no-img-element
                     : <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
                   }
-                  {/* Play button */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 bg-black/50 group-hover:bg-[#e8002d] rounded-full flex items-center justify-center transition-colors">
-                      <Play size={18} className="text-white ml-0.5" fill="white" />
+                    <div className="w-9 h-9 bg-black/50 group-hover:bg-[#e8002d] rounded-full flex items-center justify-center transition-colors">
+                      <Play size={14} className="text-white ml-0.5" fill="white" />
                     </div>
                   </div>
-                  {/* Hook type badge */}
-                  <div className="absolute top-2 left-2">
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${NICHE_COLOR[h.niche] ?? 'bg-gray-100 text-gray-700'}`}>
+                  <div className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 bg-black/60 text-white text-[8px] px-1 py-0.5 rounded">
+                    <Eye size={7} />{fmt(h.views)}
+                  </div>
+                </a>
+
+                {/* Right side */}
+                <div className="flex-1 p-3 flex flex-col gap-2 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${NICHE_COLOR[h.niche] ?? 'bg-gray-100 text-gray-700'}`}>
                       {h.niche}
                     </span>
+                    <a href={h.reelUrl} target="_blank" rel="noopener noreferrer"
+                      className="text-[10px] text-[#888] hover:text-[#e8002d] flex items-center gap-0.5 transition-colors">
+                      @{h.creator_username}<ExternalLink size={9} />
+                    </a>
                   </div>
-                  {/* Views */}
-                  <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-md">
-                    <Eye size={8} />{fmt(h.views)}
-                  </div>
+
+                  {/* Technique */}
+                  {h.technique && (
+                    <div>
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-[#aaa] mb-0.5">Техника</p>
+                      <p className="text-xs text-[#444] leading-snug">{h.technique}</p>
+                    </div>
+                  )}
                 </div>
-                {/* Info */}
-                <div className="p-3 flex items-start justify-between gap-2">
+              </div>
+
+              {/* Script to copy — full width bottom */}
+              {h.scriptToCopy && (
+                <div className="bg-black px-4 py-3 flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-[#111]">@{h.creator_username}</p>
-                    <p className="text-[10px] text-[#888] mt-0.5 leading-snug line-clamp-2">{h.caption}</p>
+                    <p className="text-[9px] text-white/40 uppercase tracking-wider mb-1">Скрипт для записи</p>
+                    <p className="text-sm font-bold text-white leading-snug">"{h.scriptToCopy}"</p>
                   </div>
-                  <ExternalLink size={12} className="text-[#ccc] group-hover:text-[#e8002d] transition-colors shrink-0 mt-0.5" />
+                  <CopyBtn text={h.scriptToCopy} />
                 </div>
-              </a>
-            ))}
-          </div>
+              )}
+            </div>
+          ))}
         </div>
 
         {/* Library link */}
         <a href={`/library?type=${encodeURIComponent(result.bestHookTypes[0] ?? '')}`}
-          className="flex items-center justify-center gap-2 py-3 border border-black/10 rounded-xl text-xs font-bold hover:border-black transition-colors">
+          className="text-center text-xs text-[#888] hover:text-black transition-colors py-2">
           Смотреть больше {result.bestHookTypes[0]} в библиотеке →
         </a>
 
@@ -251,7 +268,7 @@ export default function VideoAnalyzer() {
             </div>
             <div>
               <p className="font-semibold text-sm">Загрузи своё видео</p>
-              <p className="text-[#888] text-xs mt-1">MP4, MOV · до 300MB</p>
+              <p className="text-[#888] text-xs mt-1">MP4, MOV · до 300MB · анализ всего ролика</p>
             </div>
             <span className="text-[10px] bg-black text-white px-4 py-1.5 rounded-full font-bold uppercase tracking-wider">
               1 анализ бесплатно
