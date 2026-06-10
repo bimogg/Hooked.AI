@@ -113,14 +113,22 @@ export default function HomeContent() {
             <p className="text-[10px] text-[#bbb]">{tr('home', 'freeBadge', lang)}</p>
           </div>
 
-          {/* RIGHT: Mac browser mockup */}
-          <div className="hidden md:block shrink-0 w-[420px] lg:w-[520px] xl:w-[600px]" data-reveal="right">
+          {/* RIGHT: Mac browser mockup 3D */}
+          <div className="hidden md:block shrink-0 w-[420px] lg:w-[520px] xl:w-[600px]" data-reveal="right" style={{
+            perspective: '1200px',
+          }}>
             <div style={{
               borderRadius: 12,
               overflow: 'hidden',
-              boxShadow: '0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.08)',
+              boxShadow: '-24px 32px 80px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.07)',
               background: '#e8e8e8',
-            }}>
+              transform: 'rotateY(-14deg) rotateX(4deg)',
+              transformStyle: 'preserve-3d',
+              transition: 'transform 0.4s ease',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.transform = 'rotateY(-6deg) rotateX(2deg)')}
+            onMouseLeave={e => (e.currentTarget.style.transform = 'rotateY(-14deg) rotateX(4deg)')}
+            >
               {/* Mac window chrome */}
               <div style={{
                 background: 'linear-gradient(180deg, #ebebeb 0%, #d8d8d8 100%)',
