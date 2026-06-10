@@ -19,7 +19,7 @@ const HOOK_TYPES = [
   'Warning Hook', 'Challenge Hook', 'Engagement Hook', 'Mistake Hook',
 ];
 
-async function getHookFromDB(niche: string) {
+async function getHookFromDB(niche: string, videoTopic: string, client: Anthropic) {
   const { data } = await supabaseAdmin
     .from('hooks')
     .select('creator_username, caption, views, instagram_id, video_url, thumbnail_url, niche')
@@ -28,17 +28,31 @@ async function getHookFromDB(niche: string) {
     .neq('caption', '')
     .order('views', { ascending: false })
     .limit(40);
-  if (data && data.length > 0) {
-    const h = data[Math.floor(Math.random() * Math.min(data.length, 15))];
-    return {
-      ...h,
-      video_url: h.video_url ?? null,
-      reelUrl: h.instagram_id
-        ? `https://www.instagram.com/reel/${idToShortcode(h.instagram_id)}/`
-        : `https://www.instagram.com/${h.creator_username}/`,
-    };
-  }
-  return null;
+
+  if (!data || data.length === 0) return null;
+
+  // Let Claude pick the most relevant hook based on the video topic
+  const candidates = data.slice(0, 15);
+  const list = candidates.map((h, i) => `${i}: "${h.caption}"`).join('\n');
+
+  const pick = await client.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 10,
+    messages: [{
+      role: 'user',
+      content: `Video is about: "${videoTopic}"\n\nWhich hook caption below is most relevant to use as an example for this video?\n\n${list}\n\nReply ONLY with the number (0-${candidates.length - 1}).`,
+    }],
+  });
+
+  const idx = parseInt((pick.content[0] as { type: string; text: string }).text.trim()) || 0;
+  const h = candidates[Math.min(idx, candidates.length - 1)];
+  return {
+    ...h,
+    video_url: h.video_url ?? null,
+    reelUrl: h.instagram_id
+      ? `https://www.instagram.com/reel/${idToShortcode(h.instagram_id)}/`
+      : `https://www.instagram.com/${h.creator_username}/`,
+  };
 }
 
 async function getFallbackHook() {
@@ -51,13 +65,7 @@ async function getFallbackHook() {
     .limit(40);
   if (data && data.length > 0) {
     const h = data[Math.floor(Math.random() * Math.min(data.length, 15))];
-    return {
-      ...h,
-      video_url: h.video_url ?? null,
-      reelUrl: h.instagram_id
-        ? `https://www.instagram.com/reel/${idToShortcode(h.instagram_id)}/`
-        : `https://www.instagram.com/${h.creator_username}/`,
-    };
+    return { ...h, video_url: h.video_url ?? null, reelUrl: h.instagram_id ? `https://www.instagram.com/reel/${idToShortcode(h.instagram_id)}/` : `https://www.instagram.com/${h.creator_username}/` };
   }
   return null;
 }
@@ -76,28 +84,27 @@ export async function POST(req: NextRequest) {
       content.push({ type: 'text', text: `↑ ${ts[i] ?? i}s` });
     });
 
-    content.push({ type: 'text', text: `You are an Instagram Reels hook expert. Analyze these frames from a creator's video.
+    content.push({ type: 'text', text: `You are an Instagram Reels hook expert. Analyze these frames carefully.
 
-Find 2-3 WEAK ZONES — specific moments where the viewer would lose interest and swipe away.
+STEP 1 — Understand the video deeply:
+- Who is in it? What are they doing physically?
+- What specific topic/product/skill/situation is this video about?
+- What would the viewer expect to learn or see?
 
-For each weak zone:
-- Exactly WHEN it happens (timestamp)
-- What the creator is doing wrong at that moment (be specific and visual — describe what's on screen)
-- Which hook TYPE from the library would fix this moment
-- A concrete opening script the creator should say/show instead
+STEP 2 — Find 2-3 WEAK ZONES where viewers would swipe away.
 
-Also identify the video topic so scripts are relevant.
+CRITICAL RULE FOR SCRIPTS: Every script MUST be directly about the specific thing shown in this video. If the video is about making coffee — the script is about coffee. If it's about a workout — it's about that workout. NEVER write generic scripts. The script must sound like it was written only for THIS video.
 
 Return ONLY valid JSON:
 {
   "hookScore": <1-10>,
-  "videoTopic": "<what this video is specifically about — 1 sentence>",
+  "videoTopic": "<very specific: what exactly is shown — person, action, product, topic. E.g. 'девушка показывает утреннюю скинкер-рутину с кремом для лица' NOT just 'beauty'>",
   "weakZones": [
     {
-      "timestamp": "<e.g. '0–3 сек' or '10–15 сек'>",
-      "whatIsWrong": "<exactly what happens on screen that makes viewers leave — be visual and specific, in Russian, 1-2 sentences>",
-      "hookType": "<best hook type to fix this: Visual Hook | Question Hook | Tutorial Hook | Curiosity Hook | Warning Hook | Challenge Hook | Engagement Hook | Mistake Hook>",
-      "script": "<exact words/action the creator should use at this moment — specific to their video topic, punchy, in Russian>"
+      "timestamp": "<e.g. '0–3 сек'>",
+      "whatIsWrong": "<what specifically happens on screen at this moment that kills interest — visual, concrete, in Russian>",
+      "hookType": "<Visual Hook | Question Hook | Tutorial Hook | Curiosity Hook | Warning Hook | Challenge Hook | Engagement Hook | Mistake Hook>",
+      "script": "<opening line that MUST mention the exact topic/product/action from this video — in Russian, 1-2 punchy sentences. NO generic phrases like 'смотри до конца' or 'ты делаешь это неправильно' without saying WHAT specifically>"
     }
   ]
 }` });
@@ -120,7 +127,7 @@ Return ONLY valid JSON:
       }) => {
         const hookType = HOOK_TYPES.includes(zone.hookType) ? zone.hookType : null;
         const example = hookType
-          ? (await getHookFromDB(hookType)) ?? (await getFallbackHook())
+          ? (await getHookFromDB(hookType, analysis.videoTopic ?? '', client)) ?? (await getFallbackHook())
           : await getFallbackHook();
 
         return {
