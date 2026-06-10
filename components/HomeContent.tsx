@@ -264,35 +264,6 @@ export default function HomeContent() {
           </div>
         </div>
 
-        {/* giant gradient text */}
-        <div className="relative overflow-hidden leading-none">
-          {/* blob A */}
-          <div style={{
-            position: 'absolute', top: '5%', left: '15%',
-            width: '65%', height: '90%',
-            background: 'radial-gradient(ellipse at 35% 50%, #e8002d 0%, #ff4d6d 35%, #c0001f 60%, transparent 85%)',
-            animation: 'blob-drift 16s ease-in-out infinite',
-            opacity: .7, filter: 'blur(4px)', zIndex: 0,
-          }} />
-          {/* blob B */}
-          <div style={{
-            position: 'absolute', top: '20%', right: '5%',
-            width: '38%', height: '70%',
-            background: 'radial-gradient(ellipse at 60% 40%, #7f0015 0%, #e8002d 55%, transparent 85%)',
-            animation: 'blob-drift-2 20s ease-in-out infinite 2s',
-            opacity: .5, filter: 'blur(8px)', zIndex: 0,
-          }} />
-          <p
-            className="font-display font-extrabold uppercase select-none whitespace-nowrap"
-            style={{
-              fontSize: 'clamp(5rem,18vw,17rem)', lineHeight: .82,
-              letterSpacing: '-.04em',
-              background: 'linear-gradient(130deg,#e8002d 0%,#ff4d6d 28%,#c0001f 52%,#ff1a3c 78%,#e8002d 100%)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-              position: 'relative', zIndex: 1,
-            }}
-          >HOOKEDAI</p>
-        </div>
       </section>
 
     </div>
