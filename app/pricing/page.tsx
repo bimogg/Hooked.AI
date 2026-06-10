@@ -28,7 +28,7 @@ const plans = [
   {
     name: 'Pro',
     badge: 'MOST POPULAR',
-    price: '$19',
+    price: '$12',
     period: 'per month',
     desc: 'For creators serious about growth',
     cta: 'Get Pro',
@@ -42,29 +42,6 @@ const plans = [
       'Copy-ready hook scripts',
       'Why your current hook is weak',
       'Variant A/B hook suggestions',
-    ],
-    missing: [
-      'Unlimited analyses',
-      'Competitor analysis',
-    ],
-  },
-  {
-    name: 'Pro Max',
-    badge: 'BEST VALUE',
-    price: '$49',
-    period: 'per month',
-    desc: 'For agencies & power creators',
-    cta: 'Get Pro Max',
-    ctaHref: '/pro',
-    ctaStyle: 'bg-black text-white hover:opacity-80',
-    features: [
-      'Everything in Pro',
-      'Unlimited AI analyses',
-      'Competitor hook breakdown',
-      'Analyze any public account',
-      'Bulk analysis (up to 30 videos)',
-      'Priority support',
-      'Early access to new features',
     ],
     missing: [],
   },
@@ -92,7 +69,7 @@ export default function PricingPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl mx-auto">
         {plans.map((plan) => (
           <div
             key={plan.name}
