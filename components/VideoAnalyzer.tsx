@@ -198,27 +198,33 @@ export default function VideoAnalyzer() {
               </div>
 
               {/* Split: left = their video, right = example */}
-              <div className="grid grid-cols-2 divide-x divide-black/10">
+              <div className="flex items-stretch gap-0 px-3 py-3 bg-white">
 
-                {/* LEFT — user's video at weak zone */}
-                <div className="flex flex-col">
-                  <div className="px-3 py-1.5 bg-[#fafafa] border-b border-black/8 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-[#e8002d]" />
-                    <span className="text-[10px] font-bold text-[#555] uppercase tracking-wider">Твоё видео</span>
+                {/* LEFT — user's video */}
+                <div className="flex flex-col flex-1 rounded-xl overflow-hidden border border-black/10">
+                  <div className="px-2.5 py-1.5 bg-[#fafafa] border-b border-black/8 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e8002d]" />
+                    <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider">Твоё видео</span>
                   </div>
                   <div className="aspect-[9/14] bg-black overflow-hidden">
                     <UserVideoClip blobUrl={blobUrl} start={start} end={end} />
                   </div>
                 </div>
 
+                {/* CENTER label */}
+                <div className="flex flex-col items-center justify-center px-2 gap-1 shrink-0">
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-[9px] text-[#bbb] font-medium">Try</span>
+                    <span className="text-[9px] text-[#bbb] font-medium">this</span>
+                    <span className="text-[#bbb] text-sm">→</span>
+                  </div>
+                </div>
+
                 {/* RIGHT — library hook example */}
-                <div className="flex flex-col">
-                  <div className="px-3 py-1.5 bg-[#f0fdf4] border-b border-black/8 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-[10px] font-bold text-[#555] uppercase tracking-wider">Как надо</span>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto ${NICHE_COLOR[zone.hookType] ?? 'bg-gray-100 text-gray-600'}`}>
-                      {zone.hookType}
-                    </span>
+                <div className="flex flex-col flex-1 rounded-xl overflow-hidden border border-emerald-200">
+                  <div className="px-2.5 py-1.5 bg-[#f0fdf4] border-b border-emerald-100 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider">Как надо</span>
                   </div>
                   <div className="aspect-[9/14] bg-black overflow-hidden relative">
                     {zone.example ? (
