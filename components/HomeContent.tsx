@@ -42,9 +42,7 @@ function ScrollText({ text }: { text: string }) {
           <span key={i} style={{
             color: lit ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.13)',
             transition: 'color 0.4s ease',
-            marginRight: '0.28em',
-            display: 'inline-block',
-          }}>{word}</span>
+          }}>{word}{' '}</span>
         );
       })}
     </p>
@@ -159,7 +157,7 @@ export default function HomeContent() {
       <section className="bg-[#0a0a0a] px-6 md:px-12 py-24 md:py-36">
         <div className="max-w-3xl mx-auto">
           <p className="text-[10px] text-white/20 uppercase tracking-[0.22em] mb-10">HookedAI</p>
-          <ScrollText text="Most creators lose their audience in the first 3 seconds without ever knowing why. HookedAI finds the exact frame where attention drops — and gives you a script to fix it. No guesswork. Just the words that work." />
+          <ScrollText text="Your Reels lose 80% of viewers before your message even starts. HookedAI uploads your video, finds the exact second people leave, and shows you a hook that keeps them watching. Then writes you a script to replace your weak opening — ready to copy and post." />
         </div>
       </section>
 
