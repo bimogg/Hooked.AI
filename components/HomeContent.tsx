@@ -297,23 +297,6 @@ export default function HomeContent() {
       </section>
 
 
-      {/* ── GIANT BRAND FOOTER ── */}
-      <section className="bg-white px-6 md:px-12 pt-12 pb-0 overflow-hidden">
-        {/* nav */}
-        <div className="flex justify-between items-center mb-10 flex-wrap gap-4">
-          <div className="flex gap-7">
-            {([['/', 'Home'], ['/library', 'Library'], ['/pricing', 'Pricing']] as const).map(([href, label]) => (
-              <Link key={href} href={href} className="text-xs text-[#999] hover:text-black transition-colors">{label}</Link>
-            ))}
-          </div>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="text-xs text-[#999] hover:text-black transition-colors">Privacy</Link>
-            <Link href="/pricing" className="text-xs text-[#999] hover:text-black transition-colors">Terms</Link>
-          </div>
-        </div>
-
-      </section>
-
     </div>
   );
 }
