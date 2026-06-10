@@ -97,7 +97,7 @@ export default function HomeContent() {
               <span className="text-[#e8002d]">OR</span><br />
               LOSE
             </h1>
-            <p className="text-[#666] text-sm md:text-base max-w-xs leading-relaxed">
+            <p className="text-[#666] text-sm md:text-base max-w-xs leading-relaxed font-light">
               Upload your video. AI finds where you lose viewers. Get a script to fix it.
             </p>
             <div className="flex items-center gap-3">
@@ -195,7 +195,7 @@ export default function HomeContent() {
             </h2>
           </div>
           <div className="md:w-1/2" data-reveal="right">
-            <p className="text-[#888] text-sm md:text-base leading-relaxed mb-8">
+            <p className="text-[#888] text-sm md:text-base leading-relaxed mb-8 font-light">
               {tr('home', 'problemSub', lang)}
             </p>
             <Link href="/pro" className="inline-flex items-center gap-2 text-sm font-bold text-[#e8002d] hover:gap-3 transition-all">
@@ -229,7 +229,7 @@ export default function HomeContent() {
                 className={`p-8 flex flex-col gap-4 ${i < 2 ? 'md:border-r border-black/10' : ''} ${i > 0 ? 'border-t border-black/10 md:border-t-0' : ''}`}>
                 <span className="font-extrabold text-6xl text-black/8 leading-none">{n}</span>
                 <h3 className="font-display font-extrabold text-2xl uppercase leading-tight tracking-tight">{tr('home', tk, lang)}</h3>
-                <p className="text-[#666] text-sm leading-relaxed">{tr('home', dk, lang)}</p>
+                <p className="text-[#666] text-sm leading-relaxed font-light">{tr('home', dk, lang)}</p>
               </div>
             ))}
           </div>
@@ -249,7 +249,7 @@ export default function HomeContent() {
             <div data-reveal="left" className="bg-white border border-black/10 rounded-3xl p-10 flex flex-col gap-5">
               <p className="text-[10px] uppercase tracking-widest text-[#888] font-bold">Free</p>
               <h3 className="font-display font-extrabold text-3xl uppercase">Hook Library</h3>
-              <p className="text-[#666] text-sm leading-relaxed flex-1">{tr('home', 'libDesc', lang)}</p>
+              <p className="text-[#666] text-sm leading-relaxed flex-1 font-light">{tr('home', 'libDesc', lang)}</p>
               <Link href="/library" className="inline-flex items-center gap-2 text-sm font-bold hover:gap-3 transition-all">
                 {tr('home', 'browseLib', lang)} <ArrowRight size={14} />
               </Link>
@@ -257,7 +257,7 @@ export default function HomeContent() {
             <div data-reveal="right" className="bg-[#0a0a0a] text-white border border-black rounded-3xl p-10 flex flex-col gap-5">
               <p className="text-[10px] uppercase tracking-widest text-[#e8002d] font-bold">Pro</p>
               <h3 className="font-display font-extrabold text-3xl uppercase">AI Hook Analyzer</h3>
-              <p className="text-[#888] text-sm leading-relaxed flex-1">{tr('home', 'analyzerDesc', lang)}</p>
+              <p className="text-[#888] text-sm leading-relaxed flex-1 font-light">{tr('home', 'analyzerDesc', lang)}</p>
               <Link href="/pro" className="inline-flex items-center gap-2 text-sm font-bold text-[#e8002d] hover:gap-3 transition-all">
                 {tr('home', 'tryFree', lang)} <ArrowRight size={14} />
               </Link>
