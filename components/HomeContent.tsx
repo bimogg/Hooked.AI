@@ -93,12 +93,12 @@ export default function HomeContent() {
           {/* LEFT: text centered vertically */}
           <div className="flex flex-col gap-6 max-w-xl" data-reveal="left">
             <h1 className="font-display font-extrabold uppercase leading-[0.88] tracking-tighter text-[clamp(2.8rem,7vw,6rem)]">
-              STOP<br />
-              <span className="text-[#e8002d]">THE</span><br />
-              DROP
+              HOOK<br />
+              <span className="text-[#e8002d]">OR</span><br />
+              LOSE
             </h1>
-            <p className="text-[#666] text-sm md:text-base max-w-sm leading-relaxed">
-              {tr('home', 'heroSub', lang)}
+            <p className="text-[#666] text-sm md:text-base max-w-xs leading-relaxed">
+              Upload your video. AI finds where you lose viewers. Get a script to fix it.
             </p>
             <div className="flex items-center gap-3">
               <Link href="/pro"
