@@ -188,10 +188,10 @@ export default function VideoAnalyzer() {
   if (result && blobUrl) {
     const scoreColor = result.hookScore >= 8 ? '#16a34a' : result.hookScore >= 5 ? '#d97706' : '#e8002d';
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-10">
 
         {/* Score */}
-        <div className="flex items-center gap-4 border border-black/10 rounded-2xl p-4">
+        <div className="flex items-center gap-4 border border-black/10 rounded-2xl p-6">
           <p className="font-display font-extrabold text-5xl leading-none shrink-0" style={{ color: scoreColor }}>
             {result.hookScore}
           </p>
@@ -208,14 +208,14 @@ export default function VideoAnalyzer() {
             <div key={i} className="flex flex-col rounded-2xl overflow-hidden border border-black/10">
 
               {/* Header */}
-              <div className="bg-[#fff3f3] border-b border-[#e8002d]/15 px-4 py-2.5 flex items-center gap-2">
+              <div className="bg-[#fff3f3] border-b border-[#e8002d]/15 px-5 py-4 flex items-center gap-2">
                 <span className="flex items-center justify-center w-5 h-5 bg-[#e8002d] rounded-full text-white text-[10px] font-bold shrink-0">{i + 1}</span>
                 <span className="text-[11px] font-bold text-[#e8002d] uppercase tracking-wider">{zone.timestamp}</span>
                 <span className="text-sm text-[#333] font-medium leading-snug">{zone.whatIsWrong}</span>
               </div>
 
               {/* Split: left = their video, right = example */}
-              <div className="flex items-stretch gap-0 px-3 py-3 bg-white">
+              <div className="flex items-stretch gap-0 px-4 py-5 bg-white">
 
                 {/* LEFT — user's video */}
                 <div className="flex flex-col flex-1 rounded-xl overflow-hidden border border-black/10">
