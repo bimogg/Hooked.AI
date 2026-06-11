@@ -11,7 +11,7 @@ interface Props {
 
 function getEmbedUrl(reelUrl: string): string | null {
   const m = reelUrl.match(/instagram\.com\/reel\/([A-Za-z0-9_-]+)/);
-  return m ? `https://www.instagram.com/reel/${m[1]}/embed/` : null;
+  return m ? `https://www.instagram.com/reel/${m[1]}/embed/?autoplay=1&cr=1` : null;
 }
 
 export default function HookPlayer({ thumbnailUrl, reelUrl }: Props) {
