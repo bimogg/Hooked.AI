@@ -1,73 +1,81 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Play, ExternalLink } from 'lucide-react';
 
 interface Props {
   videoUrl: string | null;
   thumbnailUrl: string | null;
   reelUrl: string;
-  hookDuration?: number;
+  hookDuration?: number; // seconds to play before looping, default 4
 }
 
-function getEmbedUrl(reelUrl: string): string | null {
-  const m = reelUrl.match(/instagram\.com\/reel\/([A-Za-z0-9_-]+)/);
-  return m ? `https://www.instagram.com/reel/${m[1]}/embed/` : null;
-}
+export default function HookPlayer({ videoUrl, thumbnailUrl, reelUrl, hookDuration = 4 }: Props) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [failed, setFailed] = useState(false);
 
-export default function HookPlayer({ thumbnailUrl, reelUrl }: Props) {
-  const [active, setActive] = useState(false);
-  const hoveredRef = useRef(false);
-  const embedUrl = getEmbedUrl(reelUrl);
+  const play = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const v = videoRef.current;
+    if (!v || failed) { window.open(reelUrl, '_blank'); return; }
+    v.currentTime = 0;
+    v.play().then(() => setPlaying(true)).catch(() => { setFailed(true); window.open(reelUrl, '_blank'); });
+  };
 
-  // Register once — use ref so no stale closure issues
-  useEffect(() => {
-    const onBlur = () => { if (hoveredRef.current) setActive(true); };
-    window.addEventListener('blur', onBlur);
-    return () => window.removeEventListener('blur', onBlur);
-  }, []);
+  const onTimeUpdate = () => {
+    const v = videoRef.current;
+    if (v && v.currentTime >= hookDuration) { v.currentTime = 0; v.play(); }
+  };
 
-  const openReel = (e: React.MouseEvent) => { e.stopPropagation(); window.open(reelUrl, '_blank'); };
+  const openInstagram = (e: React.MouseEvent) => { e.stopPropagation(); window.open(reelUrl, '_blank'); };
 
   return (
-    <div
-      className="relative w-full h-full bg-black"
-      onMouseEnter={() => { hoveredRef.current = true; }}
-      onMouseLeave={() => { hoveredRef.current = false; }}
-    >
-      {/* iframe always on top — invisible until clicked, but receives the click */}
-      {embedUrl && (
-        <iframe
-          src={embedUrl}
-          className="absolute inset-0 w-full h-full"
-          style={{ border: 'none', opacity: active ? 1 : 0, zIndex: 2 }}
-          allow="autoplay; fullscreen"
-          allowFullScreen
-          scrolling="no"
+    <div className="relative w-full h-full bg-black cursor-pointer" onClick={play}>
+      {/* Video (hidden until playing) */}
+      {videoUrl && !failed && (
+        <video
+          ref={videoRef}
+          src={videoUrl}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${playing ? 'opacity-100' : 'opacity-0'}`}
+          muted playsInline preload="none"
+          onTimeUpdate={onTimeUpdate}
+          onError={() => setFailed(true)}
+          onEnded={() => { if (videoRef.current) { videoRef.current.currentTime = 0; videoRef.current.play(); } }}
         />
       )}
 
-      {/* Thumbnail + play button below iframe (visual only) */}
-      {!active && (
-        <div className="absolute inset-0" style={{ zIndex: 1 }}>
-          {thumbnailUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-900" />
-          )}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-12 h-12 bg-black/60 rounded-full flex items-center justify-center">
-              <Play size={18} className="text-white ml-1" fill="white" />
-            </div>
+      {/* Thumbnail */}
+      {thumbnailUrl && (
+        <div className={`absolute inset-0 transition-opacity duration-300 ${playing ? 'opacity-0' : 'opacity-100'}`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
+        </div>
+      )}
+      {!thumbnailUrl && !playing && (
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900" />
+      )}
+
+      {/* Play button overlay */}
+      {!playing && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-12 h-12 bg-black/60 hover:bg-[#e8002d] rounded-full flex items-center justify-center transition-colors">
+            <Play size={18} className="text-white ml-1" fill="white" />
           </div>
         </div>
       )}
 
-      {/* External link always accessible */}
+      {/* HOOK badge */}
+      {playing && (
+        <div className="absolute top-2 left-2 flex items-center gap-1 bg-[#e8002d] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+          <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
+          ХУК 0–{hookDuration}с
+        </div>
+      )}
+
+      {/* Instagram link — always accessible */}
       <button
-        onClick={openReel}
+        onClick={openInstagram}
         className="absolute top-2 right-2 w-7 h-7 bg-black/50 hover:bg-black rounded-full flex items-center justify-center transition-colors"
-        style={{ zIndex: 3 }}
         title="Открыть в Instagram"
       >
         <ExternalLink size={11} className="text-white" />
