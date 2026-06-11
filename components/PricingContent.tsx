@@ -68,7 +68,7 @@ export default function PricingContent() {
             </div>
             <p className="text-sm mt-2 text-[#666]">{tr('pricing', 'proDesc', lang)}</p>
           </div>
-          <a href="https://buy.polar.sh/polar_cl_6KgaItKzKLgclHCPVxC9YIRwK7ITxCvAcRXVs3R4kxf" target="_blank" rel="noopener noreferrer"
+          <a href="https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4" target="_blank" rel="noopener noreferrer"
             className="block text-center text-sm font-bold py-3.5 rounded-full transition-all bg-[#e8002d] text-white hover:opacity-90">
             {tr('pricing', 'proCta', lang)}
           </a>
