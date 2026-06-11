@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Play, ExternalLink } from 'lucide-react';
 
 interface Props {
@@ -11,20 +11,35 @@ interface Props {
 
 function getEmbedUrl(reelUrl: string): string | null {
   const m = reelUrl.match(/instagram\.com\/reel\/([A-Za-z0-9_-]+)/);
-  return m ? `https://www.instagram.com/reel/${m[1]}/embed/?autoplay=1&cr=1` : null;
+  return m ? `https://www.instagram.com/reel/${m[1]}/embed/?autoplay=1` : null;
 }
 
-export default function HookPlayer({ thumbnailUrl, reelUrl }: Props) {
-  const [active, setActive] = useState(false);
+export default function HookPlayer({ videoUrl, thumbnailUrl, reelUrl, hookDuration = 4 }: Props) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [failed, setFailed] = useState(false);
+
   const embedUrl = getEmbedUrl(reelUrl);
 
-  const openReel = (e: React.MouseEvent) => { e.stopPropagation(); window.open(reelUrl, '_blank'); };
+  const play = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const v = videoRef.current;
+    if (!v || failed) { setFailed(true); return; }
+    v.currentTime = 0;
+    v.play().then(() => setPlaying(true)).catch(() => setFailed(true));
+  };
 
-  return (
-    <div className="relative w-full h-full bg-black">
+  const onTimeUpdate = () => {
+    const v = videoRef.current;
+    if (v && v.currentTime >= hookDuration) { v.currentTime = 0; v.play(); }
+  };
 
-      {/* Embed plays inline in the card */}
-      {active && embedUrl ? (
+  const openInstagram = (e: React.MouseEvent) => { e.stopPropagation(); window.open(reelUrl, '_blank'); };
+
+  // fallback: show embed inline when video fails
+  if (failed && embedUrl) {
+    return (
+      <div className="relative w-full h-full bg-black">
         <iframe
           src={embedUrl}
           className="w-full h-full"
@@ -32,29 +47,63 @@ export default function HookPlayer({ thumbnailUrl, reelUrl }: Props) {
           allowFullScreen
           scrolling="no"
         />
-      ) : (
-        <div className="relative w-full h-full cursor-pointer" onClick={() => setActive(true)}>
-          {/* Thumbnail */}
-          {thumbnailUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900" />
-          )}
+        <button
+          onClick={openInstagram}
+          className="absolute top-2 right-2 w-7 h-7 bg-black/50 hover:bg-black rounded-full flex items-center justify-center transition-colors z-10"
+        >
+          <ExternalLink size={11} className="text-white" />
+        </button>
+      </div>
+    );
+  }
 
-          {/* Play button */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-12 h-12 bg-black/60 hover:bg-[#e8002d] rounded-full flex items-center justify-center transition-colors">
-              <Play size={18} className="text-white ml-1" fill="white" />
-            </div>
+  return (
+    <div className="relative w-full h-full bg-black cursor-pointer" onClick={play}>
+      {/* Video */}
+      {videoUrl && !failed && (
+        <video
+          ref={videoRef}
+          src={videoUrl}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${playing ? 'opacity-100' : 'opacity-0'}`}
+          muted playsInline preload="none"
+          onTimeUpdate={onTimeUpdate}
+          onError={() => setFailed(true)}
+          onEnded={() => { if (videoRef.current) { videoRef.current.currentTime = 0; videoRef.current.play(); } }}
+        />
+      )}
+
+      {/* Thumbnail */}
+      {thumbnailUrl && (
+        <div className={`absolute inset-0 transition-opacity duration-300 ${playing ? 'opacity-0' : 'opacity-100'}`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
+        </div>
+      )}
+      {!thumbnailUrl && !playing && (
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900" />
+      )}
+
+      {/* Play button */}
+      {!playing && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-12 h-12 bg-black/60 hover:bg-[#e8002d] rounded-full flex items-center justify-center transition-colors">
+            <Play size={18} className="text-white ml-1" fill="white" />
           </div>
         </div>
       )}
 
-      {/* External link — always on top */}
+      {/* HOOK badge */}
+      {playing && (
+        <div className="absolute top-2 left-2 flex items-center gap-1 bg-[#e8002d] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+          <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
+          ХУК 0–{hookDuration}с
+        </div>
+      )}
+
+      {/* Instagram link */}
       <button
-        onClick={openReel}
-        className="absolute top-2 right-2 w-7 h-7 bg-black/50 hover:bg-black rounded-full flex items-center justify-center transition-colors z-10"
+        onClick={openInstagram}
+        className="absolute top-2 right-2 w-7 h-7 bg-black/50 hover:bg-black rounded-full flex items-center justify-center transition-colors"
         title="Открыть в Instagram"
       >
         <ExternalLink size={11} className="text-white" />
