@@ -161,11 +161,11 @@ export default function VideoAnalyzer() {
       });
       setStepIdx(2);
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Ошибка');
+      if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Ошибка анализа. Попробуй ещё раз.');
       if (!isPro) markFreeUsed();
       setResult(data);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Ошибка. Попробуй ещё раз.');
+      setError(e instanceof Error ? e.message : String(e) || 'Ошибка. Попробуй ещё раз.');
     } finally { setLoading(false); }
   }, [blobUrl, isPro]);
 
