@@ -81,7 +81,7 @@ export default function HookCard({ hook }: { hook: Hook }) {
         onClick={() => setOpen(true)}
         className="bg-[#f5f5f5] rounded-xl overflow-hidden flex flex-col hover:scale-[1.02] transition-transform cursor-pointer text-left w-full"
       >
-        <div className="relative aspect-[9/12] w-full overflow-hidden">
+        <div className="relative aspect-[4/5] w-full overflow-hidden">
           {hook.thumbnail_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
