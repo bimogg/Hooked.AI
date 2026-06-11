@@ -91,7 +91,7 @@ export default function HomeContent() {
         <div className="w-full max-w-6xl mx-auto flex items-center justify-between gap-10">
 
           {/* LEFT: text centered vertically */}
-          <div className="flex flex-col gap-6 max-w-xl md:pl-10 lg:pl-20" data-reveal="left">
+          <div className="flex flex-col gap-6 max-w-xl" data-reveal="left">
             <h1 className="font-display font-extrabold uppercase leading-[0.88] tracking-tighter text-[clamp(2.8rem,7vw,6rem)]">
               HOOK<br />
               <span className="text-[#e8002d]">OR</span><br />
