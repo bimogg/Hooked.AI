@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Play, ExternalLink } from 'lucide-react';
 
 interface Props {
@@ -16,23 +16,23 @@ function getEmbedUrl(reelUrl: string): string | null {
 
 export default function HookPlayer({ thumbnailUrl, reelUrl }: Props) {
   const [active, setActive] = useState(false);
-  const [hovered, setHovered] = useState(false);
+  const hoveredRef = useRef(false);
   const embedUrl = getEmbedUrl(reelUrl);
 
-  // When user clicks the invisible iframe on top, window loses focus — detect that
+  // Register once — use ref so no stale closure issues
   useEffect(() => {
-    const onBlur = () => { if (hovered) setActive(true); };
+    const onBlur = () => { if (hoveredRef.current) setActive(true); };
     window.addEventListener('blur', onBlur);
     return () => window.removeEventListener('blur', onBlur);
-  }, [hovered]);
+  }, []);
 
   const openReel = (e: React.MouseEvent) => { e.stopPropagation(); window.open(reelUrl, '_blank'); };
 
   return (
     <div
       className="relative w-full h-full bg-black"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => { hoveredRef.current = true; }}
+      onMouseLeave={() => { hoveredRef.current = false; }}
     >
       {/* iframe always on top — invisible until clicked, but receives the click */}
       {embedUrl && (
