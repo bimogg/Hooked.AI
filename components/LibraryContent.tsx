@@ -39,7 +39,7 @@ export default function LibraryContent({ hooks, activeType }: { hooks: Hook[]; a
 
       <p className="text-xs text-[#888] mb-3">{hooks.length} hooks · {tr('library', 'sorted', lang)}</p>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {hooks.map((h) => (
           <HookCard key={h.id} hook={h} />
         ))}
