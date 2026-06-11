@@ -72,7 +72,7 @@ async function apifyFetchReels(reelUrls) {
 
 async function downloadToStorage(cdnUrl, shortcode) {
   const filename = `${shortcode}.mp4`;
-  const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/videos/${filename}`;
+  const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/videos/videos/${filename}`;
 
   console.log(`  ⬇ Скачиваю ${(0).toFixed(0)}MB...`);
   const res = await fetch(cdnUrl, { headers: INSTAGRAM_HEADERS });

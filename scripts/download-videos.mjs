@@ -31,7 +31,7 @@ async function downloadAndStore(hook) {
   const shortcode = hook.instagram_id ? shortcodeFromId(hook.instagram_id) : hook.creator_username;
   const filename = `${shortcode}.mp4`;
   const storagePath = `videos/${filename}`;
-  const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/videos/${filename}`;
+  const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/videos/videos/${filename}`;
 
   // Уже загружено — пропускаем
   if (hook.video_url && hook.video_url.includes('supabase.co')) {
