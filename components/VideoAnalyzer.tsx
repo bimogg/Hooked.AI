@@ -19,12 +19,12 @@ async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> 
     video.onloadedmetadata = async () => {
       const dur = video.duration;
       const canvas = document.createElement('canvas');
-      const scale = Math.min(1, 720 / Math.max(video.videoWidth, video.videoHeight));
+      const scale = Math.min(1, 480 / Math.max(video.videoWidth, video.videoHeight));
       canvas.width = Math.round(video.videoWidth * scale);
       canvas.height = Math.round(video.videoHeight * scale);
       const ctx = canvas.getContext('2d')!;
-      const MAX = 12;
-      const count = Math.min(MAX, Math.max(4, Math.floor(dur)));
+      const MAX = 6;
+      const count = Math.min(MAX, Math.max(3, Math.floor(dur / 3)));
       const times = Array.from({ length: count }, (_, i) => Math.min((dur / (count - 1)) * i, dur - 0.05));
       if (times[0] > 0.1) times.unshift(0);
       const frames: { b64: string; t: number }[] = [];
@@ -33,7 +33,7 @@ async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> 
           video.currentTime = t;
           video.onseeked = () => {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            frames.push({ b64: canvas.toDataURL('image/jpeg', 0.7).split(',')[1], t: Math.round(t) });
+            frames.push({ b64: canvas.toDataURL('image/jpeg', 0.55).split(',')[1], t: Math.round(t) });
             res();
           };
         });
@@ -155,10 +155,13 @@ export default function VideoAnalyzer() {
     try {
       const frameData = await extractFrames(file);
       setStepIdx(1);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 55000);
       const res = await fetch('/api/analyze-video', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t), lang }),
-      });
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timeout));
       setStepIdx(2);
       const data = await res.json();
       if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Ошибка анализа. Попробуй ещё раз.');
