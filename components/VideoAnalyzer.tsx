@@ -19,12 +19,12 @@ async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> 
     video.onloadedmetadata = async () => {
       const dur = video.duration;
       const canvas = document.createElement('canvas');
-      const scale = Math.min(1, 480 / Math.max(video.videoWidth, video.videoHeight));
+      const scale = Math.min(1, 768 / Math.max(video.videoWidth, video.videoHeight));
       canvas.width = Math.round(video.videoWidth * scale);
       canvas.height = Math.round(video.videoHeight * scale);
       const ctx = canvas.getContext('2d')!;
-      const MAX = 6;
-      const count = Math.min(MAX, Math.max(3, Math.floor(dur / 3)));
+      const MAX = 12;
+      const count = Math.min(MAX, Math.max(4, Math.floor(dur / 2)));
       const times = Array.from({ length: count }, (_, i) => Math.min((dur / (count - 1)) * i, dur - 0.05));
       if (times[0] > 0.1) times.unshift(0);
       const frames: { b64: string; t: number }[] = [];
@@ -33,7 +33,7 @@ async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> 
           video.currentTime = t;
           video.onseeked = () => {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            frames.push({ b64: canvas.toDataURL('image/jpeg', 0.55).split(',')[1], t: Math.round(t) });
+            frames.push({ b64: canvas.toDataURL('image/jpeg', 0.72).split(',')[1], t: Math.round(t) });
             res();
           };
         });
