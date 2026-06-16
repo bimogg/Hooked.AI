@@ -118,8 +118,10 @@ Return ONLY valid JSON:
       timestamp: string; whatIsWrong: string; hookType: string; script: string; exampleIndex?: number;
     }) => {
       const idx = typeof zone.exampleIndex === 'number' ? zone.exampleIndex : -1;
-      let chosen: HookRow | undefined = idx >= 0 && idx < pool.length ? pool[idx] : undefined;
-      if (!chosen) chosen = pool.find(h => h.niche === zone.hookType) ?? pool[0];
+      // Only show an example the model explicitly matched to THIS video's topic.
+      // If nothing fits (-1) or the index is invalid, show no reference at all —
+      // never a random, irrelevant hook (that's worse than empty).
+      const chosen: HookRow | undefined = idx >= 0 && idx < pool.length ? pool[idx] : undefined;
       return {
         timestamp: zone.timestamp,
         whatIsWrong: zone.whatIsWrong,
