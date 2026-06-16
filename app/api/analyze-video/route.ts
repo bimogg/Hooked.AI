@@ -20,7 +20,7 @@ const HOOK_TYPES = [
   'Warning Hook', 'Challenge Hook', 'Engagement Hook', 'Mistake Hook',
 ];
 
-async function getHookFromDB(niche: string, videoTopic: string, client: Anthropic) {
+async function getHookFromDB(niche: string) {
   const { data } = await supabaseAdmin
     .from('hooks')
     .select('creator_username, caption, views, instagram_id, video_url, thumbnail_url, niche')
@@ -28,25 +28,14 @@ async function getHookFromDB(niche: string, videoTopic: string, client: Anthropi
     .not('caption', 'is', null)
     .neq('caption', '')
     .order('views', { ascending: false })
-    .limit(40);
+    .limit(10);
 
   if (!data || data.length === 0) return null;
 
-  // Let Claude pick the most relevant hook based on the video topic
-  const candidates = data.slice(0, 15);
-  const list = candidates.map((h, i) => `${i}: "${h.caption}"`).join('\n');
-
-  const pick = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 10,
-    messages: [{
-      role: 'user',
-      content: `Video is about: "${videoTopic}"\n\nWhich hook caption below is most relevant to use as an example for this video?\n\n${list}\n\nReply ONLY with the number (0-${candidates.length - 1}).`,
-    }],
-  });
-
-  const idx = parseInt((pick.content[0] as { type: string; text: string }).text.trim()) || 0;
-  const h = candidates[Math.min(idx, candidates.length - 1)];
+  // Pick one of the top hooks of this type (small rotation for variety).
+  // No extra Claude call here — keeps the whole request to a single LLM call
+  // so it stays well under the serverless timeout.
+  const h = data[Math.floor(Math.random() * Math.min(data.length, 5))];
   return {
     ...h,
     video_url: h.video_url ?? null,
@@ -131,7 +120,7 @@ Return ONLY valid JSON:
       }) => {
         const hookType = HOOK_TYPES.includes(zone.hookType) ? zone.hookType : null;
         const example = hookType
-          ? (await getHookFromDB(hookType, analysis.videoTopic ?? '', client)) ?? (await getFallbackHook())
+          ? (await getHookFromDB(hookType)) ?? (await getFallbackHook())
           : await getFallbackHook();
 
         return {
