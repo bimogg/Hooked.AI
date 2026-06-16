@@ -3,6 +3,7 @@ import LibraryContent from '@/components/LibraryContent';
 import type { Post } from '@/components/CarouselCard';
 
 async function getHooks(type?: string): Promise<Hook[]> {
+  if (type === 'Posts') return [];
   try {
     let q = supabase
       .from('hooks')
@@ -28,9 +29,10 @@ async function getHooks(type?: string): Promise<Hook[]> {
   return [];
 }
 
-async function getPosts(): Promise<Post[]> {
+async function getPosts(niche?: string): Promise<Post[]> {
   try {
-    const q = supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(200);
+    let q = supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(200);
+    if (niche && niche !== 'all') q = q.eq('niche', niche);
     const timeout = new Promise<null>((r) => setTimeout(() => r(null), 5000));
     const result = await Promise.race([q, timeout]);
     if (result && 'data' in result && result.data) return result.data as Post[];
@@ -44,10 +46,11 @@ export default async function LibraryPage({
   searchParams: Promise<{ type?: string }>;
 }) {
   const { type } = await searchParams;
-  if (type === 'Posts') {
-    const posts = await getPosts();
-    return <LibraryContent hooks={[]} posts={posts} activeType={type} />;
-  }
-  const hooks = await getHooks(type);
-  return <LibraryContent hooks={hooks} activeType={type} />;
+  const isPosts = type === 'Posts';
+  const isNiche = !!type && type !== 'all' && type !== 'Posts';
+
+  const hooks = isPosts ? [] : await getHooks(type);
+  const posts = isNiche ? await getPosts(type) : await getPosts();
+
+  return <LibraryContent hooks={hooks} posts={posts} activeType={type} />;
 }
