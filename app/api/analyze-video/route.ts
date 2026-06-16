@@ -8,6 +8,7 @@ export const maxDuration = 60;
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 function idToShortcode(id: string): string {
+  if (!/^\d+$/.test(id)) return id;
   const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
   let n = BigInt(id);
   let code = '';
