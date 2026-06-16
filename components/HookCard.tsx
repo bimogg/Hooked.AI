@@ -51,6 +51,7 @@ const NICHE_TAG: Record<string, string> = {
 };
 
 function idToShortcode(id: string): string {
+  if (!/^\d+$/.test(id)) return id;
   const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
   let n = BigInt(id);
   let code = '';
@@ -177,3 +178,4 @@ export default function HookCard({ hook }: { hook: Hook }) {
     </>
   );
 }
+
