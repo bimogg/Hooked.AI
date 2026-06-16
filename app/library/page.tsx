@@ -12,7 +12,7 @@ async function getHooks(type?: string): Promise<Hook[]> {
       .neq('caption', '')
       .order('views', { ascending: false })
       .limit(200);
-    if (type && type !== 'all') q = q.eq('niche', type);
+    if (type && type !== 'all' && type !== 'Reels') q = q.eq('niche', type);
     const timeout = new Promise<null>((r) => setTimeout(() => r(null), 5000));
     const result = await Promise.race([q, timeout]);
     if (result && 'data' in result && result.data && result.data.length > 0) {
@@ -47,10 +47,11 @@ export default async function LibraryPage({
 }) {
   const { type } = await searchParams;
   const isPosts = type === 'Posts';
-  const isNiche = !!type && type !== 'all' && type !== 'Posts';
+  const isReels = type === 'Reels';
+  const isNiche = !!type && type !== 'all' && type !== 'Posts' && type !== 'Reels';
 
-  const hooks = isPosts ? [] : await getHooks(type);
-  const posts = isNiche ? await getPosts(type) : await getPosts();
+  const hooks = isPosts ? [] : await getHooks(isReels ? 'all' : type);
+  const posts = isReels ? [] : (isNiche ? await getPosts(type) : await getPosts());
 
   return <LibraryContent hooks={hooks} posts={posts} activeType={type} />;
 }
