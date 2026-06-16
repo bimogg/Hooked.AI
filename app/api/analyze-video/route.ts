@@ -83,7 +83,14 @@ STEP 1 — Understand the video deeply:
 - What specific topic/product/skill/situation is this video about?
 - What would the viewer expect to learn or see?
 
-STEP 2 — Find 2-3 WEAK ZONES where viewers would swipe away.
+STEP 2 — Score the HOOK (judge ONLY the first ~3 seconds / opening frames, not the whole video). Be objective and consistent — the same opening must always get a similar score. Use this rubric:
+- 1-3 (weak): slow, silent or unclear start, no on-screen text, nothing that creates curiosity or promises value. Viewer has no reason to stay.
+- 4-6 (average): some interest but a generic or slow opening; the hook is implied, not sharp.
+- 7-8 (strong): a clear hook in the first seconds — a bold claim, strong visual, or curiosity/value stated up front (often reinforced by on-screen text).
+- 9-10 (exceptional): instantly gripping — strong pattern interrupt plus a clear payoff that makes swiping away almost impossible.
+Be fair: if the opening is genuinely strong, give it a high score. Do NOT default to low or middling scores, and do not penalize a video just to justify suggestions.
+
+STEP 3 — Find 2-3 WEAK ZONES where viewers would swipe away.
 
 CRITICAL RULE FOR SCRIPTS: Every script MUST be directly about the specific thing shown in this video. NEVER write generic scripts. The script must sound like it was written only for THIS video.
 
