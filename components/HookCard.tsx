@@ -11,14 +11,6 @@ function fmt(n: number) {
   return String(n);
 }
 
-function hookScore(views: number): number {
-  if (views >= 5_000_000) return 97;
-  if (views >= 1_000_000) return 93;
-  if (views >= 500_000) return 87;
-  if (views >= 100_000) return 78;
-  if (views >= 50_000) return 70;
-  return 64;
-}
 
 function hookDesc(niche: string, lang: string): string {
   if (niche === 'Visual Hook') return tr('hookCard', 'visual', lang);
@@ -114,7 +106,6 @@ export default function HookCard({ hook }: { hook: Hook }) {
             <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${tag}`}>
               {hook.niche}
             </span>
-            <span className="text-[10px] font-bold text-emerald-600">+{hookScore(hook.views)}% {tr('hookCard', 'attention', lang)}</span>
           </div>
           <p className="text-[10px] text-[#666] leading-tight line-clamp-2">{hookDesc(hook.niche, lang)}</p>
         </div>
