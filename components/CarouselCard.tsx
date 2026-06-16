@@ -14,6 +14,28 @@ export interface Post {
   likes: number;
 }
 
+function Track({ imgs, i, contain }: { imgs: string[]; i: number; contain?: boolean }) {
+  return (
+    <div
+      className="flex h-full transition-transform duration-300 ease-out will-change-transform"
+      style={{ transform: `translateX(-${i * 100}%)` }}
+    >
+      {imgs.map((u, k) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={k}
+          src={u}
+          alt=""
+          className={`w-full h-full shrink-0 ${contain ? 'object-contain' : 'object-cover'}`}
+          style={{ flex: '0 0 100%' }}
+          loading={k === 0 ? 'eager' : 'lazy'}
+          draggable={false}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function CarouselCard({ post }: { post: Post }) {
   const imgs = post.images?.length ? post.images : (post.cover_url ? [post.cover_url] : []);
   const [i, setI] = useState(0);
@@ -27,16 +49,15 @@ export default function CarouselCard({ post }: { post: Post }) {
   return (
     <>
       <div className="rounded-xl overflow-hidden border border-black/10 bg-white">
-        <div className="relative aspect-[4/5] bg-black group cursor-pointer" onClick={() => setOpen(true)}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imgs[i]} alt="" className="w-full h-full object-cover" loading="lazy" />
+        <div className="relative aspect-[4/5] bg-black group cursor-pointer overflow-hidden" onClick={() => setOpen(true)}>
+          <Track imgs={imgs} i={i} />
           {imgs.length > 1 && (
             <>
               <button onClick={prev} aria-label="prev" className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><ChevronLeft size={16} /></button>
               <button onClick={next} aria-label="next" className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><ChevronRight size={16} /></button>
               <div className="absolute top-2 right-2 text-[10px] font-bold text-white bg-black/60 px-1.5 py-0.5 rounded-full">{i + 1}/{imgs.length}</div>
               <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-                {imgs.map((_, k) => <span key={k} className={`w-1.5 h-1.5 rounded-full ${k === i ? 'bg-white' : 'bg-white/40'}`} />)}
+                {imgs.map((_, k) => <span key={k} className={`w-1.5 h-1.5 rounded-full transition-colors ${k === i ? 'bg-white' : 'bg-white/40'}`} />)}
               </div>
             </>
           )}
@@ -55,15 +76,14 @@ export default function CarouselCard({ post }: { post: Post }) {
           <div className="relative max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setOpen(false)} aria-label="close" className="absolute -top-9 right-0 text-white/70 hover:text-white"><X size={22} /></button>
             <div className="relative aspect-[4/5] bg-black rounded-xl overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imgs[i]} alt="" className="w-full h-full object-contain" />
+              <Track imgs={imgs} i={i} contain />
               {imgs.length > 1 && (
                 <>
                   <button onClick={prev} aria-label="prev" className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center"><ChevronLeft size={20} /></button>
                   <button onClick={next} aria-label="next" className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center"><ChevronRight size={20} /></button>
                   <div className="absolute top-3 right-3 text-xs font-bold text-white bg-black/60 px-2 py-0.5 rounded-full">{i + 1}/{imgs.length}</div>
                   <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-                    {imgs.map((_, k) => <button key={k} aria-label={`slide ${k+1}`} onClick={(e) => { e.stopPropagation(); setI(k); }} className={`w-2 h-2 rounded-full ${k === i ? 'bg-white' : 'bg-white/40'}`} />)}
+                    {imgs.map((_, k) => <button key={k} aria-label={`slide ${k + 1}`} onClick={(e) => { e.stopPropagation(); setI(k); }} className={`w-2 h-2 rounded-full ${k === i ? 'bg-white' : 'bg-white/40'}`} />)}
                   </div>
                 </>
               )}
