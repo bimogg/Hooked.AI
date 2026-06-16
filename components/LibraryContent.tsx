@@ -1,13 +1,15 @@
 'use client';
 import { Hook } from '@/lib/supabase';
 import HookCard from './HookCard';
+import CarouselCard, { Post } from './CarouselCard';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 
-const HOOK_TYPES = ['all', 'Hook Tutorial', 'Visual Hook', 'Question Hook', 'Tutorial Hook', 'Engagement Hook', 'Curiosity Hook', 'Warning Hook', 'Challenge Hook', 'Mistake Hook'];
+const HOOK_TYPES = ['all', 'Posts', 'Hook Tutorial', 'Visual Hook', 'Question Hook', 'Tutorial Hook', 'Engagement Hook', 'Curiosity Hook', 'Warning Hook', 'Challenge Hook', 'Mistake Hook'];
 
-export default function LibraryContent({ hooks, activeType }: { hooks: Hook[]; activeType?: string }) {
+export default function LibraryContent({ hooks, posts = [], activeType }: { hooks: Hook[]; posts?: Post[]; activeType?: string }) {
   const { lang } = useLang();
+  const isPosts = activeType === 'Posts';
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -37,12 +39,12 @@ export default function LibraryContent({ hooks, activeType }: { hooks: Hook[]; a
         ))}
       </div>
 
-      <p className="text-xs text-[#888] mb-3">{hooks.length} hooks · {tr('library', 'sorted', lang)}</p>
+      <p className="text-xs text-[#888] mb-3">{isPosts ? posts.length : hooks.length} {isPosts ? 'posts' : 'hooks'} · {tr('library', 'sorted', lang)}</p>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {hooks.map((h) => (
-          <HookCard key={h.id} hook={h} />
-        ))}
+        {isPosts
+          ? posts.map((p) => <CarouselCard key={p.id} post={p} />)
+          : hooks.map((h) => <HookCard key={h.id} hook={h} />)}
       </div>
 
       <div className="mt-16 border-t border-black/10 pt-10 text-center">
