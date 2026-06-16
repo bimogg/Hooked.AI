@@ -78,6 +78,7 @@ export async function POST(req: NextRequest) {
     content.push({ type: 'text', text: `You are an Instagram Reels hook expert. Analyze these frames carefully.
 
 STEP 1 — Understand the video deeply:
+- Read ALL on-screen text and captions visible in any frame — quote them and treat them as critical context. Never ignore captions.
 - Who is in it? What are they doing physically?
 - What specific topic/product/skill/situation is this video about?
 - What would the viewer expect to learn or see?
