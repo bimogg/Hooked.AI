@@ -9,7 +9,7 @@ const HOOK_TYPES = ['all', 'Posts', 'Hook Tutorial', 'Visual Hook', 'Question Ho
 
 export default function LibraryContent({ hooks, posts = [], activeType }: { hooks: Hook[]; posts?: Post[]; activeType?: string }) {
   const { lang } = useLang();
-  const isPosts = activeType === 'Posts';
+  const total = hooks.length + posts.length;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -39,12 +39,11 @@ export default function LibraryContent({ hooks, posts = [], activeType }: { hook
         ))}
       </div>
 
-      <p className="text-xs text-[#888] mb-3">{isPosts ? posts.length : hooks.length} {isPosts ? 'posts' : 'hooks'} · {tr('library', 'sorted', lang)}</p>
+      <p className="text-xs text-[#888] mb-3">{total} {total === 1 ? 'result' : 'results'} · {tr('library', 'sorted', lang)}</p>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {isPosts
-          ? posts.map((p) => <CarouselCard key={p.id} post={p} />)
-          : hooks.map((h) => <HookCard key={h.id} hook={h} />)}
+        {posts.map((p) => <CarouselCard key={`p-${p.id}`} post={p} />)}
+        {hooks.map((h) => <HookCard key={`h-${h.id}`} hook={h} />)}
       </div>
 
       <div className="mt-16 border-t border-black/10 pt-10 text-center">
