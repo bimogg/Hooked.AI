@@ -105,7 +105,7 @@ interface WeakZone {
   timestamp: string; whatIsWrong: string; hookType: string; script: string;
   example: HookExample | null;
 }
-interface Result { hookScore: number; videoTopic: string; weakZones: WeakZone[]; }
+interface Result { hookScore: number; scoreReason?: string | null; videoTopic: string; weakZones: WeakZone[]; }
 
 const STEP_KEYS = ['frames', 'analyzing', 'hooks'] as const;
 
@@ -201,6 +201,7 @@ export default function VideoAnalyzer() {
           <div>
             <p className="text-[10px] text-[#aaa] uppercase tracking-widest mb-0.5">{tr('result', 'outOf', lang)}</p>
             {result.videoTopic && <p className="text-xs text-[#666]">{result.videoTopic}</p>}
+            {result.scoreReason && <p className="text-xs text-[#999] mt-1.5 leading-snug">{result.scoreReason}</p>}
           </div>
         </div>
 
