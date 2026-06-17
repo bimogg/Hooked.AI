@@ -34,7 +34,7 @@ function Carousel({ slides, i, contain }: { slides: Slide[]; i: number; contain?
     <div className="flex h-full transition-transform duration-300 ease-out will-change-transform" style={{ transform: `translateX(-${i * 100}%)` }}>
       {slides.map((s, k) => (
         <div key={k} className="w-full h-full shrink-0" style={{ flex: '0 0 100%' }}>
-          {s.type === 'video' ? (
+          {(s.type === 'video' && contain) ? (
             <video
               ref={(el) => { vids.current[k] = el; }}
               src={s.url}
@@ -44,7 +44,7 @@ function Carousel({ slides, i, contain }: { slides: Slide[]; i: number; contain?
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={s.url} alt="" className={`w-full h-full ${fit}`} loading={k === 0 ? 'eager' : 'lazy'} draggable={false} />
+            <img src={s.type === 'video' ? (s.poster || s.url) : s.url} alt="" className={`w-full h-full ${fit}`} loading={k === 0 ? 'eager' : 'lazy'} draggable={false} />
           )}
         </div>
       ))}
