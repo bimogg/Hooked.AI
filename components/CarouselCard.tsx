@@ -39,7 +39,7 @@ function Carousel({ slides, i, contain }: { slides: Slide[]; i: number; contain?
               src={s.url}
               poster={s.poster}
               className={`w-full h-full ${fit}`}
-              muted loop playsInline preload="metadata" controls={contain}
+              autoPlay muted loop playsInline preload="auto"
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
