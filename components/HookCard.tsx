@@ -97,8 +97,8 @@ export default function HookCard({ hook }: { hook: Hook }) {
             </div>
           )}
           <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-3 flex items-center gap-3 text-white text-[11px]">
-            <span className="flex items-center gap-1"><Eye size={11} />{fmt(hook.views)}</span>
-            <span className="flex items-center gap-1"><Heart size={11} />{fmt(hook.likes)}</span>
+            {hook.views > 0 && <span className="flex items-center gap-1"><Eye size={11} />{fmt(hook.views)}</span>}
+            {hook.likes > 0 && <span className="flex items-center gap-1"><Heart size={11} />{fmt(hook.likes)}</span>}
           </div>
         </div>
 
@@ -167,9 +167,9 @@ export default function HookCard({ hook }: { hook: Hook }) {
                 {hook.caption ?? '—'}
               </p>
               <div className="flex items-center gap-4 text-[#888] text-xs pt-3 border-t border-black/10">
-                <span className="flex items-center gap-1.5"><Eye size={12} />{fmt(hook.views)}</span>
-                <span className="flex items-center gap-1.5"><Heart size={12} />{fmt(hook.likes)}</span>
-                <span className="flex items-center gap-1.5"><MessageCircle size={12} />{fmt(hook.comments)}</span>
+                {hook.views > 0 && <span className="flex items-center gap-1.5"><Eye size={12} />{fmt(hook.views)}</span>}
+                {hook.likes > 0 && <span className="flex items-center gap-1.5"><Heart size={12} />{fmt(hook.likes)}</span>}
+                {hook.comments > 0 && <span className="flex items-center gap-1.5"><MessageCircle size={12} />{fmt(hook.comments)}</span>}
               </div>
             </div>
           </div>
