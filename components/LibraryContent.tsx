@@ -5,7 +5,7 @@ import CarouselCard, { Post } from './CarouselCard';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 
-const HOOK_TYPES = ['all', 'Reels', 'Posts', 'Hook Tutorial', 'Visual Hook', 'Question Hook', 'Tutorial Hook', 'Engagement Hook', 'Curiosity Hook', 'Warning Hook', 'Challenge Hook', 'Mistake Hook'];
+const HOOK_TYPES = ['all', 'Reels', 'Posts', 'Inserts', 'Hook Tutorial', 'Visual Hook', 'Question Hook', 'Tutorial Hook', 'Engagement Hook', 'Curiosity Hook', 'Warning Hook', 'Challenge Hook', 'Mistake Hook'];
 
 export default function LibraryContent({ hooks, posts = [], activeType }: { hooks: Hook[]; posts?: Post[]; activeType?: string }) {
   const { lang } = useLang();
