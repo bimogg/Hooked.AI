@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Hook } from '@/lib/supabase';
-import { Eye, Heart, MessageCircle, X, ExternalLink, Play } from 'lucide-react';
+import { Eye, Heart, MessageCircle, X, ExternalLink, Play, Download } from 'lucide-react';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 
@@ -122,24 +122,30 @@ export default function HookCard({ hook }: { hook: Hook }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative w-full bg-black" style={{ aspectRatio: '9/14' }}>
-              {hook.thumbnail_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={hook.thumbnail_url} alt="" className="w-full h-full object-cover" />
+              {hook.niche === 'Insert' && hook.video_url ? (
+                <video src={hook.video_url} poster={hook.thumbnail_url ?? undefined} controls autoPlay muted loop playsInline className="w-full h-full object-contain" />
               ) : (
-                <div className={`w-full h-full bg-gradient-to-br ${bg}`} />
-              )}
-              {(hook.video_url || hook.instagram_id) && (
-                <a
-                  href={igUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute inset-0 flex items-center justify-center group"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="w-14 h-14 bg-black/60 rounded-full flex items-center justify-center group-hover:bg-[#e8002d]/80 transition-colors">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </a>
+                <>
+                  {hook.thumbnail_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={hook.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className={`w-full h-full bg-gradient-to-br ${bg}`} />
+                  )}
+                  {(hook.video_url || hook.instagram_id) && (
+                    <a
+                      href={igUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute inset-0 flex items-center justify-center group"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="w-14 h-14 bg-black/60 rounded-full flex items-center justify-center group-hover:bg-[#e8002d]/80 transition-colors">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                      </div>
+                    </a>
+                  )}
+                </>
               )}
               <button
                 onClick={() => setOpen(false)}
@@ -171,6 +177,9 @@ export default function HookCard({ hook }: { hook: Hook }) {
                 {hook.likes > 0 && <span className="flex items-center gap-1.5"><Heart size={12} />{fmt(hook.likes)}</span>}
                 {hook.comments > 0 && <span className="flex items-center gap-1.5"><MessageCircle size={12} />{fmt(hook.comments)}</span>}
               </div>
+              {hook.niche === 'Insert' && hook.video_url && (
+                <a href={`${hook.video_url}?download=${hook.instagram_id || 'insert'}.mp4`} className="mt-4 flex items-center justify-center gap-2 bg-[#e8002d] text-white text-sm font-bold py-2.5 rounded-full hover:opacity-90"><Download size={14} />Download</a>
+              )}
             </div>
           </div>
         </div>
