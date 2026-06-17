@@ -23,11 +23,12 @@ function normalize(images: (string | Slide)[]): Slide[] {
 function Carousel({ slides, i, contain }: { slides: Slide[]; i: number; contain?: boolean }) {
   const vids = useRef<(HTMLVideoElement | null)[]>([]);
   useEffect(() => {
+    if (!contain) { vids.current.forEach((v) => v && v.pause()); return; }
     vids.current.forEach((v, k) => {
       if (!v) return;
       if (k === i) { v.currentTime = 0; v.play().catch(() => {}); } else { v.pause(); }
     });
-  }, [i]);
+  }, [i, contain]);
   const fit = contain ? 'object-contain' : 'object-cover';
   return (
     <div className="flex h-full transition-transform duration-300 ease-out will-change-transform" style={{ transform: `translateX(-${i * 100}%)` }}>
@@ -39,7 +40,7 @@ function Carousel({ slides, i, contain }: { slides: Slide[]; i: number; contain?
               src={s.url}
               poster={s.poster}
               className={`w-full h-full ${fit}`}
-              autoPlay muted loop playsInline preload="auto"
+              muted loop playsInline preload={contain ? 'auto' : 'metadata'}
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
