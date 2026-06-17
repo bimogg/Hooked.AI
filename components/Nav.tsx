@@ -51,6 +51,7 @@ export default function Nav() {
           <Link href="/library" onClick={() => setOpen(false)} className="text-sm text-[#888]">Library</Link>
           <Link href="/pricing" onClick={() => setOpen(false)} className="text-sm text-[#888]">Pricing</Link>
           <Link href="/privacy" onClick={() => setOpen(false)} className="text-sm text-[#888]">Privacy</Link>
+          <div className="py-1"><LanguageSwitcher /></div>
           {isSignedIn ? (
             <UserButton />
           ) : (
@@ -67,3 +68,4 @@ export default function Nav() {
     </header>
   );
 }
+
