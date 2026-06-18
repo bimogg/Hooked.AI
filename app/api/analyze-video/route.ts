@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
       .select('creator_username, caption, views, instagram_id, video_url, thumbnail_url, niche')
       .not('caption', 'is', null)
       .neq('caption', '')
+      .neq('niche', 'Insert')
       .order('views', { ascending: false })
       .limit(50);
     const pool: HookRow[] = poolData ?? [];
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     // ── Single Claude call: understand → score → weak zones → pick matching examples ──
     const content: Anthropic.MessageParam['content'] = [];
-    frames.slice(0, 12).forEach((b64, i) => {
+    frames.slice(0, 16).forEach((b64, i) => {
       content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } });
       content.push({ type: 'text', text: `↑ ${ts[i] ?? i}s` });
     });
@@ -68,6 +69,7 @@ STEP 1 — Understand the video deeply:
 - Who is in it? What are they doing physically?
 - What EXACT niche/topic is this (e.g. cars/motion, fitness, cooking, beauty, relationships, finance, travel)? Be specific.
 - What would the viewer expect to see or learn?
+- THE VISUAL HOOK: look closely at the FIRST 2-3 frames (0-2s). Describe exactly what is visually happening — is it static or moving, is there a face, motion, text? This is the visual hook and matters most.
 
 STEP 2 — Score the HOOK. Judge ONLY the first ~3 seconds / opening frames, NOT the whole video. Be objective and consistent: the same opening must always get a similar score. You MUST justify the number with concrete evidence from the frames in "scoreReason" — never pick a number arbitrarily. Rubric:
 - 1-3 (weak): slow, silent or unclear start, no on-screen text, nothing that creates curiosity or promises value.
@@ -77,6 +79,8 @@ STEP 2 — Score the HOOK. Judge ONLY the first ~3 seconds / opening frames, NOT
 Be fair: if the opening is genuinely strong, score it high. Do NOT default to low/middling scores, and never invent weaknesses just to justify suggestions.
 
 STEP 3 — Find 2-3 WEAK ZONES where viewers would swipe away.
+
+STEP 3.5 — Recommend the SINGLE STRONGEST hook to use for the opening of THIS video (a ready-to-use line + a concrete visual/shot tip). This is the main fix, especially when the score is below 7.
 
 STEP 4 — For EACH weak zone pick the single best matching example from the LIBRARY below.
 CRITICAL: the example MUST match THIS video's niche/topic. A cars/motion video must get a cars/motion example, NOT relationships or anything unrelated. Match on BOTH topic and hook type. If nothing truly fits the topic, pick the closest by topic first. Return its index in "exampleIndex" (or -1 if genuinely nothing fits).
@@ -93,6 +97,11 @@ Return ONLY valid JSON:
   "hookScore": <integer 1-10 per the rubric>,
   "scoreReason": "<in ${outputLang}: 1 sentence justifying the score with concrete evidence from the opening frames>",
   "videoTopic": "<very specific in ${outputLang}: niche + what exactly is shown>",
+  "bestHook": {
+    "script": "<in ${outputLang}: the single strongest ready-to-use opening hook line for THIS specific video>",
+    "hookType": "<one of the 8 hook types>",
+    "tip": "<in ${outputLang}: one concrete visual/shot tip — e.g. start on a close-up, add a fast zoom, put the hook as on-screen text in frame 1>"
+  },
   "weakZones": [
     {
       "timestamp": "<e.g. '0-3s'>",
@@ -106,7 +115,7 @@ Return ONLY valid JSON:
 
     const r1 = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1200,
+      max_tokens: 1600,
       messages: [{ role: 'user', content }],
     });
 
@@ -136,6 +145,7 @@ Return ONLY valid JSON:
       hookScore: analysis.hookScore,
       scoreReason: analysis.scoreReason ?? null,
       videoTopic: analysis.videoTopic,
+      bestHook: analysis.bestHook ?? null,
       weakZones,
     });
 
