@@ -23,12 +23,16 @@ async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> 
       canvas.width = Math.round(video.videoWidth * scale);
       canvas.height = Math.round(video.videoHeight * scale);
       const ctx = canvas.getContext('2d')!;
-      const MAX = 12;
-      const count = Math.min(MAX, Math.max(4, Math.floor(dur / 2)));
-      const times = Array.from({ length: count }, (_, i) => Math.min((dur / (count - 1)) * i, dur - 0.05));
-      if (times[0] > 0.1) times.unshift(0);
+      const MAX = 16;
+      // Dense sampling in the first 3s (the hook lives here), then spread across the rest.
+      const early = [0, 0.5, 1, 1.5, 2, 3].filter(t => t < dur);
+      const restCount = Math.max(0, Math.min(MAX - early.length, Math.floor((dur - 3) / 2)));
+      const rest = restCount > 0
+        ? Array.from({ length: restCount }, (_, i) => 3 + ((dur - 3) / (restCount + 1)) * (i + 1))
+        : [];
+      const times = [...early, ...rest].filter(t => t < dur - 0.05).slice(0, MAX);
       const frames: { b64: string; t: number }[] = [];
-      for (const t of times.slice(0, MAX)) {
+      for (const t of times) {
         await new Promise<void>(res => {
           video.currentTime = t;
           video.onseeked = () => {
@@ -105,7 +109,7 @@ interface WeakZone {
   timestamp: string; whatIsWrong: string; hookType: string; script: string;
   example: HookExample | null;
 }
-interface Result { hookScore: number; scoreReason?: string | null; videoTopic: string; weakZones: WeakZone[]; }
+interface Result { hookScore: number; scoreReason?: string | null; videoTopic: string; bestHook?: { script: string; hookType: string; tip: string } | null; weakZones: WeakZone[]; }
 
 const STEP_KEYS = ['frames', 'analyzing', 'hooks'] as const;
 
@@ -204,6 +208,19 @@ export default function VideoAnalyzer() {
             {result.scoreReason && <p className="text-xs text-[#999] mt-1.5 leading-snug">{result.scoreReason}</p>}
           </div>
         </div>
+
+        {result.bestHook && (
+          <div className="rounded-2xl overflow-hidden border border-[#e8002d]/30 bg-[#fff8f8]">
+            <div className="px-5 py-3 border-b border-[#e8002d]/15 flex items-center justify-between">
+              <span className="text-[11px] font-bold text-[#e8002d] uppercase tracking-wider">Best hook</span>
+              {result.bestHook.hookType && <span className="text-[10px] text-[#888]">{result.bestHook.hookType}</span>}
+            </div>
+            <div className="px-5 py-4">
+              <p className="text-base font-bold text-[#0a0a0a] leading-snug">&quot;{result.bestHook.script}&quot;</p>
+              {result.bestHook.tip && <p className="text-xs text-[#666] mt-2 leading-snug">{result.bestHook.tip}</p>}
+            </div>
+          </div>
+        )}
 
         {/* Weak zones */}
         {result.weakZones?.map((zone, i) => {
