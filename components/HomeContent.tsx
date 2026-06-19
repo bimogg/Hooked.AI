@@ -195,7 +195,7 @@ export default function HomeContent() {
             </h2>
           </div>
           <div className="md:w-1/2" data-reveal="right">
-            <p className="text-[#888] text-sm md:text-base leading-relaxed mb-8 font-light">
+            <p className="text-white/85 text-lg md:text-2xl leading-relaxed mb-8 font-light">
               {tr('home', 'problemSub', lang)}
             </p>
             <Link href="/pro" className="inline-flex items-center gap-2 text-sm font-bold text-[#e8002d] hover:gap-3 transition-all">
