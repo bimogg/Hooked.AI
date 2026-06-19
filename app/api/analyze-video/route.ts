@@ -19,7 +19,7 @@ function idToShortcode(id: string): string {
 
 type HookRow = {
   creator_username: string; caption: string | null; views: number;
-  instagram_id: string | null; video_url: string | null; thumbnail_url: string | null; niche: string;
+  instagram_id: string | null; video_url: string | null; thumbnail_url: string | null; niche: string; content_niche?: string | null;
 };
 
 function shapeHook(h: HookRow) {
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     // ── Candidate pool of real library hooks (one query, no extra LLM calls) ──
     const { data: poolData } = await supabaseAdmin
       .from('hooks')
-      .select('creator_username, caption, views, instagram_id, video_url, thumbnail_url, niche')
+      .select('creator_username, caption, views, instagram_id, video_url, thumbnail_url, niche, content_niche')
       .not('caption', 'is', null)
       .neq('caption', '')
       .neq('niche', 'Insert')
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     const pool: HookRow[] = poolData ?? [];
 
     const poolList = pool
-      .map((h, i) => `${i} [${h.niche}] "${(h.caption ?? '').slice(0, 120)}" (${h.views} views)`)
+      .map((h, i) => `${i} (topic: ${h.content_niche ?? 'other'}) "${(h.caption ?? '').slice(0, 120)}" (${h.views} views)`)
       .join('\n');
 
     // ── Single Claude call: understand → score → weak zones → pick matching examples ──
@@ -72,7 +72,7 @@ ${engagementNote}
 STEP 1 — Understand the video deeply:
 - Read ALL on-screen text and captions visible in any frame — quote them and treat them as critical context. Never ignore captions.
 - Who is in it? What are they doing physically?
-- What EXACT niche/topic is this (e.g. cars/motion, fitness, cooking, beauty, relationships, finance, travel)? Be specific.
+- What EXACT niche/topic is this? Also classify it into ONE content niche from this exact list: fitness, cars, food, beauty, fashion, finance, business, travel, tech, relationships, comedy, education, pets, home, music, gaming, motivation, marketing, other. (Use "marketing" for content-creation/hook/reels-tips videos.) Output it as "contentNiche".
 - What would the viewer expect to see or learn?
 - THE VISUAL HOOK: look closely at the FIRST 2-3 frames (0-2s). Describe exactly what is visually happening — is it static or moving, is there a face, motion, text? This is the visual hook and matters most.
 
@@ -87,8 +87,9 @@ STEP 3 — Find 2-3 WEAK ZONES where viewers would swipe away.
 
 STEP 3.5 — Recommend the SINGLE STRONGEST hook to use for the opening of THIS video (a ready-to-use line + a concrete visual/shot tip). This is the main fix, especially when the score is below 7.
 
-STEP 4 — For EACH weak zone, OPTIONALLY pick ONE example from the LIBRARY below — but ONLY if its caption is clearly about the SAME content topic/niche as THIS video (e.g. both fitness/sports, both cars, both cooking, both beauty).
-CRITICAL: It is MUCH better to return -1 (no example shown) than to show an unrelated one. The user hates irrelevant examples. Do NOT match on hook type alone — the CONTENT TOPIC must clearly match. If you are not highly confident the example is the same topic as this video, return -1. Default to -1 unless there is an obvious same-topic match. Return the index in "exampleIndex", or -1.
+STEP 4 — For EACH weak zone, OPTIONALLY pick ONE example from the LIBRARY below. Each library item has a (topic: X) tag.
+RULE: pick an example ONLY if its (topic) tag EQUALS this video's contentNiche from STEP 1 (e.g. video is "food" → only a (topic: food) example). If no library item shares the same topic tag, return -1.
+CRITICAL: It is MUCH better to return -1 (no example shown) than to show an unrelated one. The user hates irrelevant examples. Never pick a different-topic example just to fill the slot. Return the index in "exampleIndex", or -1.
 
 LIBRARY (index [hook type] "caption"):
 ${poolList}
@@ -102,6 +103,7 @@ Return ONLY valid JSON:
   "hookScore": <integer 1-10 per the rubric>,
   "scoreReason": "<in ${outputLang}: 1 sentence justifying the score with concrete evidence from the opening frames>",
   "videoTopic": "<very specific in ${outputLang}: niche + what exactly is shown>",
+  "contentNiche": "<one content niche in English lowercase from the STEP 1 list>",
   "bestHook": {
     "script": "<in ${outputLang}: the single strongest ready-to-use opening hook line for THIS specific video>",
     "hookType": "<one of the 8 hook types>",
