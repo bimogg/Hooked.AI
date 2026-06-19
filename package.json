@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@amplitude/unified": "^1.1.16",
     "@anthropic-ai/sdk": "^0.100.1",
     "@clerk/nextjs": "^7.5.0",
     "@supabase/ssr": "^0.10.3",
