@@ -227,7 +227,7 @@ export default function HomeContent() {
               <div key={n} data-reveal data-delay={String(i + 1)} className="flex flex-col gap-3">
                 <span className="font-display font-extrabold text-7xl text-[#e8002d]/40 leading-none">{n}</span>
                 <h3 className="font-bold text-xs uppercase tracking-widest">{tr('home', tk, lang)}</h3>
-                <p className="text-[#888] text-sm leading-relaxed font-light">{tr('home', dk, lang)}</p>
+                <p className="text-[#444] text-base md:text-lg leading-relaxed font-light">{tr('home', dk, lang)}</p>
               </div>
             ))}
           </div>
