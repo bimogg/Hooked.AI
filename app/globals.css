@@ -112,3 +112,8 @@ body {
 [data-reveal][data-delay="3"] { transition-delay: 0.3s; }
 [data-reveal][data-delay="4"] { transition-delay: 0.4s; }
 [data-reveal][data-delay="5"] { transition-delay: 0.5s; }
+
+/* mobile bottom tab bar spacing */
+@media (max-width: 767px) {
+  body { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
+}
