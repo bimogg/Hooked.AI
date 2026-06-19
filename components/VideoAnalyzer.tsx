@@ -51,6 +51,31 @@ async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> 
   });
 }
 
+// small thumbnail (~240px) from a raw base64 jpeg frame, for history storage
+async function makeThumb(b64: string): Promise<string> {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      const s = Math.min(1, 240 / Math.max(img.width, img.height));
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
+      resolve(c.toDataURL('image/jpeg', 0.6));
+    };
+    img.onerror = () => resolve('');
+    img.src = `data:image/jpeg;base64,${b64}`;
+  });
+}
+
+function saveHistory(entry: Record<string, unknown>) {
+  try {
+    const raw = localStorage.getItem('hooked_history');
+    const arr = raw ? JSON.parse(raw) : [];
+    arr.unshift(entry);
+    localStorage.setItem('hooked_history', JSON.stringify(arr.slice(0, 15)));
+  } catch {}
+}
+
 // parse "0–3 сек" or "10–15 сек" → { start, end }
 function parseTimestamp(ts: string): { start: number; end: number } {
   const nums = ts.match(/\d+/g)?.map(Number) ?? [0];
@@ -179,6 +204,19 @@ export default function VideoAnalyzer() {
       if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Ошибка анализа. Попробуй ещё раз.');
       if (!isPro) markFreeUsed();
       setResult(data);
+      // save to local history for the profile page
+      try {
+        const thumb = frameData[0]?.b64 ? await makeThumb(frameData[0].b64) : '';
+        saveHistory({
+          id: Date.now(),
+          date: new Date().toISOString(),
+          name: file.name,
+          thumb,
+          hookScore: data.hookScore ?? null,
+          videoTopic: data.videoTopic ?? null,
+          bestHook: data.bestHook ?? null,
+        });
+      } catch {}
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e) || 'Ошибка. Попробуй ещё раз.');
     } finally { setLoading(false); }
