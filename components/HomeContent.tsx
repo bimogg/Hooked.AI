@@ -92,11 +92,6 @@ export default function HomeContent() {
 
           {/* LEFT: text centered vertically */}
           <div className="flex flex-col gap-6 max-w-xl" data-reveal="left">
-            {/* mobile-only social proof */}
-            <div className="md:hidden flex items-center gap-2 text-xs text-[#666] font-medium -mb-1">
-              <span className="w-2 h-2 rounded-full bg-[#e8002d] animate-pulse" />
-              {tr('home', 'socialProof', lang)}
-            </div>
             <h1 className="font-display font-extrabold uppercase leading-[0.88] tracking-tighter text-[clamp(2.8rem,7vw,6rem)]">
               HOOK<br />
               <span className="text-[#e8002d]">OR</span><br />
