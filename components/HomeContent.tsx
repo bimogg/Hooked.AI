@@ -101,13 +101,13 @@ export default function HomeContent() {
                style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 300, letterSpacing: '-0.01em' }}>
               {tr('home', 'heroSubShort', lang)}
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
               <Link href="/pro"
-                className="bg-[#e8002d] text-white font-bold text-sm px-7 py-3.5 rounded-full hover:opacity-90 transition-opacity flex items-center gap-2">
+                className="w-full md:w-auto bg-[#e8002d] text-white font-bold text-sm px-7 py-3.5 rounded-full hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
                 {tr('home', 'ctaAnalyze', lang)} <ArrowRight size={15} />
               </Link>
               <Link href="/library"
-                className="border border-black/20 text-black font-bold text-sm px-7 py-3.5 rounded-full hover:border-black transition-colors">
+                className="w-full md:w-auto text-center md:text-left border border-black/20 text-black font-bold text-sm px-7 py-3.5 rounded-full hover:border-black transition-colors">
                 {tr('home', 'ctaBrowse', lang)}
               </Link>
             </div>
