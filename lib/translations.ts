@@ -145,7 +145,7 @@ const t = {
   upload: {
     title: { ru: 'Загрузи своё видео', en: 'Upload your video', es: 'Sube tu video', fr: 'Télécharge ta vidéo', de: 'Video hochladen', pt: 'Envie seu vídeo', it: 'Carica il tuo video', tr: 'Videonuzu yükleyin', ar: 'ارفع الفيديو', ko: '영상 업로드', zh: '上传你的视频', ja: '動画をアップロード' },
     subtitle: { ru: 'MP4, MOV · до 300MB', en: 'MP4, MOV · up to 300MB', es: 'MP4, MOV · hasta 300MB', fr: 'MP4, MOV · jusqu\'à 300MB', de: 'MP4, MOV · bis 300MB', pt: 'MP4, MOV · até 300MB', it: 'MP4, MOV · fino a 300MB', tr: 'MP4, MOV · 300MB\'a kadar', ar: 'MP4, MOV · حتى 300MB', ko: 'MP4, MOV · 최대 300MB', zh: 'MP4, MOV · 最大300MB', ja: 'MP4, MOV · 最大300MB' },
-    badge: { ru: '1 анализ бесплатно', en: '1 free analysis', es: '1 análisis gratis', fr: '1 analyse gratuite', de: '1 kostenlose Analyse', pt: '1 análise grátis', it: '1 analisi gratis', tr: '1 ücretsiz analiz', ar: 'تحليل واحد مجاناً', ko: '무료 분석 1회', zh: '1次免费分析', ja: '1回無料分析' },
+    badge: { ru: '3 анализа бесплатно', en: '3 free analyses', es: '3 análisis gratis', fr: '3 analyses gratuites', de: '3 kostenlose Analysen', pt: '3 análises grátis', it: '3 analisi gratis', tr: '3 ücretsiz analiz', ar: '3 تحليلات مجاناً', ko: '무료 분석 3회', zh: '3次免费分析', ja: '3回無料分析' },
   },
   loading: {
     frames: { ru: 'Читаем видео...', en: 'Reading video...', es: 'Leyendo video...', fr: 'Lecture de la vidéo...', de: 'Video wird gelesen...', pt: 'Lendo vídeo...', it: 'Lettura video...', tr: 'Video okunuyor...', ar: 'جارٍ قراءة الفيديو...', ko: '영상 읽는 중...', zh: '读取视频...', ja: '動画を読み込み中...' },
