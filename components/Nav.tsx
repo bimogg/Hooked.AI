@@ -19,10 +19,10 @@ export default function Nav() {
         HookedAI
       </Link>
       <nav className="hidden md:flex items-center gap-8 text-[11px] uppercase tracking-widest text-[#888]">
-        <Link href="/" className="hover:text-black transition-colors">Home</Link>
-        <Link href="/library" className="hover:text-black transition-colors">Library</Link>
-        <Link href="/pricing" className="hover:text-black transition-colors">Pricing</Link>
-        <Link href="/privacy" className="hover:text-black transition-colors">Privacy</Link>
+        <Link href="/" className="hover:text-black transition-colors">{tr('footer', 'navHome', lang)}</Link>
+        <Link href="/library" className="hover:text-black transition-colors">{tr('footer', 'navLibrary', lang)}</Link>
+        <Link href="/pricing" className="hover:text-black transition-colors">{tr('footer', 'navPricing', lang)}</Link>
+        <Link href="/privacy" className="hover:text-black transition-colors">{tr('footer', 'navPrivacy', lang)}</Link>
       </nav>
       <div className="hidden md:flex items-center gap-3">
         <LanguageSwitcher />
@@ -31,7 +31,7 @@ export default function Nav() {
         ) : (
           <SignInButton mode="modal">
             <button className="text-xs text-[#888] hover:text-black transition-colors font-medium px-3 py-1.5">
-              Sign In
+              {tr('nav', 'signIn', lang)}
             </button>
           </SignInButton>
         )}
@@ -47,16 +47,16 @@ export default function Nav() {
       </button>
       {open && (
         <div className="absolute top-14 inset-x-0 bg-white border-b border-black/10 flex flex-col gap-4 px-6 py-6 md:hidden">
-          <Link href="/" onClick={() => setOpen(false)} className="text-sm text-[#888]">Home</Link>
-          <Link href="/library" onClick={() => setOpen(false)} className="text-sm text-[#888]">Library</Link>
-          <Link href="/pricing" onClick={() => setOpen(false)} className="text-sm text-[#888]">Pricing</Link>
-          <Link href="/privacy" onClick={() => setOpen(false)} className="text-sm text-[#888]">Privacy</Link>
+          <Link href="/" onClick={() => setOpen(false)} className="text-sm text-[#888]">{tr('footer', 'navHome', lang)}</Link>
+          <Link href="/library" onClick={() => setOpen(false)} className="text-sm text-[#888]">{tr('footer', 'navLibrary', lang)}</Link>
+          <Link href="/pricing" onClick={() => setOpen(false)} className="text-sm text-[#888]">{tr('footer', 'navPricing', lang)}</Link>
+          <Link href="/privacy" onClick={() => setOpen(false)} className="text-sm text-[#888]">{tr('footer', 'navPrivacy', lang)}</Link>
           <div className="py-1"><LanguageSwitcher /></div>
           {isSignedIn ? (
             <UserButton />
           ) : (
             <SignInButton mode="modal">
-              <button className="text-sm text-[#888] text-left">Sign In</button>
+              <button className="text-sm text-[#888] text-left">{tr('nav', 'signIn', lang)}</button>
             </SignInButton>
           )}
           <Link href="/pro" onClick={() => setOpen(false)}
