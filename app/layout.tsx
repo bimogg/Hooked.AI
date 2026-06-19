@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import { LanguageProvider } from '@/components/LanguageProvider';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Analytics } from '@vercel/analytics/next';
+import AmplitudeInit from '@/components/AmplitudeInit';
 
 export const metadata: Metadata = {
   title: 'HookedAI — Stop The Drop',
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-screen flex flex-col bg-white text-[#0a0a0a]">
+        <AmplitudeInit />
         <ClerkProvider>
           <LanguageProvider>
             <Nav />
