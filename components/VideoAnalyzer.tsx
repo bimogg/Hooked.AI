@@ -372,6 +372,8 @@ export default function VideoAnalyzer() {
                   </div>
                 </div>
 
+                {zone.example && (
+                <>
                 {/* CENTER label */}
                 <div className="flex flex-col items-center justify-center px-2 gap-0.5 shrink-0">
                   {tr('result', 'tryThis', lang).split(' ').map((w, i) => (
@@ -403,6 +405,8 @@ export default function VideoAnalyzer() {
                     )}
                   </div>
                 </div>
+                </>
+                )}
               </div>
 
               {/* Script */}
