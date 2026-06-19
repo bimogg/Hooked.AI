@@ -34,8 +34,13 @@ function shapeHook(h: HookRow) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { frames, timestamps, lang = 'ru' } = await req.json() as { frames: string[]; timestamps?: number[]; lang?: string };
+    const { frames, timestamps, lang = 'ru', caption, likes, views, comments } = await req.json() as { frames: string[]; timestamps?: number[]; lang?: string; caption?: string; likes?: number | null; views?: number | null; comments?: number | null };
     const outputLang = langForPrompt(lang);
+    const realCaption = (caption ?? '').slice(0, 500);
+    const hasMetrics = typeof views === 'number' || typeof likes === 'number';
+    const engagementNote = hasMetrics
+      ? `\nREAL PERFORMANCE DATA for this published Reel (factor this into the score!): ${views != null ? `${views} views` : ''}${likes != null ? `, ${likes} likes` : ''}${comments != null ? `, ${comments} comments` : ''}.${realCaption ? ` Caption: "${realCaption}".` : ''}\nInterpretation: if the like/comment rate relative to views is strong, the hook clearly WORKED — say so in scoreReason and don't invent weaknesses. If views are decent but the like rate is weak, the hook likely lost people early — be honest and focus the advice on fixing the opening.\n`
+      : (realCaption ? `\nThe video caption is: "${realCaption}". Treat it as critical context.\n` : '');
     if (!frames?.length) return NextResponse.json({ error: 'No frames provided' }, { status: 400 });
 
     const ts = timestamps ?? frames.map((_, i) => i);
@@ -63,7 +68,7 @@ export async function POST(req: NextRequest) {
     });
 
     content.push({ type: 'text', text: `You are an Instagram Reels hook expert. Analyze these frames carefully.
-
+${engagementNote}
 STEP 1 — Understand the video deeply:
 - Read ALL on-screen text and captions visible in any frame — quote them and treat them as critical context. Never ignore captions.
 - Who is in it? What are they doing physically?
