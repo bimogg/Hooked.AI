@@ -9,7 +9,7 @@ import { tr } from '@/lib/translations';
 const POLAR_CHECKOUT = 'https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4';
 
 const FREE_KEY = 'hooked_free_count';
-const FREE_LIMIT = 10;
+const FREE_LIMIT = 3;
 function getFreeCount() { try { return parseInt(localStorage.getItem(FREE_KEY) || '0', 10); } catch { return 0; } }
 function hasUsedFree() { return getFreeCount() >= FREE_LIMIT; }
 function markFreeUsed() { try { localStorage.setItem(FREE_KEY, String(getFreeCount() + 1)); } catch {} }
@@ -334,8 +334,8 @@ export default function VideoAnalyzer() {
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         onClick={() => !loading && inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-2xl p-14 flex flex-col items-center gap-5 cursor-pointer transition-all text-center select-none ${
-          dragging ? 'border-[#e8002d] bg-[#fff8f8]' : 'border-black/15 hover:border-black/40 bg-[#fafafa]'
+        className={`rounded-3xl p-10 md:p-12 flex flex-col items-center gap-5 cursor-pointer transition-all text-center select-none border ${
+          dragging ? 'border-[#e8002d] bg-[#fff5f6] scale-[0.99]' : 'border-black/10 bg-gradient-to-b from-white to-[#f3f3f3] hover:border-black/25 hover:shadow-lg'
         } ${loading ? 'pointer-events-none' : ''}`}
       >
         <input ref={inputRef} type="file" accept="video/*" className="hidden"
@@ -358,14 +358,15 @@ export default function VideoAnalyzer() {
           </>
         ) : (
           <>
-            <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center">
-              <Upload size={24} className="text-white" />
+            <div className="w-16 h-16 rounded-2xl bg-[#e8002d] flex items-center justify-center shadow-lg shadow-[#e8002d]/25">
+              <Upload size={26} className="text-white" strokeWidth={2.2} />
             </div>
             <div>
-              <p className="font-semibold text-sm">{tr('upload', 'title', lang)}</p>
-              <p className="text-[#888] text-xs mt-1">{tr('upload', 'subtitle', lang)}</p>
+              <p className="font-bold text-base">{tr('upload', 'title', lang)}</p>
+              <p className="text-[#999] text-xs mt-1">{tr('upload', 'subtitle', lang)}</p>
             </div>
-            <span className="text-[10px] bg-black text-white px-4 py-1.5 rounded-full font-bold uppercase tracking-wider">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#e8002d] bg-[#e8002d]/10 px-3.5 py-1.5 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#e8002d]" />
               {tr('upload', 'badge', lang)}
             </span>
           </>
