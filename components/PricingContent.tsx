@@ -5,6 +5,7 @@ import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 
 const POLAR_CHECKOUT = 'https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4';
+const APPLE_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif';
 
 const PRO_ICONS = [Video, Infinity, Sparkles, BarChart3, FileText, Zap, Crown];
 
@@ -63,26 +64,28 @@ export default function PricingContent() {
           </ul>
         </div>
 
-        {/* Pro */}
-        <div className="relative overflow-hidden rounded-3xl border border-black/10 bg-white p-7 flex flex-col gap-6 shadow-[0_24px_60px_-24px_rgba(232,0,45,0.4)]">
-          {/* brand gradient glow — subtle halo bleeding from the top */}
-          <div className="pointer-events-none absolute -top-24 inset-x-0 h-44 blur-[70px] opacity-30"
-            style={{ background: 'radial-gradient(50% 55% at 50% 65%, #ff5a72 0%, transparent 70%)' }} />
+        {/* Pro — reference style */}
+        <div className="relative overflow-hidden rounded-[28px] bg-white p-7 flex flex-col shadow-[0_30px_70px_-30px_rgba(0,0,0,0.35)]"
+          style={{ fontFamily: APPLE_FONT }}>
+          {/* soft warm gradient fill behind the header + button */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[230px]"
+            style={{ background: 'linear-gradient(172deg, #ffe7d4 0%, #ffb9c6 40%, #ffd7dd 63%, #ffffff 93%)' }} />
 
-          <div className="relative">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#888]">Pro</p>
-              <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-[#e8002d] text-white">
-                {tr('pricing', 'popularBadge', lang)}
-              </span>
-            </div>
-            <div className="flex items-end gap-1.5">
-              <span className="font-display font-extrabold text-6xl leading-none">$12</span>
-              <span className="text-xs mb-2 text-[#888]">/mo</span>
-            </div>
-            <p className="text-sm mt-2 text-[#666]">{tr('pricing', 'proDesc', lang)}</p>
+          {/* header */}
+          <div className="relative flex items-center justify-between mb-5">
+            <p className="font-bold text-lg">Pro</p>
+            <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-black/85 text-white">
+              {tr('pricing', 'popularBadge', lang)}
+            </span>
           </div>
 
+          {/* price */}
+          <div className="relative flex items-baseline gap-2 mb-5">
+            <span className="font-extrabold text-[54px] leading-none tracking-tight">$12</span>
+            <span className="text-xs text-[#5a5a5a] leading-snug">{tr('pricing', 'perMonth', lang)}</span>
+          </div>
+
+          {/* button right after price */}
           {isSignedIn ? (
             <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" className={`relative ${proBtnClass}`}>
               {tr('pricing', 'proCta', lang)}
@@ -93,21 +96,20 @@ export default function PricingContent() {
             </SignInButton>
           )}
 
-          <ul className="relative flex flex-col gap-3.5 pt-1">
+          {/* features — clean dark line icons */}
+          <ul className="relative flex flex-col gap-4 mt-7">
             {proFeatures.map((k, i) => {
               const Icon = PRO_ICONS[i % PRO_ICONS.length];
               return (
-                <li key={k} className="flex items-center gap-3 text-sm">
-                  <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#e8002d]/10 text-[#e8002d] shrink-0">
-                    <Icon size={14} />
-                  </span>
+                <li key={k} className="flex items-center gap-3 text-sm text-[#1a1a1a]">
+                  <Icon size={18} strokeWidth={1.8} className="text-[#1a1a1a] shrink-0" />
                   {tr('pricing', k, lang)}
                 </li>
               );
             })}
           </ul>
 
-          <a href="mailto:anagashtay@gmail.com" className="relative text-center text-xs text-[#999] hover:text-black transition-colors">
+          <a href="mailto:anagashtay@gmail.com" className="relative text-center text-xs text-[#aaa] hover:text-black transition-colors mt-7">
             {tr('pricing', 'needHelp', lang)}
           </a>
         </div>
