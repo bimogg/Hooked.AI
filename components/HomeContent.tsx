@@ -87,11 +87,16 @@ export default function HomeContent() {
     <div className="flex flex-col overflow-hidden">
 
       {/* ── HERO ── */}
-      <section className="relative min-h-[92vh] flex items-center px-6 md:px-12 py-16">
+      <section className="relative md:min-h-[92vh] flex items-center px-6 md:px-12 py-8 md:py-16">
         <div className="w-full max-w-6xl mx-auto flex items-center justify-between gap-10">
 
           {/* LEFT: text centered vertically */}
           <div className="flex flex-col gap-6 max-w-xl" data-reveal="left">
+            {/* mobile-only social proof */}
+            <div className="md:hidden flex items-center gap-2 text-xs text-[#666] font-medium -mb-1">
+              <span className="w-2 h-2 rounded-full bg-[#e8002d] animate-pulse" />
+              {tr('home', 'socialProof', lang)}
+            </div>
             <h1 className="font-display font-extrabold uppercase leading-[0.88] tracking-tighter text-[clamp(2.8rem,7vw,6rem)]">
               HOOK<br />
               <span className="text-[#e8002d]">OR</span><br />
@@ -109,6 +114,23 @@ export default function HomeContent() {
                 className="border border-black/20 text-black font-bold text-sm px-7 py-3.5 rounded-full hover:border-black transition-colors">
                 {tr('home', 'ctaBrowse', lang)}
               </Link>
+            </div>
+
+            {/* mobile-only app screenshot */}
+            <div className="md:hidden mt-4 rounded-xl overflow-hidden border border-black/10"
+              style={{ boxShadow: '0 20px 50px rgba(0,0,0,0.16)' }}>
+              <div style={{ background: 'linear-gradient(180deg,#ebebeb,#d8d8d8)', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(0,0,0,0.1)' }}>
+                <div style={{ display: 'flex', gap: 5 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff5f57', display: 'block' }} />
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#febc2e', display: 'block' }} />
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#28c840', display: 'block' }} />
+                </div>
+                <div style={{ flex: 1, background: 'rgba(0,0,0,0.07)', borderRadius: 6, padding: '3px 10px', fontSize: 10, color: '#666', textAlign: 'center' }}>
+                  hookedai.com/library
+                </div>
+              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/app-screenshot.png" alt="HookedAI app" style={{ width: '100%', display: 'block' }} />
             </div>
           </div>
 
