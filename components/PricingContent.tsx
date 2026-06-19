@@ -1,7 +1,10 @@
 'use client';
 import { Check } from 'lucide-react';
+import { SignInButton, useUser } from '@clerk/nextjs';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
+
+const POLAR_CHECKOUT = 'https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4';
 
 function CheckItem({ text, dim }: { text: string; dim?: boolean }) {
   return (
@@ -14,6 +17,11 @@ function CheckItem({ text, dim }: { text: string; dim?: boolean }) {
 
 export default function PricingContent() {
   const { lang } = useLang();
+  const { isSignedIn, user } = useUser();
+
+  const proBtnClass = 'block w-full text-center text-sm font-bold py-3.5 rounded-full transition-all bg-[#e8002d] text-white hover:opacity-90 cursor-pointer';
+  const email = user?.primaryEmailAddress?.emailAddress;
+  const checkoutUrl = email ? `${POLAR_CHECKOUT}?customer_email=${encodeURIComponent(email)}` : POLAR_CHECKOUT;
 
   const freeFeatures = ['freeF1', 'freeF2', 'freeF3', 'freeF4', 'freeF5'];
   const freeMissing = ['freeM1', 'freeM2', 'freeM3'];
@@ -68,10 +76,15 @@ export default function PricingContent() {
             </div>
             <p className="text-sm mt-2 text-[#666]">{tr('pricing', 'proDesc', lang)}</p>
           </div>
-          <a href="https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4" target="_blank" rel="noopener noreferrer"
-            className="block text-center text-sm font-bold py-3.5 rounded-full transition-all bg-[#e8002d] text-white hover:opacity-90">
-            {tr('pricing', 'proCta', lang)}
-          </a>
+          {isSignedIn ? (
+            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" className={proBtnClass}>
+              {tr('pricing', 'proCta', lang)}
+            </a>
+          ) : (
+            <SignInButton mode="modal" forceRedirectUrl="/pricing" signUpForceRedirectUrl="/pricing">
+              <button className={proBtnClass}>{tr('pricing', 'proCta', lang)}</button>
+            </SignInButton>
+          )}
           <ul className="flex flex-col gap-3">
             {proFeatures.map(k => <CheckItem key={k} text={tr('pricing', k, lang)} />)}
           </ul>
