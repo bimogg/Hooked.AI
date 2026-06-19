@@ -6,13 +6,26 @@ import { useLang } from '@/components/LanguageProvider';
 import { tr } from '@/lib/translations';
 
 interface HistoryItem {
-  id: number;
+  id: number | string;
   date: string;
   name?: string;
   thumb?: string;
   hookScore?: number | null;
   videoTopic?: string | null;
   bestHook?: { script?: string; hookType?: string; tip?: string } | null;
+}
+
+// normalize a server row (snake_case) into HistoryItem
+function fromServer(r: Record<string, unknown>): HistoryItem {
+  return {
+    id: (r.id as string) ?? Math.random(),
+    date: (r.created_at as string) ?? new Date().toISOString(),
+    name: (r.name as string) ?? undefined,
+    thumb: (r.thumb as string) ?? undefined,
+    hookScore: (r.hook_score as number) ?? null,
+    videoTopic: (r.video_topic as string) ?? null,
+    bestHook: (r.best_hook as HistoryItem['bestHook']) ?? null,
+  };
 }
 
 function scoreColor(s: number) {
@@ -23,15 +36,26 @@ function scoreColor(s: number) {
 
 export default function ProfilePage() {
   const { lang } = useLang();
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const [history, setHistory] = useState<HistoryItem[] | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('hooked_history');
-      setHistory(raw ? JSON.parse(raw) : []);
-    } catch { setHistory([]); }
-  }, []);
+    if (!isLoaded) return;
+    const local = () => {
+      try {
+        const raw = localStorage.getItem('hooked_history');
+        setHistory(raw ? JSON.parse(raw) : []);
+      } catch { setHistory([]); }
+    };
+    if (isSignedIn) {
+      fetch('/api/history')
+        .then(r => r.json())
+        .then(d => setHistory((d.items ?? []).map(fromServer)))
+        .catch(local);
+    } else {
+      local();
+    }
+  }, [isLoaded, isSignedIn]);
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-12">
