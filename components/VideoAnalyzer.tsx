@@ -204,23 +204,30 @@ export default function VideoAnalyzer() {
       if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Ошибка анализа. Попробуй ещё раз.');
       if (!isPro) markFreeUsed();
       setResult(data);
-      // save to local history for the profile page
+      // save to history for the profile page
       try {
         const thumb = frameData[0]?.b64 ? await makeThumb(frameData[0].b64) : '';
-        saveHistory({
-          id: Date.now(),
-          date: new Date().toISOString(),
+        const entry = {
           name: file.name,
           thumb,
-          hookScore: data.hookScore ?? null,
           videoTopic: data.videoTopic ?? null,
+          hookScore: data.hookScore ?? null,
           bestHook: data.bestHook ?? null,
-        });
+        };
+        // local copy (works signed-out / offline)
+        saveHistory({ id: Date.now(), date: new Date().toISOString(), ...entry });
+        // synced copy on the account, if signed in
+        if (isSignedIn) {
+          fetch('/api/history', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(entry),
+          }).catch(() => {});
+        }
       } catch {}
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e) || 'Ошибка. Попробуй ещё раз.');
     } finally { setLoading(false); }
-  }, [blobUrl, isPro]);
+  }, [blobUrl, isPro, isSignedIn]);
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault(); setDragging(false);
