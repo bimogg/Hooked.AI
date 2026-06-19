@@ -1,10 +1,12 @@
 'use client';
-import { Check } from 'lucide-react';
+import { Check, Video, Infinity, Sparkles, BarChart3, FileText, Zap, Crown } from 'lucide-react';
 import { SignInButton, useUser } from '@clerk/nextjs';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 
 const POLAR_CHECKOUT = 'https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4';
+
+const PRO_ICONS = [Video, Infinity, Sparkles, BarChart3, FileText, Zap, Crown];
 
 function CheckItem({ text, dim }: { text: string; dim?: boolean }) {
   return (
@@ -19,7 +21,7 @@ export default function PricingContent() {
   const { lang } = useLang();
   const { isSignedIn, user } = useUser();
 
-  const proBtnClass = 'block w-full text-center text-sm font-bold py-3.5 rounded-full transition-all bg-[#e8002d] text-white hover:opacity-90 cursor-pointer';
+  const proBtnClass = 'block w-full text-center text-sm font-bold py-3.5 rounded-full transition-opacity bg-black text-white hover:opacity-90 cursor-pointer';
   const email = user?.primaryEmailAddress?.emailAddress;
   const checkoutUrl = email ? `${POLAR_CHECKOUT}?customer_email=${encodeURIComponent(email)}` : POLAR_CHECKOUT;
 
@@ -62,32 +64,52 @@ export default function PricingContent() {
         </div>
 
         {/* Pro */}
-        <div className="relative rounded-3xl border border-[#e8002d] bg-[#fff8f8] p-7 flex flex-col gap-6">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-            <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-[#e8002d] text-white">
-              {tr('pricing', 'popularBadge', lang)}
-            </span>
-          </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold mb-1 text-[#888]">Pro</p>
+        <div className="relative overflow-hidden rounded-3xl border border-black/10 bg-white p-7 flex flex-col gap-6 shadow-[0_24px_60px_-24px_rgba(232,0,45,0.4)]">
+          {/* brand gradient glow */}
+          <div className="pointer-events-none absolute -top-12 inset-x-0 h-52 blur-3xl opacity-55"
+            style={{ background: 'radial-gradient(58% 80% at 50% 35%, #ff5a72 0%, #e8002d 45%, transparent 74%)' }} />
+
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[#888]">Pro</p>
+              <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-[#e8002d] text-white">
+                {tr('pricing', 'popularBadge', lang)}
+              </span>
+            </div>
             <div className="flex items-end gap-1.5">
-              <span className="font-display font-extrabold text-5xl leading-none">$12</span>
-              <span className="text-xs mb-1.5 text-[#aaa]">/mo</span>
+              <span className="font-display font-extrabold text-6xl leading-none">$12</span>
+              <span className="text-xs mb-2 text-[#888]">/mo</span>
             </div>
             <p className="text-sm mt-2 text-[#666]">{tr('pricing', 'proDesc', lang)}</p>
           </div>
+
           {isSignedIn ? (
-            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" className={proBtnClass}>
+            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" className={`relative ${proBtnClass}`}>
               {tr('pricing', 'proCta', lang)}
             </a>
           ) : (
             <SignInButton mode="modal" forceRedirectUrl="/pricing" signUpForceRedirectUrl="/pricing">
-              <button className={proBtnClass}>{tr('pricing', 'proCta', lang)}</button>
+              <button className={`relative ${proBtnClass}`}>{tr('pricing', 'proCta', lang)}</button>
             </SignInButton>
           )}
-          <ul className="flex flex-col gap-3">
-            {proFeatures.map(k => <CheckItem key={k} text={tr('pricing', k, lang)} />)}
+
+          <ul className="relative flex flex-col gap-3.5 pt-1">
+            {proFeatures.map((k, i) => {
+              const Icon = PRO_ICONS[i % PRO_ICONS.length];
+              return (
+                <li key={k} className="flex items-center gap-3 text-sm">
+                  <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#e8002d]/10 text-[#e8002d] shrink-0">
+                    <Icon size={14} />
+                  </span>
+                  {tr('pricing', k, lang)}
+                </li>
+              );
+            })}
           </ul>
+
+          <a href="mailto:anagashtay@gmail.com" className="relative text-center text-xs text-[#999] hover:text-black transition-colors">
+            {tr('pricing', 'needHelp', lang)}
+          </a>
         </div>
 
       </div>
