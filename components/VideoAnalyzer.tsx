@@ -227,7 +227,7 @@ export default function VideoAnalyzer() {
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e) || 'Ошибка. Попробуй ещё раз.');
     } finally { setLoading(false); }
-  }, [blobUrl, isPro, isSignedIn]);
+  }, [blobUrl, isPro, isSignedIn, lang]);
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault(); setDragging(false);
@@ -271,7 +271,7 @@ export default function VideoAnalyzer() {
         {result.bestHook && (
           <div className="rounded-2xl overflow-hidden border border-[#e8002d]/30 bg-[#fff8f8]">
             <div className="px-5 py-3 border-b border-[#e8002d]/15 flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#e8002d] uppercase tracking-wider">Best hook</span>
+              <span className="text-[11px] font-bold text-[#e8002d] uppercase tracking-wider">{tr('result', 'bestHook', lang)}</span>
               {result.bestHook.hookType && <span className="text-[10px] text-[#888]">{result.bestHook.hookType}</span>}
             </div>
             <div className="px-5 py-4">
