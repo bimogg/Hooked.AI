@@ -53,7 +53,7 @@ function ScrollText({ text }: { text: string }) {
 function DotMatrix({ bars, on }: { bars: number[]; on: boolean }) {
   const H = 10;
   return (
-    <div style={{ display: 'flex', gap: 5, alignItems: 'flex-end', marginTop: 18 }}>
+    <div className="justify-center md:justify-start" style={{ display: 'flex', gap: 5, alignItems: 'flex-end', marginTop: 18 }}>
       {bars.map((h, c) => (
         <div key={c} style={{ display: 'flex', flexDirection: 'column-reverse', gap: 4 }}>
           {Array.from({ length: H }).map((_, r) => (
@@ -191,7 +191,7 @@ export default function HomeContent() {
             { labelKey: 'statLabel2', value: '80%',   bars: [2,4,3,5,4,6,5,7,6,8,7,8,8,7] },
             { labelKey: 'statLabel3', value: '3 sec', bars: [8,7,7,6,5,5,4,4,3,3,2,2,1,1] },
           ].map(({ labelKey, value, bars }) => (
-            <div key={labelKey} className="bg-[#f5f5f5] rounded-2xl p-6 md:p-7">
+            <div key={labelKey} className="bg-[#f5f5f5] rounded-2xl p-6 md:p-7 text-center md:text-left">
               <p className="text-[9px] uppercase tracking-[0.16em] text-[#aaa] mb-2 leading-snug">{tr('home', labelKey, lang)}</p>
               <p className="font-display font-extrabold text-4xl md:text-5xl leading-none">{value}</p>
               <DotMatrix bars={bars} on={statsOn} />
