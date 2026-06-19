@@ -508,8 +508,6 @@ export default function VideoAnalyzer() {
           {tr('upload', 'analyzeLink', lang)}
         </button>
       </form>
-      {!isPro && <p className="text-[11px] text-[#aaa] text-center -mt-1">{tr('upload', 'linkPro', lang)}</p>}
-
       {error && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
           <AlertCircle size={14} className="shrink-0" />{error}
