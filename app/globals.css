@@ -117,3 +117,82 @@ body {
 @media (max-width: 767px) {
   body { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
 }
+
+/* ── animated folder upload ── */
+.folder {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  height: 210px;
+  margin: 0 auto;
+  perspective: 900px;
+  transition: transform .4s cubic-bezier(.2,.8,.2,1);
+}
+.folder-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(155deg, #ff3350 0%, #c70029 100%);
+  box-shadow: 0 24px 48px -14px rgba(232,0,45,.45);
+}
+.folder-back::before { /* tab */
+  content: '';
+  position: absolute;
+  top: -15px; left: 24px;
+  width: 108px; height: 28px;
+  background: linear-gradient(155deg, #ff3350, #d4002e);
+  border-radius: 12px 12px 0 0;
+}
+.folder-papers { position: absolute; left: 0; right: 0; top: 26px; height: 120px; z-index: 2; }
+.paper {
+  position: absolute;
+  left: 50%; bottom: 0;
+  width: 72%; height: 110px;
+  margin-left: -36%;
+  background: #fff;
+  border-radius: 9px;
+  box-shadow: 0 8px 18px rgba(0,0,0,.14);
+  transform-origin: bottom center;
+  transition: transform .5s cubic-bezier(.2,.8,.2,1);
+}
+.paper:nth-child(1) { transform: translateY(-4px) rotate(-3deg); }
+.paper:nth-child(2) { transform: translateY(-8px); }
+.paper:nth-child(3) { transform: translateY(-4px) rotate(3deg); }
+.folder-front {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 62%;
+  z-index: 3;
+  border-radius: 18px;
+  background: linear-gradient(155deg, rgba(255,86,108,.5), rgba(199,0,41,.72));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.28);
+  box-shadow: 0 -6px 22px rgba(0,0,0,.12);
+  color: #fff;
+  transform-origin: bottom center;
+  transition: transform .5s cubic-bezier(.2,.8,.2,1);
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+}
+.folder-front-inner { text-align: left; }
+.folder-badge {
+  display: inline-flex;
+  margin-top: 9px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255,255,255,.24);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+.folder:hover, .folder.is-open { transform: translateY(-3px); }
+.folder:hover .folder-front,
+.folder.is-open .folder-front { transform: rotateX(-26deg); }
+.folder:hover .paper:nth-child(1),
+.folder.is-open .paper:nth-child(1) { transform: translateY(-42px) translateX(-36px) rotate(-15deg); }
+.folder:hover .paper:nth-child(2),
+.folder.is-open .paper:nth-child(2) { transform: translateY(-54px) rotate(0deg); }
+.folder:hover .paper:nth-child(3),
+.folder.is-open .paper:nth-child(3) { transform: translateY(-42px) translateX(36px) rotate(15deg); }
