@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
-import { Home, LayoutGrid, Tag, Sparkles } from 'lucide-react';
+import { Home, BookOpen, Video, DollarSign, User } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
@@ -13,10 +13,10 @@ export default function Nav() {
   const pathname = usePathname();
 
   const tabs = [
-    { href: '/', icon: Home, label: tr('footer', 'navHome', lang), match: (p: string) => p === '/' },
-    { href: '/library', icon: LayoutGrid, label: tr('footer', 'navLibrary', lang), match: (p: string) => p.startsWith('/library') },
-    { href: '/pricing', icon: Tag, label: tr('footer', 'navPricing', lang), match: (p: string) => p.startsWith('/pricing') },
-    { href: '/pro', icon: Sparkles, label: tr('nav', 'cta', lang), match: (p: string) => p.startsWith('/pro'), accent: true },
+    { href: '/', icon: Home, match: (p: string) => p === '/' },
+    { href: '/library', icon: BookOpen, match: (p: string) => p.startsWith('/library') },
+    { href: '/pro', icon: Video, match: (p: string) => p.startsWith('/pro') },
+    { href: '/pricing', icon: DollarSign, match: (p: string) => p.startsWith('/pricing') },
   ];
 
   return (
@@ -52,42 +52,37 @@ export default function Nav() {
           </Link>
         </div>
 
-        {/* mobile top-right: language + account */}
-        <div className="flex md:hidden items-center gap-2">
+        {/* mobile top-right: language only (account lives in bottom bar) */}
+        <div className="flex md:hidden items-center">
           <LanguageSwitcher />
-          {isSignedIn ? (
-            <UserButton />
-          ) : (
-            <SignInButton mode="modal">
-              <button className="text-xs font-semibold text-[#888] px-2 py-1">{tr('nav', 'signIn', lang)}</button>
-            </SignInButton>
-          )}
         </div>
       </header>
 
-      {/* mobile bottom tab bar */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-black/10 flex items-stretch justify-around pb-[env(safe-area-inset-bottom)]">
-        {tabs.map(({ href, icon: Icon, label, match, accent }) => {
-          const active = match(pathname);
-          const color = active ? '#e8002d' : '#9a9a9a';
-          return (
-            <Link key={href} href={href}
-              className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 active:opacity-60 transition-opacity">
-              {accent ? (
-                <span className="flex items-center justify-center w-9 h-9 rounded-full bg-[#e8002d] -mt-1 shadow-md shadow-[#e8002d]/30">
-                  <Icon size={18} color="#fff" strokeWidth={2.4} />
-                </span>
-              ) : (
-                <Icon size={21} color={color} strokeWidth={active ? 2.6 : 2} />
-              )}
-              <span className="text-[10px] font-semibold leading-none truncate max-w-[72px]"
-                style={{ color: accent ? '#e8002d' : color }}>
-                {label}
-              </span>
-            </Link>
-          );
-        })}
-      </nav>
+      {/* mobile bottom tab bar — floating light glass */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-50 px-4 pb-[calc(0.7rem+env(safe-area-inset-bottom))] pointer-events-none">
+        <nav className="pointer-events-auto mx-auto max-w-xs flex items-center justify-around rounded-full border border-white/60 px-2 py-2"
+          style={{ background: 'rgba(255,255,255,0.62)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', boxShadow: '0 8px 32px rgba(0,0,0,0.14)' }}>
+          {tabs.map(({ href, icon: Icon, match }) => {
+            const active = match(pathname);
+            return (
+              <Link key={href} href={href}
+                className="flex items-center justify-center px-4 py-2 rounded-full transition-all active:scale-90"
+                style={active ? { background: 'rgba(232,0,45,0.12)' } : undefined}>
+                <Icon size={22} color={active ? '#e8002d' : '#2a2a2a'} strokeWidth={active ? 2.5 : 2} />
+              </Link>
+            );
+          })}
+          {isSignedIn ? (
+            <span className="flex items-center justify-center px-3"><UserButton /></span>
+          ) : (
+            <SignInButton mode="modal">
+              <button className="flex items-center justify-center px-4 py-2 rounded-full active:scale-90 transition-all">
+                <User size={22} color="#2a2a2a" strokeWidth={2} />
+              </button>
+            </SignInButton>
+          )}
+        </nav>
+      </div>
     </>
   );
 }
