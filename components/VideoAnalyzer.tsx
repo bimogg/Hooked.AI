@@ -14,11 +14,10 @@ function getFreeCount() { try { return parseInt(localStorage.getItem(FREE_KEY) |
 function hasUsedFree() { return getFreeCount() >= FREE_LIMIT; }
 function markFreeUsed() { try { localStorage.setItem(FREE_KEY, String(getFreeCount() + 1)); } catch {} }
 
-async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> {
+async function extractFramesFromSrc(src: string, revoke: boolean): Promise<{ b64: string; t: number }[]> {
   return new Promise((resolve, reject) => {
     const video = document.createElement('video');
-    const url = URL.createObjectURL(file);
-    video.src = url; video.muted = true; video.playsInline = true; video.crossOrigin = 'anonymous';
+    video.src = src; video.muted = true; video.playsInline = true; video.crossOrigin = 'anonymous';
     video.onloadedmetadata = async () => {
       const dur = video.duration;
       const canvas = document.createElement('canvas');
@@ -45,10 +44,14 @@ async function extractFrames(file: File): Promise<{ b64: string; t: number }[]> 
           };
         });
       }
-      URL.revokeObjectURL(url); resolve(frames);
+      if (revoke) URL.revokeObjectURL(src); resolve(frames);
     };
-    video.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Не удалось загрузить видео')); };
+    video.onerror = () => { if (revoke) URL.revokeObjectURL(src); reject(new Error('Не удалось загрузить видео')); };
   });
+}
+
+async function extractFrames(file: File) {
+  return extractFramesFromSrc(URL.createObjectURL(file), true);
 }
 
 // small thumbnail (~240px) from a raw base64 jpeg frame, for history storage
@@ -137,7 +140,8 @@ interface WeakZone {
   timestamp: string; whatIsWrong: string; hookType: string; script: string;
   example: HookExample | null;
 }
-interface Result { hookScore: number; scoreReason?: string | null; videoTopic: string; bestHook?: { script: string; hookType: string; tip: string } | null; weakZones: WeakZone[]; }
+interface Metrics { likes: number | null; views: number | null; comments: number | null; username: string }
+interface Result { hookScore: number; scoreReason?: string | null; videoTopic: string; bestHook?: { script: string; hookType: string; tip: string } | null; weakZones: WeakZone[]; metrics?: Metrics | null; }
 
 const STEP_KEYS = ['frames', 'analyzing', 'hooks'] as const;
 
@@ -161,6 +165,7 @@ export default function VideoAnalyzer() {
   const [error, setError] = useState('');
   const [locked, setLocked] = useState(false);
   const [isPro, setIsPro] = useState(false);
+  const [reelUrl, setReelUrl] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const { lang } = useLang();
   const { isSignedIn, user } = useUser();
@@ -229,6 +234,57 @@ export default function VideoAnalyzer() {
     } finally { setLoading(false); }
   }, [blobUrl, isPro, isSignedIn, lang]);
 
+  const analyzeFromUrl = useCallback(async (url: string) => {
+    const clean = url.trim();
+    if (!/instagram\.com\/(reel|reels|p|tv)\//.test(clean)) { setError(tr('upload', 'scrapeError', lang)); return; }
+    if (!isPro && hasUsedFree()) { setLocked(true); return; }
+    setLoading(true); setError(''); setResult(null); setStepIdx(0);
+    try {
+      const sres = await fetch('/api/scrape-reel', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: clean }),
+      });
+      const sdata = await sres.json();
+      if (!sres.ok) {
+        if (sdata.error === 'pro_required') { setLocked(true); return; }
+        throw new Error(tr('upload', 'scrapeError', lang));
+      }
+      const proxySrc = `/api/proxy-video?url=${encodeURIComponent(sdata.videoUrl)}`;
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+      setBlobUrl(proxySrc);
+      const frameData = await extractFramesFromSrc(proxySrc, false);
+      setStepIdx(1);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 55000);
+      const res = await fetch('/api/analyze-video', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t), lang,
+          caption: sdata.caption, likes: sdata.likes, views: sdata.views, comments: sdata.comments,
+        }),
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timeout));
+      setStepIdx(2);
+      const data = await res.json();
+      if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : tr('upload', 'scrapeError', lang));
+      if (!isPro) markFreeUsed();
+      const metrics: Metrics = { likes: sdata.likes ?? null, views: sdata.views ?? null, comments: sdata.comments ?? null, username: sdata.username ?? '' };
+      setResult({ ...data, metrics });
+      try {
+        const thumb = frameData[0]?.b64 ? await makeThumb(frameData[0].b64) : '';
+        const entry = {
+          name: sdata.username ? `@${sdata.username}` : 'Reel',
+          thumb, videoTopic: data.videoTopic ?? null, hookScore: data.hookScore ?? null, bestHook: data.bestHook ?? null,
+        };
+        saveHistory({ id: Date.now(), date: new Date().toISOString(), ...entry });
+        if (isSignedIn) {
+          fetch('/api/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry) }).catch(() => {});
+        }
+      } catch {}
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : tr('upload', 'scrapeError', lang));
+    } finally { setLoading(false); }
+  }, [blobUrl, isPro, isSignedIn, lang]);
+
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault(); setDragging(false);
     const f = e.dataTransfer.files[0]; if (f) analyze(f);
@@ -265,6 +321,14 @@ export default function VideoAnalyzer() {
             <p className="text-[10px] text-[#aaa] uppercase tracking-widest mb-0.5">{tr('result', 'outOf', lang)}</p>
             {result.videoTopic && <p className="text-xs text-[#666]">{result.videoTopic}</p>}
             {result.scoreReason && <p className="text-xs text-[#999] mt-1.5 leading-snug">{result.scoreReason}</p>}
+            {result.metrics && (result.metrics.views != null || result.metrics.likes != null) && (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-[#777]">
+                {result.metrics.username && <span className="font-semibold text-[#555]">@{result.metrics.username}</span>}
+                {result.metrics.views != null && <span>👁 {fmt(result.metrics.views)}</span>}
+                {result.metrics.likes != null && <span>❤️ {fmt(result.metrics.likes)}</span>}
+                {result.metrics.comments != null && <span>💬 {fmt(result.metrics.comments)}</span>}
+              </div>
+            )}
           </div>
         </div>
 
@@ -417,6 +481,34 @@ export default function VideoAnalyzer() {
           </>
         )}
       </div>
+
+      {/* or — analyze by Instagram link (Pro) */}
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-black/10" />
+        <span className="text-[10px] uppercase tracking-widest text-[#bbb]">{tr('upload', 'or', lang)}</span>
+        <div className="h-px flex-1 bg-black/10" />
+      </div>
+      <form
+        onSubmit={e => { e.preventDefault(); if (!loading && reelUrl.trim()) analyzeFromUrl(reelUrl); }}
+        className="flex flex-col sm:flex-row gap-2"
+      >
+        <input
+          type="url"
+          value={reelUrl}
+          onChange={e => setReelUrl(e.target.value)}
+          placeholder={tr('upload', 'linkPlaceholder', lang)}
+          disabled={loading}
+          className="flex-1 border border-black/15 rounded-full px-5 py-3 text-sm focus:border-black/40 outline-none disabled:opacity-50"
+        />
+        <button
+          type="submit"
+          disabled={loading || !reelUrl.trim()}
+          className="bg-black text-white font-bold text-sm px-7 py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 whitespace-nowrap"
+        >
+          {tr('upload', 'analyzeLink', lang)}
+        </button>
+      </form>
+      {!isPro && <p className="text-[11px] text-[#aaa] text-center -mt-1">{tr('upload', 'linkPro', lang)}</p>}
 
       {error && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
