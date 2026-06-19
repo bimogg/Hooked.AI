@@ -1,43 +1,32 @@
-export const metadata = { title: 'Privacy Policy — HookedAI' };
+'use client';
+import { useLang } from '@/components/LanguageProvider';
+import { tr } from '@/lib/translations';
 
 export default function PrivacyPage() {
+  const { lang } = useLang();
+  const sections = [
+    { t: 's1t', b: 's1b' },
+    { t: 's2t', b: 's2b' },
+    { t: 's3t', b: 's3b' },
+    { t: 's4t', b: 's4b' },
+  ];
+
   return (
     <div className="max-w-2xl mx-auto px-6 py-16">
-      <h1 className="font-display font-extrabold text-3xl uppercase mb-2">Privacy Policy</h1>
-      <p className="text-[#888] text-sm mb-10">Last updated: June 10, 2026</p>
+      <h1 className="font-display font-extrabold text-3xl uppercase mb-2">{tr('privacy', 'title', lang)}</h1>
+      <p className="text-[#888] text-sm mb-10">{tr('privacy', 'updated', lang)}</p>
+
+      {sections.map(({ t, b }) => (
+        <section className="mb-8" key={t}>
+          <h2 className="font-bold text-base mb-2">{tr('privacy', t, lang)}</h2>
+          <p className="text-[#444] text-sm leading-relaxed">{tr('privacy', b, lang)}</p>
+        </section>
+      ))}
 
       <section className="mb-8">
-        <h2 className="font-bold text-base mb-2">1. What we collect</h2>
+        <h2 className="font-bold text-base mb-2">{tr('privacy', 's5t', lang)}</h2>
         <p className="text-[#444] text-sm leading-relaxed">
-          We do not collect personal data or require registration. When you upload a video, it stays in your browser — we extract a few frames from it and send only those images to our AI for analysis. The video file itself never leaves your device. No accounts, no tracking, no cookies.
-        </p>
-      </section>
-
-      <section className="mb-8">
-        <h2 className="font-bold text-base mb-2">2. How we use your data</h2>
-        <p className="text-[#444] text-sm leading-relaxed">
-          The extracted frames are sent to our AI solely to generate hook analysis and recommendations. We do not store, log, or share these frames after the analysis is returned. We do not sell any data to third parties.
-        </p>
-      </section>
-
-      <section className="mb-8">
-        <h2 className="font-bold text-base mb-2">3. Browser storage</h2>
-        <p className="text-[#444] text-sm leading-relaxed">
-          We store a small flag in your browser&apos;s localStorage to remember your free analysis and language preference. This data never leaves your device. Clear it anytime through your browser settings.
-        </p>
-      </section>
-
-      <section className="mb-8">
-        <h2 className="font-bold text-base mb-2">4. Hook Library</h2>
-        <p className="text-[#444] text-sm leading-relaxed">
-          The Hook Library contains publicly available Instagram Reels data — captions, view counts, and usernames — from public accounts. We do not store private information.
-        </p>
-      </section>
-
-      <section className="mb-8">
-        <h2 className="font-bold text-base mb-2">5. Contact</h2>
-        <p className="text-[#444] text-sm leading-relaxed">
-          Questions?{' '}
+          {tr('privacy', 'contactQ', lang)}{' '}
           <a href="mailto:anagashtay@gmail.com" className="underline hover:text-black transition-colors">
             anagashtay@gmail.com
           </a>
