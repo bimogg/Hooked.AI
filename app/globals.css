@@ -123,7 +123,7 @@ body {
   position: relative;
   width: 100%;
   max-width: 300px;
-  height: 210px;
+  height: 240px;
   margin: 0 auto;
   perspective: 900px;
   transition: transform .4s cubic-bezier(.2,.8,.2,1);
@@ -155,21 +155,22 @@ body {
   background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0) 38%);
   pointer-events: none;
 }
-.folder-papers { position: absolute; left: 0; right: 0; top: 34px; height: 116px; z-index: 2; }
+.folder-papers { position: absolute; left: 0; right: 0; top: 30px; height: 150px; z-index: 2; }
+/* vertical Reel-format cards (9:16) peeking from the folder */
 .paper {
   position: absolute;
   left: 50%; bottom: 0;
-  width: 70%; height: 104px;
-  margin-left: -35%;
-  background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
-  border-radius: 8px 8px 4px 4px;
-  box-shadow: 0 10px 20px rgba(0,0,0,.16);
+  width: 26%; height: 140px;          /* ~9:16 */
+  margin-left: -13%;
+  background: linear-gradient(180deg, #ffffff 0%, #eef0f3 100%);
+  border-radius: 12px;
+  box-shadow: 0 12px 22px rgba(0,0,0,.18);
   transform-origin: bottom center;
   transition: transform .55s cubic-bezier(.2,.85,.25,1);
 }
-.paper:nth-child(1) { transform: translateY(-3px) rotate(-2.5deg); }
-.paper:nth-child(2) { transform: translateY(-7px); }
-.paper:nth-child(3) { transform: translateY(-3px) rotate(2.5deg); }
+.paper:nth-child(1) { transform: translateX(-26px) translateY(-2px) rotate(-9deg); }
+.paper:nth-child(2) { transform: translateY(-6px); }
+.paper:nth-child(3) { transform: translateX(26px) translateY(-2px) rotate(9deg); }
 /* glass front flap */
 .folder-front {
   position: absolute;
@@ -205,8 +206,8 @@ body {
 .folder:hover .folder-front,
 .folder.is-open .folder-front { transform: rotateX(-26deg); }
 .folder:hover .paper:nth-child(1),
-.folder.is-open .paper:nth-child(1) { transform: translateY(-42px) translateX(-36px) rotate(-15deg); }
+.folder.is-open .paper:nth-child(1) { transform: translateY(-30px) translateX(-58px) rotate(-18deg); }
 .folder:hover .paper:nth-child(2),
-.folder.is-open .paper:nth-child(2) { transform: translateY(-54px) rotate(0deg); }
+.folder.is-open .paper:nth-child(2) { transform: translateY(-46px) rotate(0deg); }
 .folder:hover .paper:nth-child(3),
-.folder.is-open .paper:nth-child(3) { transform: translateY(-42px) translateX(36px) rotate(15deg); }
+.folder.is-open .paper:nth-child(3) { transform: translateY(-30px) translateX(58px) rotate(18deg); }
