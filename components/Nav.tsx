@@ -72,15 +72,11 @@ export default function Nav() {
               </Link>
             );
           })}
-          {isSignedIn ? (
-            <span className="flex items-center justify-center px-3"><UserButton /></span>
-          ) : (
-            <SignInButton mode="modal">
-              <button className="flex items-center justify-center px-4 py-2 rounded-full active:scale-90 transition-all">
-                <User size={22} color="#2a2a2a" strokeWidth={2} />
-              </button>
-            </SignInButton>
-          )}
+          <Link href="/profile"
+            className="flex items-center justify-center px-4 py-2 rounded-full transition-all active:scale-90"
+            style={pathname.startsWith('/profile') ? { background: 'rgba(232,0,45,0.12)' } : undefined}>
+            <User size={22} color={pathname.startsWith('/profile') ? '#e8002d' : '#2a2a2a'} strokeWidth={pathname.startsWith('/profile') ? 2.5 : 2} />
+          </Link>
         </nav>
       </div>
     </>
