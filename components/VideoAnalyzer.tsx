@@ -1,9 +1,12 @@
 'use client';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Upload, AlertCircle, Lock, Eye, Copy, Check } from 'lucide-react';
+import { SignInButton, useUser } from '@clerk/nextjs';
 import HookPlayer from './HookPlayer';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
+
+const POLAR_CHECKOUT = 'https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4';
 
 const FREE_KEY = 'hooked_free_count';
 const FREE_LIMIT = 10;
@@ -135,6 +138,11 @@ export default function VideoAnalyzer() {
   const [isPro, setIsPro] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { lang } = useLang();
+  const { isSignedIn, user } = useUser();
+  const checkoutUrl = (() => {
+    const email = user?.primaryEmailAddress?.emailAddress;
+    return email ? `${POLAR_CHECKOUT}?customer_email=${encodeURIComponent(email)}` : POLAR_CHECKOUT;
+  })();
 
   useEffect(() => {
     fetch('/api/check-subscription')
@@ -187,7 +195,13 @@ export default function VideoAnalyzer() {
       <Lock size={28} />
       <p className="font-bold text-lg">{tr('result', 'locked', lang)}</p>
       <p className="text-sm text-[#666] max-w-xs">{tr('result', 'lockedSub', lang)}</p>
-      <a href="https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4" target="_blank" rel="noopener noreferrer" className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90">{tr('result', 'lockedCta', lang)}</a>
+      {isSignedIn ? (
+        <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90">{tr('result', 'lockedCta', lang)}</a>
+      ) : (
+        <SignInButton mode="modal" forceRedirectUrl="/pro" signUpForceRedirectUrl="/pro">
+          <button className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90 cursor-pointer">{tr('result', 'lockedCta', lang)}</button>
+        </SignInButton>
+      )}
     </div>
   );
 
