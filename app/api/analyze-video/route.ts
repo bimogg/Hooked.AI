@@ -87,8 +87,8 @@ STEP 3 — Find 2-3 WEAK ZONES where viewers would swipe away.
 
 STEP 3.5 — Recommend the SINGLE STRONGEST hook to use for the opening of THIS video (a ready-to-use line + a concrete visual/shot tip). This is the main fix, especially when the score is below 7.
 
-STEP 4 — For EACH weak zone pick the single best matching example from the LIBRARY below.
-CRITICAL: the example MUST match THIS video's niche/topic. A cars/motion video must get a cars/motion example, NOT relationships or anything unrelated. Match on BOTH topic and hook type. If nothing truly fits the topic, pick the closest by topic first. Return its index in "exampleIndex" (or -1 if genuinely nothing fits).
+STEP 4 — For EACH weak zone, OPTIONALLY pick ONE example from the LIBRARY below — but ONLY if its caption is clearly about the SAME content topic/niche as THIS video (e.g. both fitness/sports, both cars, both cooking, both beauty).
+CRITICAL: It is MUCH better to return -1 (no example shown) than to show an unrelated one. The user hates irrelevant examples. Do NOT match on hook type alone — the CONTENT TOPIC must clearly match. If you are not highly confident the example is the same topic as this video, return -1. Default to -1 unless there is an obvious same-topic match. Return the index in "exampleIndex", or -1.
 
 LIBRARY (index [hook type] "caption"):
 ${poolList}
@@ -113,7 +113,7 @@ Return ONLY valid JSON:
       "whatIsWrong": "<in ${outputLang}: what specifically kills interest — visual, concrete>",
       "hookType": "<one of: Visual Hook | Question Hook | Tutorial Hook | Curiosity Hook | Warning Hook | Challenge Hook | Engagement Hook | Mistake Hook>",
       "script": "<in ${outputLang}: opening line mentioning the exact topic/action from this video>",
-      "exampleIndex": <index from LIBRARY of the best topic-matching example, or -1>
+      "exampleIndex": <index from LIBRARY ONLY if it is clearly the SAME content topic as this video — otherwise -1; prefer -1 whenever unsure>
     }
   ]
 }` });
