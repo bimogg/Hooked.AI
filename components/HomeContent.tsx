@@ -97,7 +97,8 @@ export default function HomeContent() {
               <span className="text-[#e8002d]">OR</span><br />
               LOSE
             </h1>
-            <p className="text-[#666] text-sm md:text-base max-w-xs leading-relaxed font-light">
+            <p className="text-[#666] text-sm md:text-base max-w-xs leading-relaxed"
+               style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 300, letterSpacing: '-0.01em' }}>
               {tr('home', 'heroSubShort', lang)}
             </p>
             <div className="flex items-center gap-3">
