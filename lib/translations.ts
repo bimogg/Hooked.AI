@@ -177,6 +177,7 @@ const t = {
   result: {
     outOf: { ru: 'из 10', en: 'out of 10', es: 'de 10', fr: 'sur 10', de: 'von 10', pt: 'de 10', it: 'su 10', tr: '10 üzerinden', ar: 'من 10', ko: '10점 중', zh: '满10分', ja: '10点中' },
     weakZone: { ru: 'Слабая зона', en: 'Weak spot', es: 'Punto débil', fr: 'Point faible', de: 'Schwache Stelle', pt: 'Ponto fraco', it: 'Punto debole', tr: 'Zayıf nokta', ar: 'نقطة ضعف', ko: '약점 구간', zh: '薄弱环节', ja: '弱いスポット' },
+    bestHook: { ru: 'Лучший хук', en: 'Best hook', es: 'Mejor hook', fr: 'Meilleur hook', de: 'Bester Hook', pt: 'Melhor hook', it: 'Miglior hook', tr: 'En iyi hook', ar: 'أفضل هوك', ko: '최고의 훅', zh: '最佳钩子', ja: 'ベストフック' },
     yourVideo: { ru: 'Твоё видео', en: 'Your video', es: 'Tu video', fr: 'Ton vidéo', de: 'Dein Video', pt: 'Seu vídeo', it: 'Il tuo video', tr: 'Senin videon', ar: 'فيديوك', ko: '내 영상', zh: '你的视频', ja: 'あなたの動画' },
     howTo: { ru: 'Референс', en: 'Reference', es: 'Referencia', fr: 'Référence', de: 'Referenz', pt: 'Referência', it: 'Riferimento', tr: 'Referans', ar: 'مرجع', ko: '레퍼런스', zh: '参考', ja: 'リファレンス' },
     script: { ru: 'Хук для вставки', en: 'Hook to use', es: 'Hook a usar', fr: 'Hook à utiliser', de: 'Hook zum Verwenden', pt: 'Hook para usar', it: 'Hook da usare', tr: 'Kullanılacak hook', ar: 'الخطّاف للاستخدام', ko: '사용할 후크', zh: '要用的钩子', ja: '使うフック' },
