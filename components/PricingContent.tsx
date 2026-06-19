@@ -65,9 +65,9 @@ export default function PricingContent() {
 
         {/* Pro */}
         <div className="relative overflow-hidden rounded-3xl border border-black/10 bg-white p-7 flex flex-col gap-6 shadow-[0_24px_60px_-24px_rgba(232,0,45,0.4)]">
-          {/* brand gradient glow */}
-          <div className="pointer-events-none absolute -top-12 inset-x-0 h-52 blur-3xl opacity-55"
-            style={{ background: 'radial-gradient(58% 80% at 50% 35%, #ff5a72 0%, #e8002d 45%, transparent 74%)' }} />
+          {/* brand gradient glow — subtle halo bleeding from the top */}
+          <div className="pointer-events-none absolute -top-24 inset-x-0 h-44 blur-[70px] opacity-30"
+            style={{ background: 'radial-gradient(50% 55% at 50% 65%, #ff5a72 0%, transparent 70%)' }} />
 
           <div className="relative">
             <div className="flex items-center justify-between mb-3">
