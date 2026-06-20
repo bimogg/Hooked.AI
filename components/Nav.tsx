@@ -15,7 +15,7 @@ export default function Nav() {
   const tabs = [
     { href: '/', icon: Home, match: (p: string) => p === '/' },
     { href: '/library', icon: BookOpen, match: (p: string) => p.startsWith('/library') },
-    { href: '/pro', icon: Video, match: (p: string) => p.startsWith('/pro') },
+    { href: '/pro', icon: Video, match: (p: string) => p === '/pro' || p.startsWith('/pro/') },
     { href: '/pricing', icon: DollarSign, match: (p: string) => p.startsWith('/pricing') },
   ];
 
