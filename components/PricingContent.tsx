@@ -22,8 +22,8 @@ export default function PricingContent() {
   const proFeatures = ['proF1', 'proF2', 'proF3', 'proF4', 'proF5', 'proF6', 'proF7'];
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
-      <div className="text-center mb-14">
+    <div className="max-w-6xl mx-auto px-5 py-10 md:py-16">
+      <div className="text-center mb-10 md:mb-14">
         <p className="text-[10px] uppercase tracking-[0.2em] text-[#e8002d] font-bold mb-3">{tr('pricing', 'badge', lang)}</p>
         <h1 className="font-display font-extrabold text-3xl md:text-4xl uppercase leading-none">
           {tr('pricing', 'title', lang)}
@@ -36,13 +36,13 @@ export default function PricingContent() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl mx-auto">
 
         {/* Free — same typography as Pro */}
-        <div className="relative rounded-[28px] border border-black/10 bg-white p-7 flex flex-col shadow-[0_30px_70px_-40px_rgba(0,0,0,0.25)]"
+        <div className="relative rounded-[28px] border border-black/10 bg-white p-6 md:p-7 flex flex-col shadow-[0_30px_70px_-40px_rgba(0,0,0,0.25)]"
           style={{ fontFamily: APPLE_FONT }}>
           <div className="flex items-center justify-between mb-5">
             <p className="font-bold text-lg">Free</p>
           </div>
           <div className="flex items-baseline gap-2 mb-5">
-            <span className="font-extrabold text-[54px] leading-none tracking-tight">$0</span>
+            <span className="font-extrabold text-[46px] md:text-[54px] leading-none tracking-tight">$0</span>
             <span className="text-xs text-[#5a5a5a]">{tr('pricing', 'freePeriod', lang)}</span>
           </div>
           <a href="/"
@@ -66,7 +66,7 @@ export default function PricingContent() {
         </div>
 
         {/* Pro — reference style */}
-        <div className="relative overflow-hidden rounded-[28px] bg-white p-7 flex flex-col shadow-[0_30px_70px_-30px_rgba(0,0,0,0.35)]"
+        <div className="relative overflow-hidden rounded-[28px] bg-white p-6 md:p-7 flex flex-col shadow-[0_30px_70px_-30px_rgba(0,0,0,0.35)]"
           style={{ fontFamily: APPLE_FONT }}>
           {/* soft warm gradient fill behind the header + button */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[230px]"
@@ -82,7 +82,7 @@ export default function PricingContent() {
 
           {/* price */}
           <div className="relative flex items-baseline gap-2 mb-5">
-            <span className="font-extrabold text-[54px] leading-none tracking-tight">$12</span>
+            <span className="font-extrabold text-[46px] md:text-[54px] leading-none tracking-tight">$12</span>
             <span className="text-xs text-[#5a5a5a] leading-snug">{tr('pricing', 'perMonth', lang)}</span>
           </div>
 
@@ -116,10 +116,6 @@ export default function PricingContent() {
         </div>
 
       </div>
-
-      <p className="text-center text-xs text-[#bbb] mt-10">
-        {tr('pricing', 'noContracts', lang)}
-      </p>
     </div>
   );
 }
