@@ -10,7 +10,7 @@ import { tr } from '@/lib/translations';
 const POLAR_CHECKOUT = 'https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4';
 
 const FREE_KEY = 'hooked_free_count';
-const FREE_LIMIT = 9999; // TEMP: raised for testing — revert to 3 before launch
+const FREE_LIMIT = 3;
 function getFreeCount() { try { return parseInt(localStorage.getItem(FREE_KEY) || '0', 10); } catch { return 0; } }
 function hasUsedFree() { return getFreeCount() >= FREE_LIMIT; }
 function markFreeUsed() { try { localStorage.setItem(FREE_KEY, String(getFreeCount() + 1)); } catch {} }
