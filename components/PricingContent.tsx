@@ -9,15 +9,6 @@ const APPLE_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe 
 
 const PRO_ICONS = [Video, Infinity, Sparkles, BarChart3, FileText, Zap, Crown];
 
-function CheckItem({ text, dim }: { text: string; dim?: boolean }) {
-  return (
-    <li className={`flex items-start gap-2.5 text-sm ${dim ? 'opacity-35 line-through' : ''}`}>
-      <Check size={14} className={`mt-0.5 shrink-0 ${dim ? 'text-[#ccc]' : 'text-emerald-600'}`} />
-      {text}
-    </li>
-  );
-}
-
 export default function PricingContent() {
   const { lang } = useLang();
   const { isSignedIn, user } = useUser();
@@ -44,23 +35,33 @@ export default function PricingContent() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl mx-auto">
 
-        {/* Free */}
-        <div className="relative rounded-3xl border border-black/15 bg-white p-7 flex flex-col gap-6">
-          <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold mb-1 text-[#888]">Free</p>
-            <div className="flex items-end gap-1.5">
-              <span className="font-display font-extrabold text-5xl leading-none">$0</span>
-              <span className="text-xs mb-1.5 text-[#aaa]">/{tr('pricing', 'freePeriod', lang)}</span>
-            </div>
-            <p className="text-sm mt-2 text-[#666]">{tr('pricing', 'freeDesc', lang)}</p>
+        {/* Free — same typography as Pro */}
+        <div className="relative rounded-[28px] border border-black/10 bg-white p-7 flex flex-col shadow-[0_30px_70px_-40px_rgba(0,0,0,0.25)]"
+          style={{ fontFamily: APPLE_FONT }}>
+          <div className="flex items-center justify-between mb-5">
+            <p className="font-bold text-lg">Free</p>
+          </div>
+          <div className="flex items-baseline gap-2 mb-5">
+            <span className="font-extrabold text-[54px] leading-none tracking-tight">$0</span>
+            <span className="text-xs text-[#5a5a5a]">{tr('pricing', 'freePeriod', lang)}</span>
           </div>
           <a href="/"
-            className="block text-center text-sm font-bold py-3.5 rounded-full transition-all border border-black/20 text-black hover:bg-black hover:text-white">
+            className="block text-center text-sm font-bold py-3.5 rounded-full transition-colors border border-black/15 text-black hover:bg-black hover:text-white">
             {tr('pricing', 'freeCta', lang)}
           </a>
-          <ul className="flex flex-col gap-3">
-            {freeFeatures.map(k => <CheckItem key={k} text={tr('pricing', k, lang)} />)}
-            {freeMissing.map(k => <CheckItem key={k} text={tr('pricing', k, lang)} dim />)}
+          <ul className="flex flex-col gap-4 mt-7">
+            {freeFeatures.map(k => (
+              <li key={k} className="flex items-center gap-3 text-sm text-[#1a1a1a]">
+                <Check size={18} strokeWidth={2} className="text-[#1a1a1a] shrink-0" />
+                {tr('pricing', k, lang)}
+              </li>
+            ))}
+            {freeMissing.map(k => (
+              <li key={k} className="flex items-center gap-3 text-sm text-[#bbb] line-through">
+                <Check size={18} strokeWidth={2} className="text-[#d0d0d0] shrink-0" />
+                {tr('pricing', k, lang)}
+              </li>
+            ))}
           </ul>
         </div>
 
