@@ -2,7 +2,7 @@
 // folder upload UI
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { AlertCircle, Lock, Eye, Copy, Check } from 'lucide-react';
-import { SignInButton, useUser } from '@clerk/nextjs';
+import { useAuth } from './AuthProvider';
 import HookPlayer from './HookPlayer';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
@@ -169,9 +169,10 @@ export default function VideoAnalyzer() {
   const [reelUrl, setReelUrl] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const { lang } = useLang();
-  const { isSignedIn, user } = useUser();
+  const { user } = useAuth();
+  const isSignedIn = !!user;
   const checkoutUrl = (() => {
-    const email = user?.primaryEmailAddress?.emailAddress;
+    const email = user?.email;
     return email ? `${POLAR_CHECKOUT}?customer_email=${encodeURIComponent(email)}` : POLAR_CHECKOUT;
   })();
 
@@ -319,9 +320,7 @@ export default function VideoAnalyzer() {
       {isSignedIn ? (
         <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90">{tr('result', 'lockedCta', lang)}</a>
       ) : (
-        <SignInButton mode="modal" forceRedirectUrl="/pro" signUpForceRedirectUrl="/pro">
-          <button className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90 cursor-pointer">{tr('result', 'lockedCta', lang)}</button>
-        </SignInButton>
+        <a href="/login" className="bg-[#e8002d] text-white font-bold text-sm px-8 py-3 rounded-full hover:opacity-90">{tr('result', 'lockedCta', lang)}</a>
       )}
     </div>
   );
