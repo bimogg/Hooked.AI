@@ -23,12 +23,12 @@ export default function PricingContent() {
 
   return (
     <div className="max-w-6xl mx-auto px-5 py-10 md:py-16">
-      <div className="text-center mb-10 md:mb-14">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#e8002d] font-bold mb-3">{tr('pricing', 'badge', lang)}</p>
-        <h1 className="font-display font-extrabold text-3xl md:text-4xl uppercase leading-none">
+      <div className="text-center mb-10 md:mb-14" style={{ fontFamily: APPLE_FONT }}>
+        <p className="text-[11px] uppercase tracking-[0.2em] text-[#e8002d] font-semibold mb-3">{tr('pricing', 'badge', lang)}</p>
+        <h1 className="font-bold text-4xl md:text-5xl tracking-tight leading-[1.05]">
           {tr('pricing', 'title', lang)}
         </h1>
-        <p className="text-[#888] text-sm mt-5 max-w-md mx-auto">
+        <p className="text-[#555] text-base md:text-lg mt-5 max-w-xl mx-auto leading-relaxed">
           {tr('pricing', 'subtitle', lang)}
         </p>
       </div>
