@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
       .from('hooks')
       .select('creator_username, caption, views, instagram_id, video_url, thumbnail_url, niche, content_niche')
       .not('caption', 'is', null).neq('caption', '').neq('niche', 'Insert')
-      .order('views', { ascending: false }).limit(50);
+      .order('views', { ascending: false }).limit(28);
     const pool: HookRow[] = poolData ?? [];
     const poolList = pool.map((h, i) => `${i} (topic: ${h.content_niche ?? 'other'}) "${(h.caption ?? '').slice(0, 120)}" (${h.views} views)`).join('\n');
 
