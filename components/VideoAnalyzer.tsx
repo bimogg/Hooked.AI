@@ -286,7 +286,7 @@ export default function VideoAnalyzer() {
         }).finally(() => clearTimeout(gt));
         if (!res.ok) throw new Error('gemini_failed');
         data = await res.json();
-        try { frameData = await extractFramesFromSrc(proxySrc, false); } catch {} // thumbnail only
+        // (thumbnail extracted in the background after the result is shown — don't block)
       } catch {
         // FALLBACK: frames via proxy → Claude
         frameData = await extractFramesFromSrc(proxySrc, false);
@@ -304,8 +304,11 @@ export default function VideoAnalyzer() {
       setStepIdx(2);
       if (!isPro) markFreeUsed();
       setResult({ ...data, metrics });
+      // history is saved in the background — never blocks the visible result
       try {
-        const thumb = frameData[0]?.b64 ? await makeThumb(frameData[0].b64) : '';
+        let thumbFrames = frameData;
+        if (!thumbFrames.length) { try { thumbFrames = await extractFramesFromSrc(proxySrc, false); } catch {} }
+        const thumb = thumbFrames[0]?.b64 ? await makeThumb(thumbFrames[0].b64) : '';
         const entry = {
           name: sdata.username ? `@${sdata.username}` : 'Reel',
           thumb, videoTopic: data.videoTopic ?? null, hookScore: data.hookScore ?? null, bestHook: data.bestHook ?? null,
