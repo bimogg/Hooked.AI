@@ -1,15 +1,16 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
 import { Home, BookOpen, Video, DollarSign, User } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useLang } from './LanguageProvider';
+import { useAuth } from './AuthProvider';
 import { tr } from '@/lib/translations';
 
 export default function Nav() {
   const { lang } = useLang();
-  const { isSignedIn } = useUser();
+  const { user } = useAuth();
+  const isSignedIn = !!user;
   const pathname = usePathname();
 
   const tabs = [
@@ -38,13 +39,13 @@ export default function Nav() {
         <div className="hidden md:flex items-center gap-3">
           <LanguageSwitcher />
           {isSignedIn ? (
-            <UserButton />
+            <Link href="/profile" className="flex items-center justify-center w-8 h-8 rounded-full bg-[#e8002d] text-white text-xs font-bold uppercase">
+              {(user?.email?.[0] ?? 'U')}
+            </Link>
           ) : (
-            <SignInButton mode="modal">
-              <button className="text-xs text-[#888] hover:text-black transition-colors font-medium px-3 py-1.5">
-                {tr('nav', 'signIn', lang)}
-              </button>
-            </SignInButton>
+            <Link href="/login" className="text-xs text-[#888] hover:text-black transition-colors font-medium px-3 py-1.5">
+              {tr('nav', 'signIn', lang)}
+            </Link>
           )}
           <Link href="/pro"
             className="bg-[#e8002d] text-white text-xs font-bold px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
