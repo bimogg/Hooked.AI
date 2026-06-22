@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { UserButton, SignInButton, useUser } from '@clerk/nextjs';
 import { useLang } from '@/components/LanguageProvider';
+import { useAuth } from '@/components/AuthProvider';
 import { tr } from '@/lib/translations';
 
 interface HistoryItem {
@@ -36,7 +36,11 @@ function scoreColor(s: number) {
 
 export default function ProfilePage() {
   const { lang } = useLang();
-  const { isSignedIn, isLoaded, user } = useUser();
+  const { user, loading, signOut } = useAuth();
+  const isSignedIn = !!user;
+  const isLoaded = !loading;
+  const displayName = (user?.user_metadata?.full_name as string) || user?.email?.split('@')[0] || 'You';
+  const avatar = user?.user_metadata?.avatar_url as string | undefined;
   const [history, setHistory] = useState<HistoryItem[] | null>(null);
 
   useEffect(() => {
@@ -64,20 +68,26 @@ export default function ProfilePage() {
       {/* account card */}
       {isSignedIn ? (
         <div className="flex items-center gap-3 bg-[#f5f5f5] rounded-2xl px-5 py-4 mb-8">
-          <UserButton />
-          <div className="min-w-0">
-            <p className="font-bold text-sm truncate">{user?.fullName || user?.username || 'You'}</p>
-            <p className="text-[#888] text-xs truncate">{user?.primaryEmailAddress?.emailAddress}</p>
+          {avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatar} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+          ) : (
+            <span className="w-10 h-10 rounded-full bg-[#e8002d] text-white flex items-center justify-center font-bold uppercase shrink-0">{user?.email?.[0] ?? 'U'}</span>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="font-bold text-sm truncate">{displayName}</p>
+            <p className="text-[#888] text-xs truncate">{user?.email}</p>
           </div>
+          <button onClick={signOut} className="text-xs font-semibold text-[#888] hover:text-black transition-colors shrink-0">
+            {tr('auth', 'signOut', lang)}
+          </button>
         </div>
       ) : (
         <div className="bg-[#f5f5f5] rounded-2xl px-5 py-6 mb-8 text-center">
           <p className="text-sm text-[#666] mb-4 max-w-xs mx-auto">{tr('profile', 'signedOut', lang)}</p>
-          <SignInButton mode="modal" forceRedirectUrl="/profile" signUpForceRedirectUrl="/profile">
-            <button className="bg-[#e8002d] text-white font-bold text-sm px-7 py-3 rounded-full hover:opacity-90 transition-opacity cursor-pointer">
-              {tr('nav', 'signIn', lang)}
-            </button>
-          </SignInButton>
+          <Link href="/login" className="inline-block bg-[#e8002d] text-white font-bold text-sm px-7 py-3 rounded-full hover:opacity-90 transition-opacity">
+            {tr('nav', 'signIn', lang)}
+          </Link>
         </div>
       )}
 
