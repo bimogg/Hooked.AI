@@ -13,6 +13,9 @@ export default function Nav() {
   const isSignedIn = !!user;
   const pathname = usePathname();
 
+  // clean full-screen auth page — no nav
+  if (pathname === '/login') return null;
+
   const tabs = [
     { href: '/', icon: Home, match: (p: string) => p === '/' },
     { href: '/library', icon: BookOpen, match: (p: string) => p.startsWith('/library') },
