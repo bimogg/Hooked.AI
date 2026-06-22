@@ -1,21 +1,29 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/library(.*)',
-  '/pricing(.*)',
-  '/privacy(.*)',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/analyze-video(.*)',
-  '/api/polar-webhook(.*)',
-]);
+// Refreshes the Supabase auth session on each request (keeps cookies valid).
+// Route/feature gating is handled in the pages/components themselves.
+export async function middleware(req: NextRequest) {
+  let res = NextResponse.next({ request: req });
 
-export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
-    await auth.protect();
-  }
-});
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return req.cookies.getAll(); },
+        setAll(toSet) {
+          toSet.forEach(({ name, value }) => req.cookies.set(name, value));
+          res = NextResponse.next({ request: req });
+          toSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
+        },
+      },
+    },
+  );
+
+  await supabase.auth.getUser();
+  return res;
+}
 
 export const config = {
   matcher: ['/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)', '/(api|trpc)(.*)'],
