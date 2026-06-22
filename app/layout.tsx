@@ -3,7 +3,7 @@ import './globals.css';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import { LanguageProvider } from '@/components/LanguageProvider';
-import { ClerkProvider } from '@clerk/nextjs';
+import { AuthProvider } from '@/components/AuthProvider';
 import { Analytics } from '@vercel/analytics/next';
 import AmplitudeInit from '@/components/AmplitudeInit';
 
@@ -22,13 +22,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen flex flex-col bg-white text-[#0a0a0a]">
         <AmplitudeInit />
-        <ClerkProvider>
+        <AuthProvider>
           <LanguageProvider>
             <Nav />
             <main className="flex-1">{children}</main>
             <Footer />
           </LanguageProvider>
-        </ClerkProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>
