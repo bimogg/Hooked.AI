@@ -68,11 +68,11 @@ async function uploadToGemini(bytes: ArrayBuffer): Promise<{ name: string; uri: 
 }
 
 async function waitActive(name: string): Promise<boolean> {
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < 40; i++) {
     const st = await (await fetch(`${BASE}/v1beta/${name}?key=${KEY}`)).json();
     if (st.state === 'ACTIVE') return true;
     if (st.state === 'FAILED') return false;
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise(r => setTimeout(r, 800));
   }
   return false;
 }
