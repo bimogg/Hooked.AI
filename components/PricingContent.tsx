@@ -1,5 +1,5 @@
 'use client';
-import { Check, Video, Infinity, Sparkles, BarChart3, FileText, Zap, Crown } from 'lucide-react';
+import { Check, X, Video, Infinity, Sparkles, BarChart3, FileText, Zap, Crown } from 'lucide-react';
 import { SignInButton, useUser } from '@clerk/nextjs';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
@@ -117,6 +117,37 @@ export default function PricingContent() {
 
       </div>
 
+      {/* The old way vs Hooked AI — comparison */}
+      <div className="max-w-3xl mx-auto mt-24" style={{ fontFamily: APPLE_FONT }}>
+        <h2 className="font-bold text-2xl md:text-3xl text-center mb-10 tracking-tight">{tr('pricing', 'cmpTitle', lang)}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Without */}
+          <div className="rounded-3xl border border-black/10 bg-[#f6f6f7] p-7">
+            <p className="font-semibold text-sm text-[#999] mb-5 uppercase tracking-wide">{tr('pricing', 'cmpOld', lang)}</p>
+            <ul className="flex flex-col gap-4">
+              {['cmpO1', 'cmpO2', 'cmpO3'].map(k => (
+                <li key={k} className="flex items-start gap-3 text-sm text-[#7a7a7a] leading-snug">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-black/[0.06] shrink-0 mt-0.5"><X size={12} className="text-[#999]" strokeWidth={2.5} /></span>
+                  {tr('pricing', k, lang)}
+                </li>
+              ))}
+            </ul>
+          </div>
+          {/* With */}
+          <div className="rounded-3xl border border-[#e8002d]/25 bg-white p-7 shadow-[0_20px_50px_-28px_rgba(232,0,45,0.4)]">
+            <p className="font-semibold text-sm text-[#e8002d] mb-5 uppercase tracking-wide">{tr('pricing', 'cmpNew', lang)}</p>
+            <ul className="flex flex-col gap-4">
+              {['cmpN1', 'cmpN2', 'cmpN3'].map(k => (
+                <li key={k} className="flex items-start gap-3 text-sm text-[#1a1a1a] font-medium leading-snug">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#e8002d]/12 shrink-0 mt-0.5"><Check size={12} className="text-[#e8002d]" strokeWidth={3} /></span>
+                  {tr('pricing', k, lang)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
       {/* Pro includes — concise checklist (Spotify-style) */}
       <div className="max-w-3xl mx-auto mt-20 flex flex-col md:flex-row md:items-start gap-6 md:gap-12" style={{ fontFamily: APPLE_FONT }}>
         <h2 className="font-bold text-2xl md:text-4xl tracking-tight md:w-1/2 leading-tight">{tr('pricing', 'includesTitle', lang)}</h2>
@@ -128,6 +159,20 @@ export default function PricingContent() {
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* closing CTA */}
+      <div className="max-w-xl mx-auto mt-24 text-center" style={{ fontFamily: APPLE_FONT }}>
+        <h2 className="font-bold text-2xl md:text-3xl tracking-tight mb-6 leading-snug">{tr('pricing', 'closeTitle', lang)}</h2>
+        <div className="max-w-xs mx-auto">
+          {isSignedIn ? (
+            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" className={proBtnClass}>{tr('pricing', 'proCta', lang)}</a>
+          ) : (
+            <SignInButton mode="modal" forceRedirectUrl="/pricing" signUpForceRedirectUrl="/pricing">
+              <button className={proBtnClass}>{tr('pricing', 'proCta', lang)}</button>
+            </SignInButton>
+          )}
+        </div>
       </div>
     </div>
   );
