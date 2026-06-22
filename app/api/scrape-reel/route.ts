@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { getServerUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export const maxDuration = 60;
 
+const OWNER_EMAILS = ['anagashtay@gmail.com'];
+
 async function isPro(): Promise<boolean> {
-  const { userId } = await auth();
-  if (!userId) return false;
-  const user = await currentUser();
-  const email = user?.emailAddresses?.[0]?.emailAddress;
+  const u = await getServerUser();
+  const email = u?.email?.toLowerCase();
   if (!email) return false;
+  if (OWNER_EMAILS.includes(email)) return true;
   const { data } = await supabaseAdmin
     .from('subscribers')
     .select('status')
-    .eq('email', email.toLowerCase())
+    .eq('email', email)
     .single();
   return data?.status === 'active';
 }
