@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
-import type { User } from '@supabase/supabase-js';
+import type { User, Session } from '@supabase/supabase-js';
 import { supabaseBrowser } from '@/lib/supabase-browser';
 
 interface AuthCtx {
@@ -17,8 +17,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const sb = supabaseBrowser();
-    sb.auth.getUser().then(({ data }) => { setUser(data.user ?? null); setLoading(false); });
-    const { data: sub } = sb.auth.onAuthStateChange((_e, session) => {
+    sb.auth.getUser().then((res: { data: { user: User | null } }) => {
+      setUser(res.data.user ?? null);
+      setLoading(false);
+    });
+    const { data: sub } = sb.auth.onAuthStateChange((_event: string, session: Session | null) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
