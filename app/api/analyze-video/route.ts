@@ -87,9 +87,13 @@ STEP 3 — Find 2-3 WEAK ZONES where viewers would swipe away.
 
 STEP 3.5 — Recommend the SINGLE STRONGEST hook to use for the opening of THIS video (a ready-to-use line + a concrete visual/shot tip). This is the main fix, especially when the score is below 7.
 
-STEP 4 — For EACH weak zone, OPTIONALLY pick ONE example from the LIBRARY below. Each library item has a (topic: X) tag.
-RULE: pick an example ONLY if its (topic) tag EQUALS this video's contentNiche from STEP 1 (e.g. video is "food" → only a (topic: food) example). If no library item shares the same topic tag, return -1.
-CRITICAL: It is MUCH better to return -1 (no example shown) than to show an unrelated one. The user hates irrelevant examples. Never pick a different-topic example just to fill the slot. Return the index in "exampleIndex", or -1.
+STEP 4 — For EACH weak zone, pick ONE example from the LIBRARY below. Each library item has a (topic: X) tag.
+RULES (in priority order):
+1. Best: an example whose (topic) EQUALS this video's contentNiche.
+2. If none matches exactly, a (topic: marketing) example is an acceptable fallback — those teach general hook technique and apply to any video.
+3. NEVER pick a DIFFERENT specific consumer niche (e.g. do not give a fitness/food/cars example to a beauty video).
+4. Return -1 only if there is genuinely nothing relevant (very rare — a marketing example almost always fits).
+Try to ALWAYS provide a helpful example. Return the index in "exampleIndex", or -1.
 
 LIBRARY (index [hook type] "caption"):
 ${poolList}
@@ -115,7 +119,7 @@ Return ONLY valid JSON:
       "whatIsWrong": "<in ${outputLang}: what specifically kills interest — visual, concrete>",
       "hookType": "<one of: Visual Hook | Question Hook | Tutorial Hook | Curiosity Hook | Warning Hook | Challenge Hook | Engagement Hook | Mistake Hook>",
       "script": "<in ${outputLang}: opening line mentioning the exact topic/action from this video>",
-      "exampleIndex": <index from LIBRARY ONLY if it is clearly the SAME content topic as this video — otherwise -1; prefer -1 whenever unsure>
+      "exampleIndex": <best library index per the STEP 4 rules — same niche preferred, marketing example as fallback; -1 only if nothing relevant>
     }
   ]
 }` });
