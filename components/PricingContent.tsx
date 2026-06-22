@@ -173,6 +173,13 @@ export default function PricingContent() {
             </SignInButton>
           )}
         </div>
+        {/* payment methods */}
+        <div className="flex items-center justify-center gap-2 mt-6 flex-wrap">
+          {['Visa', 'Mastercard', 'Amex', 'Apple Pay'].map(b => (
+            <span key={b} className="px-3 py-1.5 rounded-lg bg-white border border-black/10 text-[11px] font-bold text-[#555] shadow-sm">{b}</span>
+          ))}
+        </div>
+        <p className="text-xs text-[#aaa] mt-3">{tr('pricing', 'payNote', lang)}</p>
       </div>
     </div>
   );
