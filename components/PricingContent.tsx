@@ -1,7 +1,7 @@
 'use client';
 import { Check, X, Video, Infinity, Sparkles, BarChart3, FileText, Zap, Crown } from 'lucide-react';
-import { SignInButton, useUser } from '@clerk/nextjs';
 import { useLang } from './LanguageProvider';
+import { useAuth } from './AuthProvider';
 import { tr } from '@/lib/translations';
 
 const POLAR_CHECKOUT = 'https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4';
@@ -11,10 +11,11 @@ const PRO_ICONS = [Video, Infinity, Sparkles, BarChart3, FileText, Zap, Crown];
 
 export default function PricingContent() {
   const { lang } = useLang();
-  const { isSignedIn, user } = useUser();
+  const { user } = useAuth();
+  const isSignedIn = !!user;
 
   const proBtnClass = 'block w-full text-center text-sm font-bold py-3.5 rounded-full transition-opacity bg-black text-white hover:opacity-90 cursor-pointer';
-  const email = user?.primaryEmailAddress?.emailAddress;
+  const email = user?.email;
   const checkoutUrl = email ? `${POLAR_CHECKOUT}?customer_email=${encodeURIComponent(email)}` : POLAR_CHECKOUT;
 
   const freeFeatures = ['freeF1', 'freeF2', 'freeF3', 'freeF4', 'freeF5'];
@@ -92,9 +93,7 @@ export default function PricingContent() {
               {tr('pricing', 'proCta', lang)}
             </a>
           ) : (
-            <SignInButton mode="modal" forceRedirectUrl="/pricing" signUpForceRedirectUrl="/pricing">
-              <button className={`relative ${proBtnClass}`}>{tr('pricing', 'proCta', lang)}</button>
-            </SignInButton>
+            <a href="/login" className={`relative ${proBtnClass}`}>{tr('pricing', 'proCta', lang)}</a>
           )}
 
           {/* features — clean dark line icons */}
@@ -168,9 +167,7 @@ export default function PricingContent() {
           {isSignedIn ? (
             <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" className={proBtnClass}>{tr('pricing', 'proCta', lang)}</a>
           ) : (
-            <SignInButton mode="modal" forceRedirectUrl="/pricing" signUpForceRedirectUrl="/pricing">
-              <button className={proBtnClass}>{tr('pricing', 'proCta', lang)}</button>
-            </SignInButton>
+            <a href="/login" className={proBtnClass}>{tr('pricing', 'proCta', lang)}</a>
           )}
         </div>
         {/* payment methods */}
