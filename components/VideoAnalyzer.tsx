@@ -6,6 +6,7 @@ import { SignInButton, useUser } from '@clerk/nextjs';
 import HookPlayer from './HookPlayer';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
+import { supabase } from '@/lib/supabase';
 
 const POLAR_CHECKOUT = 'https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4';
 
@@ -142,7 +143,7 @@ interface WeakZone {
   example: HookExample | null;
 }
 interface Metrics { likes: number | null; views: number | null; comments: number | null; username: string }
-interface Result { hookScore: number; scoreReason?: string | null; videoTopic: string; bestHook?: { script: string; hookType: string; tip: string } | null; weakZones: WeakZone[]; metrics?: Metrics | null; }
+interface Result { hookScore: number; scoreReason?: string | null; videoTopic: string; audioHook?: string | null; bestHook?: { script: string; hookType: string; tip: string } | null; weakZones: WeakZone[]; metrics?: Metrics | null; }
 
 const STEP_KEYS = ['frames', 'analyzing', 'hooks'] as const;
 
@@ -196,18 +197,35 @@ export default function VideoAnalyzer() {
 
     setLoading(true); setError(''); setResult(null); setStepIdx(0);
     try {
-      const frameData = await extractFrames(file);
+      const frameData = await extractFrames(file); // for thumbnail + Claude fallback
       setStepIdx(1);
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 55000);
-      const res = await fetch('/api/analyze-video', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t), lang }),
-        signal: controller.signal,
-      }).finally(() => clearTimeout(timeout));
+      let data;
+      try {
+        // PRIMARY: Gemini native video (sees motion + audio) — upload file to Supabase, analyze server-side
+        const sign = await (await fetch('/api/upload-url', { method: 'POST' })).json();
+        if (!sign?.path) throw new Error('no_upload_url');
+        const up = await supabase.storage.from('videos').uploadToSignedUrl(sign.path, sign.token, file);
+        if (up.error) throw up.error;
+        const res = await fetch('/api/analyze-video-gemini', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ storagePath: sign.path, lang }),
+        });
+        if (!res.ok) throw new Error('gemini_failed');
+        data = await res.json();
+      } catch {
+        // FALLBACK: frame-based Claude
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 55000);
+        const res = await fetch('/api/analyze-video', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t), lang }),
+          signal: controller.signal,
+        }).finally(() => clearTimeout(timeout));
+        const d = await res.json();
+        if (!res.ok) throw new Error(typeof d.error === 'string' ? d.error : 'Ошибка анализа. Попробуй ещё раз.');
+        data = d;
+      }
       setStepIdx(2);
-      const data = await res.json();
-      if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Ошибка анализа. Попробуй ещё раз.');
       if (!isPro) markFreeUsed();
       setResult(data);
       // save to history for the profile page
@@ -249,26 +267,38 @@ export default function VideoAnalyzer() {
         if (sdata.error === 'pro_required') { setLocked(true); return; }
         throw new Error(tr('upload', 'scrapeError', lang));
       }
+      const metrics: Metrics = { likes: sdata.likes ?? null, views: sdata.views ?? null, comments: sdata.comments ?? null, username: sdata.username ?? '' };
       const proxySrc = `/api/proxy-video?url=${encodeURIComponent(sdata.videoUrl)}`;
       if (blobUrl) URL.revokeObjectURL(blobUrl);
       setBlobUrl(proxySrc);
-      const frameData = await extractFramesFromSrc(proxySrc, false);
       setStepIdx(1);
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 55000);
-      const res = await fetch('/api/analyze-video', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t), lang,
-          caption: sdata.caption, likes: sdata.likes, views: sdata.views, comments: sdata.comments,
-        }),
-        signal: controller.signal,
-      }).finally(() => clearTimeout(timeout));
+      let frameData: { b64: string; t: number }[] = [];
+      let data;
+      try {
+        // PRIMARY: Gemini native video straight from the scraped URL (motion + audio)
+        const res = await fetch('/api/analyze-video-gemini', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl: sdata.videoUrl, lang, caption: sdata.caption, likes: sdata.likes, views: sdata.views, comments: sdata.comments }),
+        });
+        if (!res.ok) throw new Error('gemini_failed');
+        data = await res.json();
+        try { frameData = await extractFramesFromSrc(proxySrc, false); } catch {} // thumbnail only
+      } catch {
+        // FALLBACK: frames via proxy → Claude
+        frameData = await extractFramesFromSrc(proxySrc, false);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 55000);
+        const res = await fetch('/api/analyze-video', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t), lang, caption: sdata.caption, likes: sdata.likes, views: sdata.views, comments: sdata.comments }),
+          signal: controller.signal,
+        }).finally(() => clearTimeout(timeout));
+        const d = await res.json();
+        if (!res.ok) throw new Error(typeof d.error === 'string' ? d.error : tr('upload', 'scrapeError', lang));
+        data = d;
+      }
       setStepIdx(2);
-      const data = await res.json();
-      if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : tr('upload', 'scrapeError', lang));
       if (!isPro) markFreeUsed();
-      const metrics: Metrics = { likes: sdata.likes ?? null, views: sdata.views ?? null, comments: sdata.comments ?? null, username: sdata.username ?? '' };
       setResult({ ...data, metrics });
       try {
         const thumb = frameData[0]?.b64 ? await makeThumb(frameData[0].b64) : '';
@@ -322,6 +352,7 @@ export default function VideoAnalyzer() {
             <p className="text-[10px] text-[#aaa] uppercase tracking-widest mb-0.5">{tr('result', 'outOf', lang)}</p>
             {result.videoTopic && <p className="text-xs text-[#666]">{result.videoTopic}</p>}
             {result.scoreReason && <p className="text-xs text-[#999] mt-1.5 leading-snug">{result.scoreReason}</p>}
+            {result.audioHook && <p className="text-xs text-[#999] mt-1.5 leading-snug">🔊 {result.audioHook}</p>}
             {result.metrics && (result.metrics.views != null || result.metrics.likes != null) && (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-[#777]">
                 {result.metrics.username && <span className="font-semibold text-[#555]">@{result.metrics.username}</span>}
