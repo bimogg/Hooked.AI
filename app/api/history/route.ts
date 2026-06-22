@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getServerUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 
 // GET: list the signed-in user's analysis history
 export async function GET() {
-  const { userId } = await auth();
+  const u = await getServerUser();
+  const userId = u?.id;
   if (!userId) return NextResponse.json({ items: [] });
 
   const { data, error } = await supabaseAdmin
@@ -20,7 +21,8 @@ export async function GET() {
 
 // POST: save one analysis for the signed-in user
 export async function POST(req: NextRequest) {
-  const { userId } = await auth();
+  const u = await getServerUser();
+  const userId = u?.id;
   if (!userId) return NextResponse.json({ ok: false }, { status: 401 });
 
   try {
