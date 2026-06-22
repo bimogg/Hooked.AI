@@ -1,10 +1,13 @@
 'use client';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 
 export default function Footer() {
   const { lang } = useLang();
+  const pathname = usePathname();
+  if (pathname === '/login') return null;
   return (
     <footer className="bg-[#0a0a0a] text-white mt-auto">
       <div className="max-w-6xl mx-auto px-6 py-12">
