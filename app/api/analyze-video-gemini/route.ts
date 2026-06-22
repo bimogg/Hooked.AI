@@ -110,9 +110,18 @@ export async function POST(req: NextRequest) {
     } else {
       bytes = await fetchVideoBytes(videoUrl as string);
     }
-    const { name, uri } = await uploadToGemini(bytes);
-    geminiName = name;
-    if (!(await waitActive(name))) return NextResponse.json({ error: 'video_processing_failed' }, { status: 502 });
+    // FAST path: send the video inline (no Files API upload/processing wait) for reels up to ~18MB.
+    // Only large videos fall back to the slower Files API path.
+    const INLINE_LIMIT = 14 * 1024 * 1024; // ~14MB raw → stays under Gemini's 20MB request limit after base64
+    let videoPart: Record<string, unknown>;
+    if (bytes.byteLength <= INLINE_LIMIT) {
+      videoPart = { inline_data: { mime_type: 'video/mp4', data: Buffer.from(bytes).toString('base64') } };
+    } else {
+      const { name, uri } = await uploadToGemini(bytes);
+      geminiName = name;
+      if (!(await waitActive(name))) return NextResponse.json({ error: 'video_processing_failed' }, { status: 502 });
+      videoPart = { file_data: { mime_type: 'video/mp4', file_uri: uri } };
+    }
 
     const realCaption = (caption ?? '').slice(0, 500);
     const hasMetrics = typeof views === 'number' || typeof likes === 'number';
@@ -144,7 +153,7 @@ Return ONLY JSON:
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ file_data: { mime_type: 'video/mp4', file_uri: uri } }, { text: prompt }] }],
+        contents: [{ parts: [videoPart, { text: prompt }] }],
         generationConfig: { responseMimeType: 'application/json', temperature: 0.4 },
       }),
     });
