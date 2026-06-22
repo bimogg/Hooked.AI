@@ -116,6 +116,27 @@ export default function PricingContent() {
         </div>
 
       </div>
+
+      {/* What you get with Pro — value explanations (Apple style) */}
+      <div className="max-w-2xl mx-auto mt-20" style={{ fontFamily: APPLE_FONT }}>
+        <h2 className="font-bold text-2xl md:text-3xl text-center mb-10 tracking-tight">{tr('pricing', 'valueTitle', lang)}</h2>
+        <div className="flex flex-col gap-8">
+          {[['v1t', 'v1d', Infinity], ['v2t', 'v2d', Video], ['v3t', 'v3d', Sparkles]].map(([t, d, Icon]) => {
+            const I = Icon as typeof Infinity;
+            return (
+              <div key={t as string} className="flex gap-4 items-start">
+                <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#e8002d]/10 text-[#e8002d] shrink-0">
+                  <I size={20} strokeWidth={2} />
+                </span>
+                <div>
+                  <p className="font-semibold text-base">{tr('pricing', t as string, lang)}</p>
+                  <p className="text-[#666] text-sm mt-1 leading-relaxed">{tr('pricing', d as string, lang)}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
