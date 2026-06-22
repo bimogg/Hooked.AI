@@ -6,7 +6,6 @@ import { SignInButton, useUser } from '@clerk/nextjs';
 import HookPlayer from './HookPlayer';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
-import { supabase } from '@/lib/supabase';
 
 const POLAR_CHECKOUT = 'https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4';
 
@@ -197,37 +196,20 @@ export default function VideoAnalyzer() {
 
     setLoading(true); setError(''); setResult(null); setStepIdx(0);
     try {
-      const frameData = await extractFrames(file); // for thumbnail + Claude fallback
+      // Uploaded files use the FAST frame-based engine (instant — no slow video upload).
+      // Link analysis uses Gemini native video (no device upload there).
+      const frameData = await extractFrames(file);
       setStepIdx(1);
-      let data;
-      try {
-        // PRIMARY: Gemini native video (sees motion + audio) — upload file to Supabase, analyze server-side
-        const sign = await (await fetch('/api/upload-url', { method: 'POST' })).json();
-        if (!sign?.path) throw new Error('no_upload_url');
-        const up = await supabase.storage.from('videos').uploadToSignedUrl(sign.path, sign.token, file);
-        if (up.error) throw up.error;
-        const gc = new AbortController();
-        const gt = setTimeout(() => gc.abort(), 55000);
-        const res = await fetch('/api/analyze-video-gemini', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ storagePath: sign.path, lang }), signal: gc.signal,
-        }).finally(() => clearTimeout(gt));
-        if (!res.ok) throw new Error('gemini_failed');
-        data = await res.json();
-      } catch {
-        // FALLBACK: frame-based Claude
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 55000);
-        const res = await fetch('/api/analyze-video', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t), lang }),
-          signal: controller.signal,
-        }).finally(() => clearTimeout(timeout));
-        const d = await res.json();
-        if (!res.ok) throw new Error(typeof d.error === 'string' ? d.error : 'Ошибка анализа. Попробуй ещё раз.');
-        data = d;
-      }
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 55000);
+      const res = await fetch('/api/analyze-video', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ frames: frameData.map(f => f.b64), timestamps: frameData.map(f => f.t), lang }),
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timeout));
       setStepIdx(2);
+      const data = await res.json();
+      if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Ошибка анализа. Попробуй ещё раз.');
       if (!isPro) markFreeUsed();
       setResult(data);
       // save to history for the profile page
