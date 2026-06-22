@@ -206,10 +206,12 @@ export default function VideoAnalyzer() {
         if (!sign?.path) throw new Error('no_upload_url');
         const up = await supabase.storage.from('videos').uploadToSignedUrl(sign.path, sign.token, file);
         if (up.error) throw up.error;
+        const gc = new AbortController();
+        const gt = setTimeout(() => gc.abort(), 55000);
         const res = await fetch('/api/analyze-video-gemini', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ storagePath: sign.path, lang }),
-        });
+          body: JSON.stringify({ storagePath: sign.path, lang }), signal: gc.signal,
+        }).finally(() => clearTimeout(gt));
         if (!res.ok) throw new Error('gemini_failed');
         data = await res.json();
       } catch {
@@ -276,10 +278,12 @@ export default function VideoAnalyzer() {
       let data;
       try {
         // PRIMARY: Gemini native video straight from the scraped URL (motion + audio)
+        const gc = new AbortController();
+        const gt = setTimeout(() => gc.abort(), 55000);
         const res = await fetch('/api/analyze-video-gemini', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ videoUrl: sdata.videoUrl, lang, caption: sdata.caption, likes: sdata.likes, views: sdata.views, comments: sdata.comments }),
-        });
+          body: JSON.stringify({ videoUrl: sdata.videoUrl, lang, caption: sdata.caption, likes: sdata.likes, views: sdata.views, comments: sdata.comments }), signal: gc.signal,
+        }).finally(() => clearTimeout(gt));
         if (!res.ok) throw new Error('gemini_failed');
         data = await res.json();
         try { frameData = await extractFramesFromSrc(proxySrc, false); } catch {} // thumbnail only
