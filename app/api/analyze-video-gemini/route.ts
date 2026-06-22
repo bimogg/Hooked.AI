@@ -135,7 +135,7 @@ STEP 1 — Understand it: what physically happens, on-screen text, what is said/
 STEP 2 — Score the HOOK (first ~3 seconds only), 1-10, justify with concrete evidence from VISUALS + MOTION + AUDIO in scoreReason.
 STEP 3 — 2-3 weak zones where viewers swipe away.
 STEP 3.5 — The single strongest hook to use for THIS video (ready line + concrete visual/audio tip).
-STEP 4 — For each weak zone, pick ONE library example ONLY if its (topic) tag clearly matches this video's contentNiche, else -1 (prefer -1 when unsure — never show an off-topic example).
+STEP 4 — For each weak zone pick ONE library example: best = same (topic) as the video's contentNiche; if none matches, a (topic: marketing) example is an acceptable fallback (universal hook technique); NEVER a different specific consumer niche (no fitness example for a food video). Return -1 only if nothing relevant (rare). Try to always give a helpful example.
 
 Classify contentNiche as one of: fitness, cars, food, beauty, fashion, finance, business, travel, tech, relationships, comedy, education, pets, home, music, gaming, motivation, marketing, other.
 
@@ -147,7 +147,7 @@ Return ONLY JSON:
 {"hookScore": <1-10>, "scoreReason":"...", "videoTopic":"...", "contentNiche":"...",
 "audioHook":"<in ${outputLang}: what is heard in first 3s and whether it hooks>",
 "bestHook":{"script":"...","hookType":"...","tip":"..."},
-"weakZones":[{"timestamp":"0-3s","whatIsWrong":"...","hookType":"...","script":"...","exampleIndex":<index or -1>}]}`;
+"weakZones":[{"timestamp":"0-3s","whatIsWrong":"...","hookType":"...","script":"...","exampleIndex":<best index per STEP 4 — same niche preferred, marketing fallback; -1 only if nothing relevant>}]}`;
 
     const genRes = await fetch(`${BASE}/v1beta/models/${MODEL}:generateContent?key=${KEY}`, {
       method: 'POST',
