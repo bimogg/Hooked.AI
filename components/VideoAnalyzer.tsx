@@ -1,7 +1,7 @@
 'use client';
 // folder upload UI
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { AlertCircle, Lock, Eye, Copy, Check } from 'lucide-react';
+import { AlertCircle, Lock, Eye, Copy, Check, Link2 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import HookPlayer from './HookPlayer';
 import { useLang } from './LanguageProvider';
@@ -446,76 +446,65 @@ export default function VideoAnalyzer() {
   /* ── UPLOAD ── */
   return (
     <div className="flex flex-col gap-4">
-      <div
-        onDragOver={e => { e.preventDefault(); setDragging(true); }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        onClick={() => !loading && inputRef.current?.click()}
-        className={`flex flex-col items-center gap-5 cursor-pointer select-none py-6 ${loading ? 'pointer-events-none' : ''}`}
-      >
-        <input ref={inputRef} type="file" accept="video/*" className="hidden"
-          onChange={e => { const f = e.target.files?.[0]; if (f) analyze(f); }} />
+      <input ref={inputRef} type="file" accept="video/*" className="hidden"
+        onChange={e => { const f = e.target.files?.[0]; if (f) analyze(f); }} />
 
-        {loading ? (
-          <>
-            <div className="relative w-12 h-12">
-              <div className="absolute inset-0 border-2 border-black/10 rounded-full" />
-              <div className="absolute inset-0 border-2 border-[#e8002d] border-t-transparent rounded-full animate-spin" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">{tr('loading', STEP_KEYS[stepIdx], lang)}</p>
-              <div className="flex justify-center gap-1 mt-2">
-                {STEP_KEYS.map((_, i) => (
-                  <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i <= stepIdx ? 'bg-[#e8002d]' : 'bg-black/15'}`} />
-                ))}
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className={`folder ${dragging ? 'is-open' : ''}`}>
-            <div className="folder-back" />
-            <div className="folder-papers">
-              <span className="paper" />
-              <span className="paper" />
-              <span className="paper" />
-            </div>
-            <div className="folder-front">
-              <div className="folder-front-inner">
-                <p className="font-bold text-base leading-tight">{tr('upload', 'title', lang)}</p>
-                <p className="text-white/75 text-[11px] mt-0.5">{tr('upload', 'subtitle', lang)}</p>
-                <span className="folder-badge">{tr('upload', 'badge', lang)}</span>
-              </div>
+      {loading ? (
+        <div className="flex flex-col items-center gap-5 py-12">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 border-2 border-black/10 rounded-full" />
+            <div className="absolute inset-0 border-2 border-[#e8002d] border-t-transparent rounded-full animate-spin" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-medium">{tr('loading', STEP_KEYS[stepIdx], lang)}</p>
+            <div className="flex justify-center gap-1 mt-2">
+              {STEP_KEYS.map((_, i) => (
+                <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i <= stepIdx ? 'bg-[#e8002d]' : 'bg-black/15'}`} />
+              ))}
             </div>
           </div>
-        )}
-      </div>
-
-      {/* or — analyze by Instagram link (Pro) */}
-      <div className="flex items-center gap-3">
-        <div className="h-px flex-1 bg-black/10" />
-        <span className="text-[10px] uppercase tracking-widest text-[#bbb]">{tr('upload', 'or', lang)}</span>
-        <div className="h-px flex-1 bg-black/10" />
-      </div>
-      <form
-        onSubmit={e => { e.preventDefault(); if (!loading && reelUrl.trim()) analyzeFromUrl(reelUrl); }}
-        className="flex flex-col sm:flex-row gap-2"
-      >
-        <input
-          type="url"
-          value={reelUrl}
-          onChange={e => setReelUrl(e.target.value)}
-          placeholder={tr('upload', 'linkPlaceholder', lang)}
-          disabled={loading}
-          className="flex-1 border border-black/15 rounded-full px-5 py-3 text-sm focus:border-black/40 outline-none disabled:opacity-50"
-        />
-        <button
-          type="submit"
-          disabled={loading || !reelUrl.trim()}
-          className="bg-black text-white font-bold text-sm px-7 py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 whitespace-nowrap"
+        </div>
+      ) : (
+        <div
+          onDragOver={e => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={onDrop}
+          className="flex flex-col gap-3"
         >
-          {tr('upload', 'analyzeLink', lang)}
-        </button>
-      </form>
+          {/* OpusClip-style combined bar: link + Analyze, or Upload */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <form
+              onSubmit={e => { e.preventDefault(); if (reelUrl.trim()) analyzeFromUrl(reelUrl); }}
+              className={`flex-1 flex items-center gap-2 rounded-full pl-5 pr-1.5 py-1.5 transition-colors ${dragging ? 'bg-[#1a1a1a] ring-2 ring-[#e8002d]' : 'bg-[#141414]'}`}
+            >
+              <Link2 size={16} className="text-white/40 shrink-0" />
+              <input
+                type="url"
+                value={reelUrl}
+                onChange={e => setReelUrl(e.target.value)}
+                placeholder={tr('upload', 'dropLink', lang)}
+                className="flex-1 bg-transparent text-white placeholder-white/40 text-sm outline-none min-w-0"
+              />
+              <button type="submit" disabled={!reelUrl.trim()}
+                className="bg-[#e8002d] text-white text-sm font-bold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 whitespace-nowrap">
+                {tr('upload', 'analyzeLink', lang)}
+              </button>
+            </form>
+
+            <span className="text-[#aaa] text-xs text-center self-center">{tr('upload', 'or', lang)}</span>
+
+            <button onClick={() => inputRef.current?.click()}
+              className="border border-black/15 rounded-full px-6 py-3.5 text-sm font-bold hover:bg-black hover:text-white transition-colors whitespace-nowrap">
+              {tr('upload', 'uploadFile', lang)}
+            </button>
+          </div>
+
+          <p className="text-[11px] text-[#aaa] text-center flex items-center justify-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#e8002d]" />{tr('upload', 'badge', lang)}
+          </p>
+        </div>
+      )}
+
       {error && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
           <AlertCircle size={14} className="shrink-0" />{error}
