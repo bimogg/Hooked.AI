@@ -100,7 +100,7 @@ ${poolList}
 
 CRITICAL RULE FOR SCRIPTS: Every script MUST be directly about the specific thing shown in THIS video. Never generic.
 
-IMPORTANT: Write everything for the creator in plain, simple ${outputLang} — NO jargon ("retention", "hook type", "engagement"). Use everyday words and direct commands (Replace / Add / Remove / Say). hookType stays in English (internal only, not shown to the user).
+LANGUAGE: Write everything for the creator in the SAME language as the video itself (its on-screen text / caption / spoken words) — so the hooks are ready to paste and use. Only if the video's language is unclear, use ${outputLang}. Plain, simple words — NO jargon ("retention", "hook type", "engagement"). Use direct commands (Replace / Add / Remove / Say). hookType stays in English (internal only, not shown).
 
 Return ONLY valid JSON:
 {
