@@ -100,11 +100,12 @@ ${poolList}
 
 CRITICAL RULE FOR SCRIPTS: Every script MUST be directly about the specific thing shown in THIS video. Never generic.
 
-IMPORTANT: Write videoTopic, whatIsWrong, script, scoreReason in ${outputLang}. hookType must stay in English.
+IMPORTANT: Write everything for the creator in plain, simple ${outputLang} — NO jargon ("retention", "hook type", "engagement"). Use everyday words and direct commands (Replace / Add / Remove / Say). hookType stays in English (internal only, not shown to the user).
 
 Return ONLY valid JSON:
 {
   "hookScore": <integer 1-10 per the rubric>,
+  "verdict": "<one punchy sentence in ${outputLang}: the result + main problem in plain words, e.g. 'Слабый хук — теряешь зрителей на 2-й секунде' or 'Сильный хук — сразу цепляет'>",
   "scoreReason": "<in ${outputLang}: 1 sentence justifying the score with concrete evidence from the opening frames>",
   "videoTopic": "<very specific in ${outputLang}: niche + what exactly is shown>",
   "contentNiche": "<one content niche in English lowercase from the STEP 1 list>",
@@ -116,7 +117,8 @@ Return ONLY valid JSON:
   "weakZones": [
     {
       "timestamp": "<e.g. '0-3s'>",
-      "whatIsWrong": "<in ${outputLang}: what specifically kills interest — visual, concrete>",
+      "whatIsWrong": "<in plain ${outputLang}: what specifically kills interest — visual, concrete>",
+      "fix": "<short imperative action in ${outputLang} starting with a verb (Замени / Добавь / Убери / Скажи …), no jargon>",
       "hookType": "<one of: Visual Hook | Question Hook | Tutorial Hook | Curiosity Hook | Warning Hook | Challenge Hook | Engagement Hook | Mistake Hook>",
       "script": "<in ${outputLang}: opening line mentioning the exact topic/action from this video>",
       "exampleIndex": <best library index per the STEP 4 rules — same niche preferred, marketing example as fallback; -1 only if nothing relevant>
@@ -136,16 +138,14 @@ Return ONLY valid JSON:
     const analysis = JSON.parse(j1[0]);
 
     const weakZones = (analysis.weakZones ?? []).slice(0, 3).map((zone: {
-      timestamp: string; whatIsWrong: string; hookType: string; script: string; exampleIndex?: number;
+      timestamp: string; whatIsWrong: string; fix?: string; hookType: string; script: string; exampleIndex?: number;
     }) => {
       const idx = typeof zone.exampleIndex === 'number' ? zone.exampleIndex : -1;
-      // Only show an example the model explicitly matched to THIS video's topic.
-      // If nothing fits (-1) or the index is invalid, show no reference at all —
-      // never a random, irrelevant hook (that's worse than empty).
       const chosen: HookRow | undefined = idx >= 0 && idx < pool.length ? pool[idx] : undefined;
       return {
         timestamp: zone.timestamp,
         whatIsWrong: zone.whatIsWrong,
+        fix: zone.fix ?? null,
         hookType: zone.hookType,
         script: zone.script,
         example: chosen ? shapeHook(chosen) : null,
@@ -154,6 +154,7 @@ Return ONLY valid JSON:
 
     return NextResponse.json({
       hookScore: analysis.hookScore,
+      verdict: analysis.verdict ?? null,
       scoreReason: analysis.scoreReason ?? null,
       videoTopic: analysis.videoTopic,
       bestHook: analysis.bestHook ?? null,
