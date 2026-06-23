@@ -97,7 +97,7 @@ function CopyBtn({ text, lang }: { text: string; lang: string }) {
   return (
     <button
       onClick={e => { e.preventDefault(); navigator.clipboard.writeText(text); setDone(true); setTimeout(() => setDone(false), 2000); }}
-      className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/30 text-white hover:bg-white hover:text-black transition-all shrink-0 whitespace-nowrap"
+      className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border border-black/15 text-[#555] hover:bg-black hover:text-white transition-all shrink-0 whitespace-nowrap"
     >
       {done
         ? <><Check size={10} />{tr('result', 'copied', lang)}</>
@@ -138,11 +138,11 @@ interface HookExample {
   thumbnail_url: string | null; video_url: string | null; niche: string; reelUrl: string;
 }
 interface WeakZone {
-  timestamp: string; whatIsWrong: string; hookType: string; script: string;
+  timestamp: string; whatIsWrong: string; fix?: string | null; hookType: string; script: string;
   example: HookExample | null;
 }
 interface Metrics { likes: number | null; views: number | null; comments: number | null; username: string }
-interface Result { hookScore: number; scoreReason?: string | null; videoTopic: string; audioHook?: string | null; bestHook?: { script: string; hookType: string; tip: string } | null; weakZones: WeakZone[]; metrics?: Metrics | null; }
+interface Result { hookScore: number; verdict?: string | null; scoreReason?: string | null; videoTopic: string; audioHook?: string | null; bestHook?: { script: string; hookType: string; tip: string } | null; weakZones: WeakZone[]; metrics?: Metrics | null; }
 
 const STEP_KEYS = ['frames', 'analyzing', 'hooks'] as const;
 
@@ -167,6 +167,7 @@ export default function VideoAnalyzer() {
   const [locked, setLocked] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [reelUrl, setReelUrl] = useState('');
+  const [doneSteps, setDoneSteps] = useState<number[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const { lang } = useLang();
   const { user } = useAuth();
@@ -327,133 +328,116 @@ export default function VideoAnalyzer() {
 
   /* ── RESULT ── */
   if (result && blobUrl) {
-    const scoreColor = result.hookScore >= 8 ? '#16a34a' : result.hookScore >= 5 ? '#d97706' : '#e8002d';
+    const s = result.hookScore;
+    const scoreColor = s >= 8 ? '#16a34a' : s >= 5 ? '#d97706' : '#e8002d';
+    const scoreLabel = s >= 8 ? tr('result', 'scoreStrong', lang) : s >= 5 ? tr('result', 'scoreMid', lang) : tr('result', 'scoreWeak', lang);
+    const verdict = result.verdict || `${scoreLabel} — ${result.scoreReason ?? ''}`;
+    const topExample = result.weakZones?.find(z => z.example)?.example ?? null;
+    const firstTs = parseTimestamp(result.weakZones?.[0]?.timestamp ?? '0-3s');
+    const toggleStep = (i: number) => setDoneSteps(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
     return (
       <div className="flex flex-col gap-10">
 
-        {/* Score */}
-        <div className="flex items-center gap-4 border border-black/10 rounded-2xl p-6">
-          <p className="font-display font-extrabold text-5xl leading-none shrink-0" style={{ color: scoreColor }}>
-            {result.hookScore}
-          </p>
-          <div>
-            <p className="text-[10px] text-[#aaa] uppercase tracking-widest mb-0.5">{tr('result', 'outOf', lang)}</p>
-            {result.videoTopic && <p className="text-xs text-[#666]">{result.videoTopic}</p>}
-            {result.scoreReason && <p className="text-xs text-[#999] mt-1.5 leading-snug">{result.scoreReason}</p>}
-            {result.audioHook && <p className="text-xs text-[#999] mt-1.5 leading-snug">🔊 {result.audioHook}</p>}
-            {result.metrics && (result.metrics.views != null || result.metrics.likes != null) && (
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-[#777]">
-                {result.metrics.username && <span className="font-semibold text-[#555]">@{result.metrics.username}</span>}
-                {result.metrics.views != null && <span>👁 {fmt(result.metrics.views)}</span>}
-                {result.metrics.likes != null && <span>❤️ {fmt(result.metrics.likes)}</span>}
-                {result.metrics.comments != null && <span>💬 {fmt(result.metrics.comments)}</span>}
-              </div>
-            )}
-          </div>
+        {/* 1 — VERDICT (one bold phrase, not a number) */}
+        <div className="text-center pt-2">
+          <span className="inline-flex items-center gap-2 mb-3">
+            <span className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ background: scoreColor }}>{s}</span>
+            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: scoreColor }}>{scoreLabel}</span>
+          </span>
+          <h2 className="font-extrabold text-2xl md:text-[28px] leading-tight tracking-tight max-w-lg mx-auto" style={{ color: scoreColor }}>{verdict}</h2>
+          {(result.scoreReason || result.audioHook) && (
+            <p className="text-sm text-[#666] mt-3 max-w-md mx-auto leading-relaxed">
+              {result.scoreReason}{result.audioHook ? ` 🔊 ${result.audioHook}` : ''}
+            </p>
+          )}
+          {result.metrics && (result.metrics.views != null || result.metrics.likes != null) && (
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-3 text-[11px] text-[#777]">
+              {result.metrics.username && <span className="font-semibold text-[#555]">@{result.metrics.username}</span>}
+              {result.metrics.views != null && <span>👁 {fmt(result.metrics.views)}</span>}
+              {result.metrics.likes != null && <span>❤️ {fmt(result.metrics.likes)}</span>}
+              {result.metrics.comments != null && <span>💬 {fmt(result.metrics.comments)}</span>}
+            </div>
+          )}
         </div>
 
+        {/* 2 — MAIN FIX (first thing, copy-ready) */}
         {result.bestHook && (
-          <div className="rounded-2xl overflow-hidden border border-[#e8002d]/30 bg-[#fff8f8]">
-            <div className="px-5 py-3 border-b border-[#e8002d]/15 flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#e8002d] uppercase tracking-wider">{tr('result', 'bestHook', lang)}</span>
-              {result.bestHook.hookType && <span className="text-[10px] text-[#888]">{result.bestHook.hookType}</span>}
+          <div className="rounded-3xl border-2 border-[#e8002d]/25 bg-[#fff8f8] p-6">
+            <p className="text-[11px] font-bold text-[#e8002d] uppercase tracking-wider mb-3">🔥 {tr('result', 'mainFix', lang)}</p>
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-lg md:text-xl font-bold text-[#0a0a0a] leading-snug">«{result.bestHook.script}»</p>
+              <CopyBtn text={result.bestHook.script} lang={lang} />
             </div>
-            <div className="px-5 py-4">
-              <p className="text-base font-bold text-[#0a0a0a] leading-snug">&quot;{result.bestHook.script}&quot;</p>
-              {result.bestHook.tip && <p className="text-xs text-[#666] mt-2 leading-snug">{result.bestHook.tip}</p>}
+            {result.bestHook.tip && (
+              <p className="text-sm text-[#666] mt-3 leading-snug">
+                <span className="font-semibold text-[#333]">{tr('result', 'fixTip', lang)}:</span> {result.bestHook.tip}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* 3 — BEFORE → AFTER */}
+        {topExample && (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col rounded-2xl overflow-hidden border border-black/10">
+              <div className="px-3 py-2 bg-[#fafafa] border-b border-black/8 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#999]" />
+                <span className="text-[10px] font-bold text-[#888] uppercase tracking-wider">{tr('result', 'nowYou', lang)}</span>
+              </div>
+              <div className="aspect-[3/4] bg-black overflow-hidden">
+                <UserVideoClip blobUrl={blobUrl} start={firstTs.start} end={firstTs.end} />
+              </div>
+            </div>
+            <div className="flex flex-col rounded-2xl overflow-hidden border border-emerald-200">
+              <div className="px-3 py-2 bg-[#f0fdf4] border-b border-emerald-100 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="text-[10px] font-bold text-[#888] uppercase tracking-wider">{tr('result', 'doThis', lang)}</span>
+              </div>
+              <div className="aspect-[3/4] bg-black overflow-hidden relative">
+                <HookPlayer videoUrl={topExample.video_url} thumbnailUrl={topExample.thumbnail_url} reelUrl={topExample.reelUrl} />
+                <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded pointer-events-none">
+                  <Eye size={8} />{fmt(topExample.views)}
+                </div>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Weak zones */}
-        {result.weakZones?.map((zone, i) => {
-          const { start, end } = parseTimestamp(zone.timestamp);
-          return (
-            <div key={i} className="flex flex-col rounded-2xl overflow-hidden border border-black/10">
-
-              {/* Header */}
-              <div className="bg-[#fff3f3] border-b border-[#e8002d]/15 px-5 py-4 flex items-center gap-2">
-                <span className="flex items-center justify-center w-5 h-5 bg-[#e8002d] rounded-full text-white text-[10px] font-bold shrink-0">{i + 1}</span>
-                <span className="text-[11px] font-bold text-[#e8002d] uppercase tracking-wider">{zone.timestamp}</span>
-                <span className="text-sm text-[#333] font-medium leading-snug">{zone.whatIsWrong}</span>
-              </div>
-
-              {/* Split: left = their video, right = example */}
-              <div className="flex items-stretch gap-0 px-4 py-5 bg-white">
-
-                {/* LEFT — user's video */}
-                <div className="flex flex-col flex-1 rounded-xl overflow-hidden border border-black/10">
-                  <div className="px-2.5 py-1.5 bg-[#fafafa] border-b border-black/8 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#e8002d]" />
-                    <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider">{tr('result', 'yourVideo', lang)}</span>
-                  </div>
-                  <div className="aspect-[3/4] bg-black overflow-hidden">
-                    <UserVideoClip blobUrl={blobUrl} start={start} end={end} />
-                  </div>
-                </div>
-
-                {zone.example && (
-                <>
-                {/* CENTER label */}
-                <div className="flex flex-col items-center justify-center px-2 gap-0.5 shrink-0">
-                  {tr('result', 'tryThis', lang).split(' ').map((w, i) => (
-                    <span key={i} className="text-[9px] text-[#bbb] font-medium">{w}</span>
-                  ))}
-                  <span className="text-[#bbb] text-sm mt-0.5">→</span>
-                </div>
-
-                {/* RIGHT — library hook example */}
-                <div className="flex flex-col flex-1 rounded-xl overflow-hidden border border-emerald-200">
-                  <div className="px-2.5 py-1.5 bg-[#f0fdf4] border-b border-emerald-100 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span className="text-[9px] font-bold text-[#888] uppercase tracking-wider">{tr('result', 'howTo', lang)}</span>
-                  </div>
-                  <div className="aspect-[3/4] bg-black overflow-hidden relative">
-                    {zone.example ? (
-                      <>
-                        <HookPlayer
-                          videoUrl={zone.example.video_url}
-                          thumbnailUrl={zone.example.thumbnail_url}
-                          reelUrl={zone.example.reelUrl}
-                        />
-                        <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded pointer-events-none">
-                          <Eye size={8} />{fmt(zone.example.views)}
+        {/* 4 — CHECKLIST (what to do, Todoist-style) */}
+        {result.weakZones && result.weakZones.length > 0 && (
+          <div>
+            <h3 className="font-bold text-lg tracking-tight mb-4">{tr('result', 'checklistTitle', lang)}</h3>
+            <div className="flex flex-col gap-3">
+              {result.weakZones.map((zone, i) => {
+                const isDone = doneSteps.includes(i);
+                return (
+                  <div key={i} className="flex gap-3 items-start border border-black/10 rounded-2xl p-4">
+                    <button onClick={() => toggleStep(i)}
+                      className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${isDone ? 'bg-[#e8002d] border-[#e8002d]' : 'border-black/25 hover:border-[#e8002d]'}`}>
+                      {isDone && <Check size={12} className="text-white" strokeWidth={3} />}
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-semibold text-sm leading-snug ${isDone ? 'line-through text-[#bbb]' : 'text-[#1a1a1a]'}`}>
+                        {zone.fix || zone.whatIsWrong}
+                      </p>
+                      {zone.script && (
+                        <div className="mt-2 flex items-center justify-between gap-2 bg-[#f5f5f5] rounded-xl px-3 py-2">
+                          <p className="text-xs text-[#555] leading-snug min-w-0">«{zone.script}»</p>
+                          <CopyBtn text={zone.script} lang={lang} />
                         </div>
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white/30 text-xs">нет примера</div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-                </>
-                )}
-              </div>
-
-              {/* Script */}
-              <div className="bg-black px-4 py-3 flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[9px] text-white/40 uppercase tracking-wider mb-1">{tr('result', 'script', lang)}</p>
-                  <p className="text-sm font-bold text-white leading-snug">"{zone.script}"</p>
-                </div>
-                <CopyBtn text={zone.script} lang={lang} />
-              </div>
-
+                );
+              })}
             </div>
-          );
-        })}
+          </div>
+        )}
 
-        {/* Library + upsell */}
-        <a href="/library" className="text-center text-xs text-[#aaa] hover:text-black transition-colors">
-          {tr('result', 'library', lang)}
-        </a>
-        <div className="border border-dashed border-black/15 rounded-2xl p-4 text-center">
-          <p className="text-sm font-semibold">{tr('result', 'upsellTitle', lang)}</p>
-          <a href="/pricing" className="inline-block mt-2 bg-black text-white text-xs font-bold px-6 py-2 rounded-full hover:opacity-80">
-            {tr('result', 'upsellCta', lang)}
-          </a>
-        </div>
-        <button onClick={() => { setResult(null); setBlobUrl(null); }} className="text-xs text-[#ccc] hover:text-black transition-colors text-center">
-          {tr('result', 'another', lang)}
+        {/* 5 — CTA: re-check after reshooting */}
+        <button onClick={() => { setResult(null); setBlobUrl(null); setDoneSteps([]); }}
+          className="w-full bg-[#e8002d] text-white font-bold text-sm py-4 rounded-full hover:opacity-90 transition-opacity">
+          {tr('result', 'recheck', lang)}
         </button>
       </div>
     );
