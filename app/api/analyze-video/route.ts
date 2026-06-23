@@ -100,7 +100,7 @@ ${poolList}
 
 CRITICAL RULE FOR SCRIPTS: Every script MUST be directly about the specific thing shown in THIS video. Never generic.
 
-LANGUAGE: Write everything for the creator in the SAME language as the video itself (its on-screen text / caption / spoken words) — so the hooks are ready to paste and use. Only if the video's language is unclear, use ${outputLang}. Plain, simple words — NO jargon ("retention", "hook type", "engagement"). Use direct commands (Replace / Add / Remove / Say). hookType stays in English (internal only, not shown).
+LANGUAGE (CRITICAL): Write EVERY user-facing field (verdict, scoreReason, videoTopic, whatIsWrong, fix, bestHook.script, bestHook.tip, weakZones.script) in ${outputLang} — ALWAYS. Even if the video's on-screen text / caption is in a DIFFERENT language, you MUST translate everything and respond ONLY in ${outputLang}. Plain, simple words — NO jargon ("retention", "hook type", "engagement"). Use direct commands (Replace / Add / Remove / Say). Only hookType stays in English (internal, not shown).
 
 Return ONLY valid JSON:
 {
