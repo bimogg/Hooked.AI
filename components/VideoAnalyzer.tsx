@@ -475,15 +475,15 @@ export default function VideoAnalyzer() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <form
               onSubmit={e => { e.preventDefault(); if (reelUrl.trim()) analyzeFromUrl(reelUrl); }}
-              className={`flex-1 flex items-center gap-2 rounded-full pl-5 pr-1.5 py-1.5 transition-colors ${dragging ? 'bg-[#1a1a1a] ring-2 ring-[#e8002d]' : 'bg-[#141414]'}`}
+              className={`flex-1 flex items-center gap-2 rounded-full pl-5 pr-1.5 py-1.5 border transition-colors ${dragging ? 'bg-[#fff5f6] border-[#e8002d]' : 'bg-[#f4f4f5] border-black/10'}`}
             >
-              <Link2 size={16} className="text-white/40 shrink-0" />
+              <Link2 size={16} className="text-black/35 shrink-0" />
               <input
                 type="url"
                 value={reelUrl}
                 onChange={e => setReelUrl(e.target.value)}
                 placeholder={tr('upload', 'dropLink', lang)}
-                className="flex-1 bg-transparent text-white placeholder-white/40 text-sm outline-none min-w-0"
+                className="flex-1 bg-transparent text-[#0a0a0a] placeholder-[#999] text-sm outline-none min-w-0"
               />
               <button type="submit" disabled={!reelUrl.trim()}
                 className="bg-[#e8002d] text-white text-sm font-bold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 whitespace-nowrap">
