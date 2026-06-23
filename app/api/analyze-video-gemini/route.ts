@@ -142,12 +142,14 @@ Classify contentNiche as one of: fitness, cars, food, beauty, fashion, finance, 
 LIBRARY (index (topic: niche) "caption"):
 ${poolList}
 
-Write videoTopic, scoreReason, whatIsWrong, script, tip, audioHook in ${outputLang}. hookType in English.
+Write EVERYTHING for the creator in plain, simple ${outputLang} — NO jargon like "retention", "hook type", "engagement". Use everyday words and direct commands (Replace / Add / Remove / Say). hookType stays in English (used internally, not shown).
+"verdict": one punchy sentence — the result + the main problem in plain words, e.g. "Слабый хук — теряешь зрителей на 2-й секунде" or "Сильный хук — он сразу цепляет".
+Each weak zone needs a "fix": a SHORT imperative action in ${outputLang} starting with a verb (Замени / Добавь / Убери / Скажи …), no jargon.
 Return ONLY JSON:
-{"hookScore": <1-10>, "scoreReason":"...", "videoTopic":"...", "contentNiche":"...",
+{"hookScore": <1-10>, "verdict":"<punchy one-liner in ${outputLang}>", "scoreReason":"...", "videoTopic":"...", "contentNiche":"...",
 "audioHook":"<in ${outputLang}: what is heard in first 3s and whether it hooks>",
 "bestHook":{"script":"...","hookType":"...","tip":"..."},
-"weakZones":[{"timestamp":"0-3s","whatIsWrong":"...","hookType":"...","script":"...","exampleIndex":<best index per STEP 4 — same niche preferred, marketing fallback; -1 only if nothing relevant>}]}`;
+"weakZones":[{"timestamp":"0-3s","whatIsWrong":"<plain ${outputLang}>","fix":"<short imperative action in ${outputLang}>","hookType":"...","script":"...","exampleIndex":<best index per STEP 4 — same niche preferred, marketing fallback; -1 only if nothing relevant>}]}`;
 
     const genRes = await fetch(`${BASE}/v1beta/models/${MODEL}:generateContent?key=${KEY}`, {
       method: 'POST',
@@ -164,15 +166,16 @@ Return ONLY JSON:
     const analysis = JSON.parse(j[0]);
 
     const weakZones = (analysis.weakZones ?? []).slice(0, 3).map((zone: {
-      timestamp: string; whatIsWrong: string; hookType: string; script: string; exampleIndex?: number;
+      timestamp: string; whatIsWrong: string; fix?: string; hookType: string; script: string; exampleIndex?: number;
     }) => {
       const idx = typeof zone.exampleIndex === 'number' ? zone.exampleIndex : -1;
       const chosen: HookRow | undefined = idx >= 0 && idx < pool.length ? pool[idx] : undefined;
-      return { timestamp: zone.timestamp, whatIsWrong: zone.whatIsWrong, hookType: zone.hookType, script: zone.script, example: chosen ? shapeHook(chosen) : null };
+      return { timestamp: zone.timestamp, whatIsWrong: zone.whatIsWrong, fix: zone.fix ?? null, hookType: zone.hookType, script: zone.script, example: chosen ? shapeHook(chosen) : null };
     });
 
     return NextResponse.json({
       hookScore: analysis.hookScore,
+      verdict: analysis.verdict ?? null,
       scoreReason: analysis.scoreReason ?? null,
       videoTopic: analysis.videoTopic,
       audioHook: analysis.audioHook ?? null,
