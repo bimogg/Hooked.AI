@@ -471,6 +471,12 @@ export default function VideoAnalyzer() {
           onDrop={onDrop}
           className="flex flex-col gap-3"
         >
+          {/* compact header — only before analysis */}
+          <div className="mb-4 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <h1 className="font-bold text-2xl md:text-3xl tracking-tight">AI Hook Analyzer</h1>
+            <p className="text-sm text-[#777] mt-1.5 max-w-md mx-auto leading-relaxed">{tr('pro', 'desc', lang)}</p>
+          </div>
+
           {/* OpusClip-style combined bar: link + Analyze, or Upload */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <form
