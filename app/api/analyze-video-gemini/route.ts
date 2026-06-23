@@ -142,7 +142,7 @@ Classify contentNiche as one of: fitness, cars, food, beauty, fashion, finance, 
 LIBRARY (index (topic: niche) "caption"):
 ${poolList}
 
-LANGUAGE: Write EVERYTHING for the creator in the SAME language as the video itself (its spoken words / on-screen text / caption) — so the hooks are ready to paste and use. Only if the video's language is unclear, use ${outputLang}. Plain, simple words — NO jargon like "retention", "hook type", "engagement". Use direct commands (Replace / Add / Remove / Say). hookType stays in English (internal only, not shown).
+LANGUAGE (CRITICAL): Write EVERY user-facing field (verdict, scoreReason, videoTopic, audioHook, whatIsWrong, fix, bestHook.script, bestHook.tip, weakZones.script) in ${outputLang} — ALWAYS. Even if the video's on-screen text / audio / caption is in a DIFFERENT language, you MUST translate everything and respond ONLY in ${outputLang}. Plain, simple words — NO jargon ("retention", "hook type", "engagement"). Use direct commands (Replace / Add / Remove / Say). Only hookType stays in English (internal, not shown).
 "verdict": one punchy sentence — the result + the main problem in plain words, e.g. "Слабый хук — теряешь зрителей на 2-й секунде" or "Сильный хук — он сразу цепляет".
 Each weak zone needs a "fix": a SHORT imperative action in ${outputLang} starting with a verb (Замени / Добавь / Убери / Скажи …), no jargon.
 Return ONLY JSON:
