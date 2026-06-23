@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { supabaseBrowser } from '@/lib/supabase-browser';
 import { supabase } from '@/lib/supabase';
 import { useLang } from '@/components/LanguageProvider';
@@ -65,9 +66,15 @@ export default function LoginPage() {
               </div>
 
               <form onSubmit={emailLink} className="flex flex-col gap-3">
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-                  placeholder={tr('auth', 'emailPlaceholder', lang)}
-                  className="w-full bg-white/[0.06] border border-white/12 rounded-full px-5 py-3.5 text-sm text-white placeholder-white/40 outline-none focus:border-white/40" />
+                <div className="relative">
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
+                    placeholder={tr('auth', 'emailPlaceholder', lang)}
+                    className="w-full bg-white/[0.06] border border-white/12 rounded-full pl-5 pr-12 py-3.5 text-sm text-white placeholder-white/40 outline-none focus:border-white/40" />
+                  <button type="submit" disabled={busy || !email.trim()} aria-label="continue"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white text-black flex items-center justify-center disabled:opacity-30 hover:opacity-90 transition-opacity">
+                    <ArrowRight size={16} strokeWidth={2.5} />
+                  </button>
+                </div>
                 <button type="submit" disabled={busy || !email.trim()}
                   className="w-full bg-white text-black font-bold text-sm py-3.5 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40">
                   {tr('auth', 'continueBtn', lang)}
