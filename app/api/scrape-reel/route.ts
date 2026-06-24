@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerUser } from '@/lib/supabase-server';
+import { getRequestUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export const maxDuration = 60;
 
 const OWNER_EMAILS = ['anagashtay@gmail.com'];
 
-async function isPro(): Promise<boolean> {
-  const u = await getServerUser();
+async function isPro(req: NextRequest): Promise<boolean> {
+  const u = await getRequestUser(req);
   const email = u?.email?.toLowerCase();
   if (!email) return false;
   if (OWNER_EMAILS.includes(email)) return true;
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   const token = process.env.APIFY_TOKEN;
   if (!token) return NextResponse.json({ error: 'scraping_not_configured' }, { status: 500 });
 
-  if (!(await isPro())) return NextResponse.json({ error: 'pro_required' }, { status: 402 });
+  if (!(await isPro(req))) return NextResponse.json({ error: 'pro_required' }, { status: 402 });
 
   let url = '';
   try { url = (await req.json()).url ?? ''; } catch {}
