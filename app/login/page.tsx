@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { supabaseBrowser } from '@/lib/supabase-browser';
 import { supabase } from '@/lib/supabase';
 import { useLang } from '@/components/LanguageProvider';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { tr } from '@/lib/translations';
 
 const APPLE_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif';
@@ -99,8 +100,7 @@ export default function LoginPage() {
         setTimeout(() => { window.location.href = '/'; }, 1200);
       }
     } catch (e) {
-      const raw = (e as Error).message || String(e);
-      setErr(`${friendlyError(raw, lang)} — [${raw}]`);
+      setErr(friendlyError((e as Error).message, lang));
     } finally {
       setBusy(false);
     }
@@ -115,7 +115,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen bg-[#0a0a0a]" style={{ fontFamily: APPLE_FONT }}>
       {/* LEFT — auth form */}
-      <div className="w-full md:w-1/2 flex items-center justify-center px-6 py-16 text-white">
+      <div className="relative w-full md:w-1/2 flex items-center justify-center px-6 py-16 text-white">
+        <div className="absolute top-4 right-4 z-50"><LanguageSwitcher /></div>
         <div className="w-full max-w-sm">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.jpg" alt="HookedAI" className="w-12 h-12 rounded-xl object-cover mx-auto mb-7" />
