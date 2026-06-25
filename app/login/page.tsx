@@ -22,7 +22,7 @@ export default function LoginPage() {
   const [thumbs, setThumbs] = useState<string[]>([]);
 
   useEffect(() => {
-    supabase.from('hooks').select('thumbnail_url').not('thumbnail_url', 'is', null).order('views', { ascending: false }).limit(48)
+    supabase.from('hooks').select('thumbnail_url').not('thumbnail_url', 'is', null).order('views', { ascending: false }).limit(60)
       .then(({ data }) => setThumbs(((data ?? []) as { thumbnail_url: string | null }[]).map(r => r.thumbnail_url).filter((u): u is string => !!u)));
   }, []);
 
@@ -174,14 +174,14 @@ export default function LoginPage() {
 
       {/* RIGHT — animated tilted wall of real Reels (Mobbin-style) */}
       <div className="hidden md:block w-1/2 relative overflow-hidden bg-[#0a0a0a] border-l border-white/10">
-        <div className="absolute inset-0 -rotate-[8deg] scale-[1.3] origin-center flex gap-2.5 px-2">
-          {[0, 1, 2, 3].map(col => {
-            const colThumbs = thumbs.filter((_, i) => i % 4 === col);
+        <div className="absolute inset-0 -rotate-[8deg] scale-[1.12] origin-center flex gap-2 px-2">
+          {[0, 1, 2, 3, 4].map(col => {
+            const colThumbs = thumbs.filter((_, i) => i % 5 === col);
             const loop = colThumbs.length ? [...colThumbs, ...colThumbs] : [];
             return (
               <div
                 key={col}
-                className="flex-1 flex flex-col gap-2.5 will-change-transform"
+                className="flex-1 flex flex-col gap-2 will-change-transform"
                 style={{ animation: `${col % 2 === 1 ? 'reelDown' : 'reelUp'} ${46 + col * 6}s linear infinite` }}
               >
                 {loop.map((t, i) => (
