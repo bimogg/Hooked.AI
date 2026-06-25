@@ -88,8 +88,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.jpg" alt="HookedAI" className="w-12 h-12 rounded-xl object-cover mx-auto mb-7" />
-          <h1 className="text-2xl font-bold text-center tracking-tight">{tr('auth', titleKey, lang)}</h1>
-          <p className="text-sm text-white/50 text-center mt-2 mb-8">{tr('auth', 'sub', lang)}</p>
+          <h1 className="text-2xl font-bold text-center tracking-tight mb-8">{tr('auth', titleKey, lang)}</h1>
 
           {msg ? (
             <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm text-center px-5 py-6">
