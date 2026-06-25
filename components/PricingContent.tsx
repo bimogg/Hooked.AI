@@ -94,6 +94,7 @@ export default function PricingContent() {
   ], [lang, isSignedIn, checkoutUrl]);
 
   const sliderPct = (stepIdx / (VOLUME_STEPS.length - 1)) * 100;
+  const current = plans.find(p => p.id === highlight)!;
 
   return (
     <div className="bg-white text-[#0a0a0a] min-h-[calc(100vh-80px)]">
@@ -146,6 +147,28 @@ export default function PricingContent() {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Live price readout — updates as the slider moves */}
+        <div className="text-center mb-12 md:mb-16">
+          <p className="text-sm text-[#888] mb-2">
+            {formatVolume(volume, lang)} {tr('pricing', 'readoutUnit', lang)}
+          </p>
+          <div className="flex items-baseline justify-center gap-1.5">
+            {current.price === null ? (
+              <span className="font-display font-bold text-5xl md:text-6xl tracking-tight text-[#0a0a0a]">
+                {tr('pricing', 'customPrice', lang)}
+              </span>
+            ) : (
+              <>
+                <span className="font-display font-bold text-5xl md:text-6xl tracking-tight text-[#0a0a0a]">
+                  ${current.price}
+                </span>
+                <span className="text-lg text-[#999]">/ mo</span>
+              </>
+            )}
+          </div>
+          <p className="text-sm font-medium text-[#e8002d] mt-2 uppercase tracking-wide">{current.name}</p>
         </div>
 
         {/* Cards — 4 columns like Resend */}
