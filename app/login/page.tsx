@@ -99,7 +99,8 @@ export default function LoginPage() {
         setTimeout(() => { window.location.href = '/'; }, 1200);
       }
     } catch (e) {
-      setErr(friendlyError((e as Error).message, lang));
+      const raw = (e as Error).message || String(e);
+      setErr(`${friendlyError(raw, lang)} — [${raw}]`);
     } finally {
       setBusy(false);
     }
