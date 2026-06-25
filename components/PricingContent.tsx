@@ -8,7 +8,7 @@ import { tr } from '@/lib/translations';
 
 const POLAR_CHECKOUT = 'https://buy.polar.sh/polar_cl_z60eWttODS3mrButkP1Q6WZzVsDpDLgpk4fMs4X32s4';
 
-const VOLUME_STEPS = [3, 10, 50, 100, 200, 500, 1000] as const;
+const VOLUME_STEPS = [3, 10, 20, 50, 100, 250, 500] as const;
 
 type PlanId = 'free' | 'pro' | 'creator' | 'enterprise';
 
@@ -26,8 +26,8 @@ type Plan = {
 
 function recommendedPlan(volume: number): PlanId {
   if (volume <= 3) return 'free';
-  if (volume <= 50) return 'pro';
-  if (volume <= 500) return 'creator';
+  if (volume <= 20) return 'pro';
+  if (volume <= 100) return 'creator';
   return 'enterprise';
 }
 
