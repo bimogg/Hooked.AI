@@ -45,11 +45,17 @@ export default function LoginPage() {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash || '';
       const params = new URLSearchParams(window.location.search);
+      const tokenHash = params.get('token_hash');
+      const type = params.get('type');
       const code = params.get('code');
-      if (hash.includes('type=recovery') || params.get('type') === 'recovery') {
+      if (type === 'recovery' && tokenHash) {
+        // Cross-device safe: verify the recovery token to create a session.
+        sb.auth.verifyOtp({ type: 'recovery', token_hash: tokenHash })
+          .then(({ error }) => { if (!error) setMode('recovery'); else setErr(friendlyError(error.message, lang)); })
+          .catch(() => {});
+      } else if (hash.includes('type=recovery')) {
         setMode('recovery');
       } else if (code) {
-        // PKCE recovery link — exchange the code so updateUser has a session, then show the form.
         sb.auth.exchangeCodeForSession(code)
           .then(() => setMode('recovery'))
           .catch(() => {});
