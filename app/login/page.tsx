@@ -165,13 +165,6 @@ export default function LoginPage() {
                   </div>
                 )}
 
-                {mode === 'signin' && (
-                  <button type="button" onClick={() => { setMode('forgot'); setErr(null); }}
-                    className="self-end text-xs text-white/50 hover:text-white/80 -mt-1">
-                    {tr('auth', 'forgotLink', lang)}
-                  </button>
-                )}
-
                 {err && <p className="text-xs text-red-400 text-center">{err}</p>}
 
                 <button type="submit" disabled={busy}
