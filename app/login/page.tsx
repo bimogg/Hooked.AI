@@ -36,11 +36,25 @@ export default function LoginPage() {
       .then(({ data }) => setThumbs(((data ?? []) as { thumbnail_url: string | null }[]).map(r => r.thumbnail_url).filter((u): u is string => !!u)));
   }, []);
 
-  // When the user opens the password-reset link, Supabase emits PASSWORD_RECOVERY.
+  // When the user opens the password-reset link, switch to the "set new password" form.
   useEffect(() => {
-    const { data: sub } = supabaseBrowser().auth.onAuthStateChange((event: string) => {
+    const sb = supabaseBrowser();
+    const { data: sub } = sb.auth.onAuthStateChange((event: string) => {
       if (event === 'PASSWORD_RECOVERY') { setMode('recovery'); setErr(null); setMsg(null); }
     });
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash || '';
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      if (hash.includes('type=recovery') || params.get('type') === 'recovery') {
+        setMode('recovery');
+      } else if (code) {
+        // PKCE recovery link — exchange the code so updateUser has a session, then show the form.
+        sb.auth.exchangeCodeForSession(code)
+          .then(() => setMode('recovery'))
+          .catch(() => {});
+      }
+    }
     return () => { sub.subscription.unsubscribe(); };
   }, []);
 
