@@ -52,7 +52,7 @@ export default function LoginPage() {
       if (type === 'recovery' && tokenHash) {
         // Cross-device safe: verify the recovery token to create a session.
         sb.auth.verifyOtp({ type: 'recovery', token_hash: tokenHash })
-          .then(({ error }) => { if (!error) setMode('recovery'); else setErr(friendlyError(error.message, lang)); })
+          .then(({ error }: { error: { message: string } | null }) => { if (!error) setMode('recovery'); else setErr(friendlyError(error.message, lang)); })
           .catch(() => {});
       } else if (hash.includes('type=recovery')) {
         setMode('recovery');
