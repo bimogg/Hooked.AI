@@ -28,7 +28,7 @@ export default function LoginPage() {
 
   // When the user opens the password-reset link, Supabase emits PASSWORD_RECOVERY.
   useEffect(() => {
-    const { data: sub } = supabaseBrowser().auth.onAuthStateChange((event) => {
+    const { data: sub } = supabaseBrowser().auth.onAuthStateChange((event: string) => {
       if (event === 'PASSWORD_RECOVERY') { setMode('recovery'); setErr(null); setMsg(null); }
     });
     return () => { sub.subscription.unsubscribe(); };
