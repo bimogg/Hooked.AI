@@ -16,7 +16,7 @@ export default function LoginPage() {
   const [thumbs, setThumbs] = useState<string[]>([]);
 
   useEffect(() => {
-    supabase.from('hooks').select('thumbnail_url').not('thumbnail_url', 'is', null).limit(21)
+    supabase.from('hooks').select('thumbnail_url').not('thumbnail_url', 'is', null).order('views', { ascending: false }).limit(30)
       .then(({ data }) => setThumbs(((data ?? []) as { thumbnail_url: string | null }[]).map(r => r.thumbnail_url).filter((u): u is string => !!u)));
   }, []);
 
@@ -87,17 +87,34 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* RIGHT — tilted collage of real hook thumbnails */}
-      <div className="hidden md:block w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 -rotate-6 scale-125 origin-center">
-          <div className="columns-3 gap-3 p-3">
-            {thumbs.map((t, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={i} src={t} alt="" loading="lazy" className="w-full mb-3 rounded-xl object-cover" />
-            ))}
-          </div>
+      {/* RIGHT — animated tilted wall of real Reels (Mobbin-style) */}
+      <div className="hidden md:block w-1/2 relative overflow-hidden bg-[#0a0a0a]">
+        <div className="absolute inset-0 -rotate-[8deg] scale-[1.35] origin-center flex gap-3 px-2">
+          {[0, 1, 2].map(col => {
+            const colThumbs = thumbs.filter((_, i) => i % 3 === col);
+            const loop = colThumbs.length ? [...colThumbs, ...colThumbs] : [];
+            return (
+              <div
+                key={col}
+                className="flex-1 flex flex-col gap-3 will-change-transform"
+                style={{ animation: `${col === 1 ? 'reelDown' : 'reelUp'} ${44 + col * 7}s linear infinite` }}
+              >
+                {loop.map((t, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={i} src={t} alt="" loading="lazy" className="w-full rounded-xl object-cover shadow-lg" />
+                ))}
+              </div>
+            );
+          })}
         </div>
+        {/* fade into the dark form side */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-transparent to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#0a0a0a] to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+        <style>{`
+          @keyframes reelUp { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+          @keyframes reelDown { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+        `}</style>
       </div>
     </div>
   );
