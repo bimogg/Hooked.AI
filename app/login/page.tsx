@@ -10,6 +10,16 @@ const APPLE_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe 
 
 type Mode = 'signin' | 'signup' | 'forgot' | 'recovery';
 
+function friendlyError(m: string, lang: string): string {
+  const s = (m || '').toLowerCase();
+  if (s.includes('invalid login') || s.includes('invalid credentials')) return tr('auth', 'errInvalid', lang);
+  if (s.includes('already registered') || s.includes('already been registered') || s.includes('user already')) return tr('auth', 'errExists', lang);
+  if (s.includes('not confirmed')) return tr('auth', 'errNotConfirmed', lang);
+  if (s.includes('at least') || s.includes('password should') || s.includes('6 character')) return tr('auth', 'errShort', lang);
+  if (s.includes('rate limit') || s.includes('too many') || s.includes('after')) return tr('auth', 'errRate', lang);
+  return tr('auth', 'errGeneric', lang);
+}
+
 export default function LoginPage() {
   const { lang } = useLang();
   const [mode, setMode] = useState<Mode>('signin');
@@ -69,7 +79,7 @@ export default function LoginPage() {
         setTimeout(() => { window.location.href = '/'; }, 1200);
       }
     } catch (e) {
-      setErr((e as Error).message);
+      setErr(friendlyError((e as Error).message, lang));
     } finally {
       setBusy(false);
     }
