@@ -1,7 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { Crown, Pencil, Check } from 'lucide-react';
+import { Crown, Pencil, Check, Instagram } from 'lucide-react';
 import { useLang } from '@/components/LanguageProvider';
 import { useAuth } from '@/components/AuthProvider';
 import { supabaseBrowser } from '@/lib/supabase-browser';
@@ -35,7 +35,6 @@ function scoreColor(s: number) {
   return '#e8002d';
 }
 
-// Cartoon avatars (DiceBear) — no asset hosting needed.
 const AVATARS = [
   'https://api.dicebear.com/9.x/adventurer/svg?seed=Milo',
   'https://api.dicebear.com/9.x/adventurer/svg?seed=Zoe',
@@ -51,7 +50,6 @@ const AVATARS = [
   'https://api.dicebear.com/9.x/bottts/svg?seed=Pixel',
 ];
 
-// Background banners
 const BANNERS: Record<string, string> = {
   sky: 'linear-gradient(135deg,#a8d8ff 0%,#e8f4ff 100%)',
   sunset: 'linear-gradient(135deg,#ff9a8b 0%,#ff6a88 50%,#ff99ac 100%)',
@@ -63,6 +61,32 @@ const BANNERS: Record<string, string> = {
 };
 const BANNER_IDS = Object.keys(BANNERS);
 
+const RAINBOW = 'linear-gradient(90deg,#ff0040,#ff8a00,#ffd500,#22c55e,#3b82f6,#8b5cf6)';
+
+function TikTokIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+    </svg>
+  );
+}
+function XIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+function socialUrl(platform: 'instagram' | 'tiktok' | 'x', v: string): string {
+  const val = v.trim();
+  if (/^https?:\/\//i.test(val)) return val;
+  const handle = val.replace(/^@/, '');
+  if (platform === 'instagram') return `https://instagram.com/${handle}`;
+  if (platform === 'tiktok') return `https://tiktok.com/@${handle}`;
+  return `https://x.com/${handle}`;
+}
+
 export default function ProfilePage() {
   const { lang } = useLang();
   const { user, loading, signOut } = useAuth();
@@ -73,18 +97,24 @@ export default function ProfilePage() {
   const [history, setHistory] = useState<HistoryItem[] | null>(null);
   const [pro, setPro] = useState(false);
 
-  const [avatar, setAvatar] = useState<string>('');
-  const [banner, setBanner] = useState<string>('sky');
-  const [bio, setBio] = useState<string>('');
+  const [avatar, setAvatar] = useState('');
+  const [banner, setBanner] = useState('sky');
+  const [bio, setBio] = useState('');
+  const [ig, setIg] = useState('');
+  const [tt, setTt] = useState('');
+  const [xx, setXx] = useState('');
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    const m = (user.user_metadata ?? {}) as { avatar_url?: string; banner?: string; bio?: string };
+    const m = (user.user_metadata ?? {}) as Record<string, string>;
     setAvatar(m.avatar_url || '');
     setBanner(m.banner && BANNERS[m.banner] ? m.banner : 'sky');
     setBio(m.bio || '');
+    setIg(m.instagram || '');
+    setTt(m.tiktok || '');
+    setXx(m.x || '');
   }, [user]);
 
   useEffect(() => {
@@ -105,7 +135,7 @@ export default function ProfilePage() {
   const save = async () => {
     setSaving(true);
     try {
-      await supabaseBrowser().auth.updateUser({ data: { avatar_url: avatar, banner, bio } });
+      await supabaseBrowser().auth.updateUser({ data: { avatar_url: avatar, banner, bio, instagram: ig, tiktok: tt, x: xx } });
       setEditing(false);
     } finally {
       setSaving(false);
@@ -117,57 +147,90 @@ export default function ProfilePage() {
   const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
   const best = scores.length ? Math.max(...scores) : null;
   const initial = (displayName[0] || 'U').toUpperCase();
+  const expPct = Math.min(100, 12 + analysesCount * 8);
+
+  const socials: { key: 'instagram' | 'tiktok' | 'x'; val: string; icon: ReactNode }[] = [
+    { key: 'instagram', val: ig, icon: <Instagram size={16} /> },
+    { key: 'tiktok', val: tt, icon: <TikTokIcon /> },
+    { key: 'x', val: xx, icon: <XIcon /> },
+  ];
 
   return (
-    <div className="max-w-2xl mx-auto px-5 py-10">
+    <div className="max-w-lg mx-auto px-5 py-10">
       {isSignedIn ? (
         <>
-          {/* PROFILE CARD */}
-          <div className="rounded-3xl border border-black/10 overflow-hidden shadow-[0_8px_40px_-16px_rgba(0,0,0,0.2)] mb-6">
+          {/* PROFILE CARD — reference style */}
+          <div className="rounded-3xl border border-black/[0.08] overflow-hidden shadow-[0_10px_50px_-18px_rgba(0,0,0,0.25)] mb-6 bg-white">
+            {/* banner */}
             <div className="relative h-32" style={{ background: BANNERS[banner] }}>
               <button
                 onClick={() => setEditing(e => !e)}
-                className="absolute top-3 right-3 flex items-center gap-1.5 bg-white/90 backdrop-blur text-black text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-white transition-colors shadow-sm"
+                className="absolute top-3 right-3 flex items-center gap-1.5 bg-white text-black text-[13px] font-semibold px-3.5 py-1.5 rounded-full hover:bg-white/90 transition-colors shadow-sm"
               >
-                <Pencil size={12} /> {tr('profile', 'editProfile', lang)}
+                {tr('profile', 'editProfile', lang)} <Pencil size={13} />
               </button>
             </div>
 
             <div className="px-6 pb-6">
-              <div className="-mt-10 mb-3">
+              {/* avatar + exp bar on one line */}
+              <div className="flex items-end justify-between -mt-11 mb-4">
                 {avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt="" className="w-20 h-20 rounded-full object-cover bg-white ring-4 ring-white shadow-md" />
+                  <img src={avatar} alt="" className="w-[88px] h-[88px] rounded-full object-cover bg-white ring-[5px] ring-white shadow-md" />
                 ) : (
-                  <span className="w-20 h-20 rounded-full bg-[#e8002d] text-white text-2xl font-bold flex items-center justify-center ring-4 ring-white shadow-md">{initial}</span>
+                  <span className="w-[88px] h-[88px] rounded-full bg-[#e8002d] text-white text-3xl font-bold flex items-center justify-center ring-[5px] ring-white shadow-md">{initial}</span>
                 )}
+                <div className="pb-1.5 w-32">
+                  <p className="text-[11px] text-[#999] mb-1 text-right">exp.</p>
+                  <div className="h-2 rounded-full bg-black/[0.06] overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${expPct}%`, background: RAINBOW }} />
+                  </div>
+                </div>
               </div>
 
+              {/* name + premium */}
               <div className="flex items-center gap-2">
-                <h1 className="font-display font-extrabold text-2xl truncate">{displayName}</h1>
+                <h1 className="font-display font-extrabold text-2xl tracking-tight truncate">{displayName}</h1>
                 {pro && (
                   <span title="Pro" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-[#ffd700] to-[#ff9500] shrink-0 shadow-sm">
                     <Crown size={13} className="text-white" fill="white" />
                   </span>
                 )}
               </div>
-              <p className="text-[#888] text-sm mt-0.5">{user?.email}</p>
-              {bio && <p className="text-sm text-[#444] mt-3 leading-relaxed">{bio}</p>}
 
-              <div className="grid grid-cols-3 gap-2 mt-6 mb-1">
+              <p className="text-sm text-[#666] mt-1.5 leading-relaxed">{bio || user?.email}</p>
+
+              {/* stats — 3 cols with dividers */}
+              <div className="flex items-stretch border-y border-black/[0.07] my-5">
                 {[
                   { v: analysesCount, l: tr('profile', 'statAnalyses', lang) },
                   { v: avg ?? '—', l: tr('profile', 'statAvg', lang) },
                   { v: best ?? '—', l: tr('profile', 'statBest', lang) },
                 ].map((s, i) => (
-                  <div key={i} className="text-center rounded-2xl bg-[#f5f5f5] py-3">
+                  <div key={i} className={`flex-1 text-center py-4 ${i > 0 ? 'border-l border-black/[0.07]' : ''}`}>
                     <p className="font-display font-extrabold text-xl leading-none">{s.v}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-[#999] mt-1">{s.l}</p>
+                    <p className="text-[11px] text-[#999] mt-1.5">{s.l}</p>
                   </div>
                 ))}
               </div>
 
-              <button onClick={signOut} className="text-xs font-semibold text-[#999] hover:text-black transition-colors mt-4">
+              {/* socials */}
+              <div className="grid grid-cols-3 gap-3">
+                {socials.map(s => (
+                  s.val ? (
+                    <a key={s.key} href={socialUrl(s.key, s.val)} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center justify-center h-11 rounded-2xl bg-[#f5f5f5] text-black hover:bg-[#ececec] transition-colors">
+                      {s.icon}
+                    </a>
+                  ) : (
+                    <div key={s.key} className="flex items-center justify-center h-11 rounded-2xl bg-[#fafafa] text-black/25">
+                      {s.icon}
+                    </div>
+                  )
+                ))}
+              </div>
+
+              <button onClick={signOut} className="text-xs font-semibold text-[#999] hover:text-black transition-colors mt-5">
                 {tr('auth', 'signOut', lang)}
               </button>
             </div>
@@ -196,13 +259,15 @@ export default function ProfilePage() {
                 ))}
               </div>
 
-              <input
-                value={bio}
-                onChange={e => setBio(e.target.value)}
-                maxLength={120}
+              <input value={bio} onChange={e => setBio(e.target.value)} maxLength={120}
                 placeholder={tr('profile', 'bioPlaceholder', lang)}
-                className="w-full border border-black/12 rounded-xl px-4 py-3 text-sm outline-none focus:border-black/40 mb-4"
-              />
+                className="w-full border border-black/12 rounded-xl px-4 py-3 text-sm outline-none focus:border-black/40 mb-3" />
+
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <input value={ig} onChange={e => setIg(e.target.value)} placeholder="Instagram" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
+                <input value={tt} onChange={e => setTt(e.target.value)} placeholder="TikTok" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
+                <input value={xx} onChange={e => setXx(e.target.value)} placeholder="X" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
+              </div>
 
               <div className="flex gap-2">
                 <button onClick={save} disabled={saving}
