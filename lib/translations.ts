@@ -162,6 +162,7 @@ const t = {
     fInserts: { ru: 'Вставки', en: 'Inserts', es: 'Insertos', fr: 'Inserts', de: 'Inserts', pt: 'Inserts', it: 'Inserti', tr: 'Eklemeler', ar: 'مقاطع', ko: '인서트', zh: '插入片段', ja: 'インサート' },
     fTechniques: { ru: 'Техники', en: 'Techniques', es: 'Técnicas', fr: 'Techniques', de: 'Techniken', pt: 'Técnicas', it: 'Tecniche', tr: 'Teknikler', ar: 'تقنيات', ko: '기법', zh: '技巧', ja: 'テクニック' },
     techApp: { ru: 'Приложение', en: 'App', es: 'App', fr: 'App', de: 'App', pt: 'App', it: 'App', tr: 'Uygulama', ar: 'التطبيق', ko: '앱', zh: '应用', ja: 'アプリ' },
+    howTo: { ru: 'Как сделать', en: 'How to', es: 'Cómo hacer', fr: 'Comment faire', de: 'Anleitung', pt: 'Como fazer', it: 'Come fare', tr: 'Nasıl yapılır', ar: 'كيفية العمل', ko: '방법', zh: '操作步骤', ja: '作り方' },
     fHookTutorial: { ru: 'Как делать хуки', en: 'Hook Tutorial', es: 'Tutorial de Hooks', fr: 'Tutoriel Hook', de: 'Hook-Tutorial', pt: 'Tutorial de Hook', it: 'Tutorial Hook', tr: 'Hook Eğitimi', ar: 'شرح الهوك', ko: '훅 튜토리얼', zh: '钩子教程', ja: 'フック解説' },
     fVisual: { ru: 'Визуальный', en: 'Visual Hook', es: 'Hook Visual', fr: 'Hook Visuel', de: 'Visueller Hook', pt: 'Hook Visual', it: 'Hook Visivo', tr: 'Görsel Hook', ar: 'هوك بصري', ko: '비주얼 훅', zh: '视觉钩子', ja: 'ビジュアルフック' },
     fQuestion: { ru: 'Вопрос', en: 'Question Hook', es: 'Hook de Pregunta', fr: 'Hook Question', de: 'Frage-Hook', pt: 'Hook de Pergunta', it: 'Hook Domanda', tr: 'Soru Hook', ar: 'هوك سؤال', ko: '질문 훅', zh: '问题钩子', ja: '質問フック' },
