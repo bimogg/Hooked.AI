@@ -1,6 +1,7 @@
 import { supabaseAdmin as supabase, Hook } from '@/lib/supabase';
 import LibraryContent from '@/components/LibraryContent';
 import type { Post } from '@/components/CarouselCard';
+import { TECHNIQUES } from '@/lib/techniques';
 
 async function getHooks(type?: string): Promise<Hook[]> {
   if (type === 'Posts') return [];
@@ -51,10 +52,11 @@ export default async function LibraryPage({
   const isPosts = type === 'Posts';
   const isReels = type === 'Reels';
   const isInserts = type === 'Inserts';
-  const isNiche = !!type && !['all', 'Posts', 'Reels', 'Inserts'].includes(type);
+  const isTechniques = type === 'Techniques';
+  const isNiche = !!type && !['all', 'Posts', 'Reels', 'Inserts', 'Techniques'].includes(type);
 
-  const hooks = isPosts ? [] : await getHooks(type);
-  const posts = (isReels || isInserts) ? [] : (isNiche ? await getPosts(type) : await getPosts());
+  const hooks = (isPosts || isTechniques) ? [] : await getHooks(type);
+  const posts = (isReels || isInserts || isTechniques) ? [] : (isNiche ? await getPosts(type) : await getPosts());
 
-  return <LibraryContent hooks={hooks} posts={posts} activeType={type} />;
+  return <LibraryContent hooks={hooks} posts={posts} techniques={isTechniques ? TECHNIQUES : []} activeType={type} />;
 }
