@@ -6,12 +6,12 @@ import CarouselCard, { Post } from './CarouselCard';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 
-const PRIMARY_COUNT = 4; // all, Reels, Posts, Inserts
+const PRIMARY_COUNT = 5; // all, Reels, Posts, Inserts, Techniques
 
-const HOOK_TYPES = ['all', 'Reels', 'Posts', 'Inserts', 'Hook Tutorial', 'Visual Hook', 'Question Hook', 'Tutorial Hook', 'Engagement Hook', 'Curiosity Hook', 'Warning Hook', 'Challenge Hook', 'Mistake Hook'];
+const HOOK_TYPES = ['all', 'Reels', 'Posts', 'Inserts', 'Techniques', 'Hook Tutorial', 'Visual Hook', 'Question Hook', 'Tutorial Hook', 'Engagement Hook', 'Curiosity Hook', 'Warning Hook', 'Challenge Hook', 'Mistake Hook'];
 
 const FILTER_KEY: Record<string, string> = {
-  'all': 'fAll', 'Reels': 'fReels', 'Posts': 'fPosts', 'Inserts': 'fInserts',
+  'all': 'fAll', 'Reels': 'fReels', 'Posts': 'fPosts', 'Inserts': 'fInserts', 'Techniques': 'fTechniques',
   'Hook Tutorial': 'fHookTutorial', 'Visual Hook': 'fVisual', 'Question Hook': 'fQuestion',
   'Tutorial Hook': 'fTutorial', 'Engagement Hook': 'fEngagement', 'Curiosity Hook': 'fCuriosity',
   'Warning Hook': 'fWarning', 'Challenge Hook': 'fChallenge', 'Mistake Hook': 'fMistake',
