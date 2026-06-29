@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { getUserMedia, IgMedia } from '@/lib/instagram';
+import { getRequestUser } from '@/lib/supabase-server';
 
 const APIFY_TOKEN = process.env.APIFY_API_TOKEN ?? '';
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY ?? '';
@@ -13,6 +14,10 @@ const HOOK_TYPES = [
 export const maxDuration = 120;
 
 export async function POST(req: NextRequest) {
+  // Require sign-in before any paid analysis (protects API spend from anonymous abuse).
+  const user = await getRequestUser(req);
+  if (!user) return NextResponse.json({ error: 'auth_required' }, { status: 401 });
+
   const { username } = await req.json().catch(() => ({}));
   if (!username) return NextResponse.json({ error: 'username required' }, { status: 400 });
 
