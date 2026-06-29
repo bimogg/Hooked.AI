@@ -28,7 +28,7 @@ export default function TechniqueCard({ t }: { t: Technique }) {
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => { setOpen(true); setIdx(0); }}
         className="bg-[#f5f5f5] rounded-xl overflow-hidden flex flex-col hover:scale-[1.02] transition-transform cursor-pointer text-left w-full"
       >
         <div className="relative aspect-[9/12] w-full overflow-hidden">
@@ -55,19 +55,19 @@ export default function TechniqueCard({ t }: { t: Technique }) {
 
       {open && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
           onClick={() => setOpen(false)}
         >
           <div
-            className="bg-white rounded-2xl w-full max-w-[360px] overflow-hidden shadow-2xl my-6"
+            className="bg-white rounded-2xl overflow-hidden shadow-2xl w-full max-w-[380px] sm:max-w-[840px] h-[90vh] sm:h-[80vh] flex flex-col sm:flex-row"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative w-full bg-black" style={{ aspectRatio: '9/14' }}>
-              {/* swipeable carousel of clips */}
+            {/* VIDEO carousel — top on mobile, left on desktop (fixed) */}
+            <div className="relative bg-black shrink-0 h-[42vh] sm:h-full sm:w-[42%]">
               <div
                 ref={trackRef}
                 onScroll={onScroll}
-                className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-none"
+                className="flex h-full w-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
                 style={{ scrollbarWidth: 'none' }}
               >
                 {t.clips.map((c, i) => (
@@ -88,7 +88,6 @@ export default function TechniqueCard({ t }: { t: Technique }) {
 
               {many && (
                 <>
-                  {/* arrows (desktop) */}
                   {idx > 0 && (
                     <button onClick={() => go(-1)}
                       className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/45 hover:bg-black/70 rounded-full items-center justify-center text-white z-10">
@@ -101,7 +100,6 @@ export default function TechniqueCard({ t }: { t: Technique }) {
                       <ChevronRight size={18} />
                     </button>
                   )}
-                  {/* dots */}
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
                     {t.clips.map((_, i) => (
                       <span key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === idx ? 'bg-white' : 'bg-white/40'}`} />
@@ -118,7 +116,8 @@ export default function TechniqueCard({ t }: { t: Technique }) {
               </button>
             </div>
 
-            <div className="p-5">
+            {/* STEPS — scrolls independently */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-6">
               <h3 className="font-display font-extrabold text-lg leading-tight mb-1">{L(t.title)}</h3>
               <p className="text-[11px] text-[#888] mb-4">{tr('library', 'techApp', lang)}: {L(t.app)}</p>
               <ol className="flex flex-col gap-3">
