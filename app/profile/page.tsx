@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { Crown, Pencil, Check, Instagram } from 'lucide-react';
+import { Crown, Pencil, Check } from 'lucide-react';
 import { useLang } from '@/components/LanguageProvider';
 import { useAuth } from '@/components/AuthProvider';
 import { supabaseBrowser } from '@/lib/supabase-browser';
@@ -63,6 +63,15 @@ const BANNER_IDS = Object.keys(BANNERS);
 
 const RAINBOW = 'linear-gradient(90deg,#ff0040,#ff8a00,#ffd500,#22c55e,#3b82f6,#8b5cf6)';
 
+function InstagramIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
 function TikTokIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -150,7 +159,7 @@ export default function ProfilePage() {
   const expPct = Math.min(100, 12 + analysesCount * 8);
 
   const socials: { key: 'instagram' | 'tiktok' | 'x'; val: string; icon: ReactNode }[] = [
-    { key: 'instagram', val: ig, icon: <Instagram size={16} /> },
+    { key: 'instagram', val: ig, icon: <InstagramIcon /> },
     { key: 'tiktok', val: tt, icon: <TikTokIcon /> },
     { key: 'x', val: xx, icon: <XIcon /> },
   ];
