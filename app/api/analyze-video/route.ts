@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getRequestUser } from '@/lib/supabase-server';
 import { langForPrompt } from '@/lib/translations';
 
 export const maxDuration = 60;
@@ -33,6 +34,9 @@ function shapeHook(h: HookRow) {
 }
 
 export async function POST(req: NextRequest) {
+  // Require sign-in before any paid analysis (protects API spend from anonymous abuse).
+  const user = await getRequestUser(req);
+  if (!user) return NextResponse.json({ error: 'auth_required' }, { status: 401 });
   try {
     const { frames, timestamps, lang = 'ru', caption, likes, views, comments } = await req.json() as { frames: string[]; timestamps?: number[]; lang?: string; caption?: string; likes?: number | null; views?: number | null; comments?: number | null };
     const outputLang = langForPrompt(lang);
