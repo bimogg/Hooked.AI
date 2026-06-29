@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Hook } from '@/lib/supabase';
 import HookCard from './HookCard';
 import CarouselCard, { Post } from './CarouselCard';
+import TechniqueCard from './TechniqueCard';
+import type { Technique } from '@/lib/techniques';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 
@@ -23,9 +25,10 @@ function chipClass(active: boolean) {
   }`;
 }
 
-export default function LibraryContent({ hooks, posts = [], activeType }: { hooks: Hook[]; posts?: Post[]; activeType?: string }) {
+export default function LibraryContent({ hooks, posts = [], techniques = [], activeType }: { hooks: Hook[]; posts?: Post[]; techniques?: Technique[]; activeType?: string }) {
   const { lang } = useLang();
-  const total = hooks.length + posts.length;
+  const isTechniques = activeType === 'Techniques';
+  const total = isTechniques ? techniques.length : hooks.length + posts.length;
 
   const primary = HOOK_TYPES.slice(0, PRIMARY_COUNT);
   const secondary = HOOK_TYPES.slice(PRIMARY_COUNT);
@@ -72,8 +75,14 @@ export default function LibraryContent({ hooks, posts = [], activeType }: { hook
       <p className="text-xs text-[#888] mb-3">{total} {total === 1 ? tr('library', 'result', lang) : tr('library', 'results', lang)} · {tr('library', 'sorted', lang)}</p>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {posts.map((p) => <CarouselCard key={`p-${p.id}`} post={p} />)}
-        {hooks.map((h) => <HookCard key={`h-${h.id}`} hook={h} />)}
+        {isTechniques ? (
+          techniques.map((t) => <TechniqueCard key={t.id} t={t} />)
+        ) : (
+          <>
+            {posts.map((p) => <CarouselCard key={`p-${p.id}`} post={p} />)}
+            {hooks.map((h) => <HookCard key={`h-${h.id}`} hook={h} />)}
+          </>
+        )}
       </div>
 
       <div className="mt-16 border-t border-black/10 pt-10 text-center">
