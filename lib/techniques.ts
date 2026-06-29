@@ -26,26 +26,21 @@ export interface Technique {
 
 const BASE = 'https://asftbzhrxmikfubzrily.supabase.co/storage/v1/object/public/techniques';
 
-// Method for the two-tone / accent caption text seen in the demos.
+// Method for the two-tone / accent caption text — made in NodeVideo.
 // Add `img` or `video` (public techniques-bucket URL) to any step to illustrate it.
+// Steps are being filled in one by one as Alina sends them.
 const TWO_TONE_STEPS: Step[] = [
-  { text: { ru: 'Открой CapCut → «Новый проект» и добавь своё видео.', en: 'Open CapCut → "New project" and add your clip.' } },
-  { text: { ru: 'Внизу нажми «Текст» → «Добавить текст».', en: 'At the bottom tap "Text" → "Add text".' } },
-  { text: { ru: 'Напечатай фразу (например «I found it at the Yandex Museum»).', en: 'Type your phrase (e.g. "I found it at the Yandex Museum").' } },
-  { text: { ru: 'Во вкладке «Шрифт» выбери жирный шрифт, как в видео.', en: 'In the "Font" tab pick a bold font like in the video.' } },
-  { text: { ru: 'Чтобы слова были разного цвета — разбей текст на два слоя: один белый, второй цветной (красный/жёлтый), и поставь их рядом.', en: 'For different word colors split the text into two layers: one white, one colored (red/yellow), placed next to each other.' } },
-  { text: { ru: 'Во вкладке «Стиль» добавь лёгкую обводку или тень, чтобы текст читался на любом фоне.', en: 'In "Style" add a thin outline or shadow so text stays readable on any background.' } },
-  { text: { ru: 'Перетащи текст в верхнюю часть кадра.', en: 'Drag the text to the top of the frame.' } },
-  { text: { ru: 'Растяни слой текста на всю длину клипа (или нужный отрезок).', en: 'Stretch the text layer across the whole clip (or the part you need).' } },
-  { text: { ru: '(По желанию) «Анимация» → «Вход» → выбери появление (Fade / Type).', en: '(Optional) "Animation" → "In" → pick an entrance (Fade / Type).' } },
-  { text: { ru: 'Нажми «Экспорт» вверху справа и сохрани видео без вотермарки.', en: 'Tap "Export" top-right and save the video without a watermark.' } },
+  {
+    text: { ru: 'Скачай приложение NodeVideo.', en: 'Download the NodeVideo app.' },
+    img: `${BASE}/step1.jpg`,
+  },
 ];
 
 export const TECHNIQUES: Technique[] = [
   {
     id: 'two-tone-text',
     title: { ru: 'Двухцветный текст / субтитры', en: 'Two-color caption text' },
-    app: { ru: 'CapCut', en: 'CapCut' },
+    app: { ru: 'NodeVideo', en: 'NodeVideo' },
     thumbUrl: `${BASE}/IMG_2837.png`,
     clips: [
       { videoUrl: `${BASE}/IMG_2837.mp4`, thumbUrl: `${BASE}/IMG_2837.png` },
