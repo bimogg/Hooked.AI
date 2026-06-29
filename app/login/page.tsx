@@ -9,6 +9,10 @@ import { tr } from '@/lib/translations';
 
 const APPLE_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif';
 
+// Serve tiny resized webp thumbs (≈13KB vs 100KB+ originals) so the reels wall loads fast.
+const optimized = (u: string) =>
+  `https://images.weserv.nl/?url=${encodeURIComponent(u.replace(/^https?:\/\//, ''))}&w=320&output=webp&q=70`;
+
 type Mode = 'signin' | 'signup' | 'forgot' | 'recovery';
 
 function friendlyError(m: string, lang: string): string {
@@ -210,7 +214,7 @@ export default function LoginPage() {
               >
                 {loop.map((t, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img key={i} src={t} alt="" loading="lazy" className="w-full rounded-xl object-cover shadow-lg" />
+                  <img key={i} src={optimized(t)} alt="" loading="lazy" decoding="async" className="w-full rounded-xl object-cover shadow-lg" />
                 ))}
               </div>
             );
