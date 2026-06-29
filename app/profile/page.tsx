@@ -185,9 +185,9 @@ export default function ProfilePage() {
               <div className="flex items-end justify-between -mt-11 mb-4">
                 {avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt="" className="w-[88px] h-[88px] rounded-full object-cover bg-white ring-[5px] ring-white shadow-md" />
+                  <img src={avatar} alt="" className="relative z-10 w-[92px] h-[92px] rounded-full object-cover bg-white border-4 border-white shadow-[0_4px_14px_-4px_rgba(0,0,0,0.25)]" />
                 ) : (
-                  <span className="w-[88px] h-[88px] rounded-full bg-[#e8002d] text-white text-3xl font-bold flex items-center justify-center ring-[5px] ring-white shadow-md">{initial}</span>
+                  <span className="relative z-10 w-[92px] h-[92px] rounded-full bg-[#e8002d] text-white text-3xl font-bold flex items-center justify-center border-4 border-white shadow-[0_4px_14px_-4px_rgba(0,0,0,0.25)]">{initial}</span>
                 )}
                 <div className="pb-1.5 w-32">
                   <p className="text-[11px] text-[#999] mb-1 text-right">exp.</p>
