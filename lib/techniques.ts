@@ -1,21 +1,26 @@
 // Techniques shown in the Hook Library "Techniques" group. Each technique is a
-// short demo video + step-by-step instructions for recreating the effect.
+// carousel of short demo clips + step-by-step instructions for recreating it.
 // Steps live here (not in the DB) so adding a technique = edit this file + deploy.
 
 export type Loc = { ru: string; en: string };
+
+export interface Clip {
+  videoUrl: string;
+  thumbUrl: string;
+}
 
 export interface Technique {
   id: string;
   title: Loc;
   app: Loc;
-  videoUrl: string;
-  thumbUrl: string;
+  thumbUrl: string; // card cover
+  clips: Clip[]; // swipeable carousel inside the modal
   steps: Loc[];
 }
 
 const BASE = 'https://asftbzhrxmikfubzrily.supabase.co/storage/v1/object/public/techniques';
 
-// Shared method for the two-tone / accent caption text seen in the demos.
+// Method for the two-tone / accent caption text seen in the demos.
 const TWO_TONE_STEPS: Loc[] = [
   { ru: 'Открой CapCut → «Новый проект» и добавь своё видео.', en: 'Open CapCut → "New project" and add your clip.' },
   { ru: 'Внизу нажми «Текст» → «Добавить текст».', en: 'At the bottom tap "Text" → "Add text".' },
@@ -31,19 +36,14 @@ const TWO_TONE_STEPS: Loc[] = [
 
 export const TECHNIQUES: Technique[] = [
   {
-    id: 'two-tone-headline',
-    title: { ru: 'Двухцветный заголовок', en: 'Two-color headline text' },
+    id: 'two-tone-text',
+    title: { ru: 'Двухцветный текст / субтитры', en: 'Two-color caption text' },
     app: { ru: 'CapCut', en: 'CapCut' },
-    videoUrl: `${BASE}/IMG_2837.mp4`,
     thumbUrl: `${BASE}/IMG_2837.png`,
-    steps: TWO_TONE_STEPS,
-  },
-  {
-    id: 'accent-caption',
-    title: { ru: 'Жёлтый акцент-текст', en: 'Yellow accent caption' },
-    app: { ru: 'CapCut', en: 'CapCut' },
-    videoUrl: `${BASE}/IMG_2840.mp4`,
-    thumbUrl: `${BASE}/IMG_2840.png`,
+    clips: [
+      { videoUrl: `${BASE}/IMG_2837.mp4`, thumbUrl: `${BASE}/IMG_2837.png` },
+      { videoUrl: `${BASE}/IMG_2840.mp4`, thumbUrl: `${BASE}/IMG_2840.png` },
+    ],
     steps: TWO_TONE_STEPS,
   },
 ];
