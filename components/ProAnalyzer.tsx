@@ -134,6 +134,7 @@ export default function ProAnalyzer() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: target }),
       });
+      if (res.status === 401) { window.location.href = `/login?next=${encodeURIComponent('/pro')}`; return; }
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? 'Ошибка'); return; }
       setResults(data.reels);
