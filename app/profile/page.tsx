@@ -164,142 +164,130 @@ export default function ProfilePage() {
     { key: 'x', val: xx, icon: <XIcon /> },
   ];
 
-  return (
-    <div className="max-w-lg mx-auto px-5 py-10">
-      {isSignedIn ? (
-        <>
-          {/* PROFILE CARD — reference style */}
-          <div className="rounded-3xl border border-black/[0.08] overflow-hidden shadow-[0_10px_50px_-18px_rgba(0,0,0,0.25)] mb-6 bg-white">
-            {/* banner */}
-            <div className="relative h-32" style={{ background: BANNERS[banner] }}>
-              <button
-                onClick={() => setEditing(e => !e)}
-                className="absolute top-3 right-3 flex items-center gap-1.5 bg-white text-black text-[13px] font-semibold px-3.5 py-1.5 rounded-full hover:bg-white/90 transition-colors shadow-sm"
-              >
-                {tr('profile', 'editProfile', lang)} <Pencil size={13} />
-              </button>
-            </div>
+  const profileCard = (
+    <div className="rounded-3xl border border-black/[0.08] overflow-hidden shadow-[0_10px_50px_-18px_rgba(0,0,0,0.25)] bg-white">
+      {/* banner */}
+      <div className="relative h-32" style={{ background: BANNERS[banner] }}>
+        <button
+          onClick={() => setEditing(e => !e)}
+          className="absolute top-3 right-3 flex items-center gap-1.5 bg-white text-black text-[13px] font-semibold px-3.5 py-1.5 rounded-full hover:bg-white/90 transition-colors shadow-sm"
+        >
+          {tr('profile', 'editProfile', lang)} <Pencil size={13} />
+        </button>
+      </div>
 
-            <div className="px-6 pb-6">
-              {/* avatar + exp bar on one line */}
-              <div className="flex items-end justify-between -mt-11 mb-4">
-                {avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt="" className="relative z-10 w-[92px] h-[92px] rounded-full object-cover bg-white border-4 border-white shadow-[0_4px_14px_-4px_rgba(0,0,0,0.25)]" />
-                ) : (
-                  <span className="relative z-10 w-[92px] h-[92px] rounded-full bg-[#e8002d] text-white text-3xl font-bold flex items-center justify-center border-4 border-white shadow-[0_4px_14px_-4px_rgba(0,0,0,0.25)]">{initial}</span>
-                )}
-                <div className="pb-1.5 w-32">
-                  <p className="text-[11px] text-[#999] mb-1 text-right">exp.</p>
-                  <div className="h-2 rounded-full bg-black/[0.06] overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${expPct}%`, background: RAINBOW }} />
-                  </div>
-                </div>
-              </div>
-
-              {/* name + premium */}
-              <div className="flex items-center gap-2">
-                <h1 className="font-display font-extrabold text-2xl tracking-tight truncate">{displayName}</h1>
-                {pro && (
-                  <span title="Pro" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-[#ffd700] to-[#ff9500] shrink-0 shadow-sm">
-                    <Crown size={13} className="text-white" fill="white" />
-                  </span>
-                )}
-              </div>
-
-              <p className="text-sm text-[#666] mt-1.5 leading-relaxed">{bio || user?.email}</p>
-
-              {/* stats — 3 cols with dividers */}
-              <div className="flex items-stretch border-y border-black/[0.07] my-5">
-                {[
-                  { v: analysesCount, l: tr('profile', 'statAnalyses', lang) },
-                  { v: avg ?? '—', l: tr('profile', 'statAvg', lang) },
-                  { v: best ?? '—', l: tr('profile', 'statBest', lang) },
-                ].map((s, i) => (
-                  <div key={i} className={`flex-1 text-center py-4 ${i > 0 ? 'border-l border-black/[0.07]' : ''}`}>
-                    <p className="font-display font-extrabold text-xl leading-none">{s.v}</p>
-                    <p className="text-[11px] text-[#999] mt-1.5">{s.l}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* socials */}
-              <div className="grid grid-cols-3 gap-3">
-                {socials.map(s => (
-                  s.val ? (
-                    <a key={s.key} href={socialUrl(s.key, s.val)} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-center h-11 rounded-2xl bg-[#f5f5f5] text-black hover:bg-[#ececec] transition-colors">
-                      {s.icon}
-                    </a>
-                  ) : (
-                    <div key={s.key} className="flex items-center justify-center h-11 rounded-2xl bg-[#fafafa] text-black/25">
-                      {s.icon}
-                    </div>
-                  )
-                ))}
-              </div>
-
-              <button onClick={signOut} className="text-xs font-semibold text-[#999] hover:text-black transition-colors mt-5">
-                {tr('auth', 'signOut', lang)}
-              </button>
+      <div className="px-6 pb-6">
+        {/* avatar + exp bar on one line */}
+        <div className="flex items-end justify-between -mt-11 mb-4">
+          {avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatar} alt="" className="relative z-10 w-[92px] h-[92px] rounded-full object-cover bg-white border-4 border-white shadow-[0_4px_14px_-4px_rgba(0,0,0,0.25)]" />
+          ) : (
+            <span className="relative z-10 w-[92px] h-[92px] rounded-full bg-[#e8002d] text-white text-3xl font-bold flex items-center justify-center border-4 border-white shadow-[0_4px_14px_-4px_rgba(0,0,0,0.25)]">{initial}</span>
+          )}
+          <div className="pb-1.5 w-32">
+            <p className="text-[11px] text-[#999] mb-1 text-right">exp.</p>
+            <div className="h-2 rounded-full bg-black/[0.06] overflow-hidden">
+              <div className="h-full rounded-full" style={{ width: `${expPct}%`, background: RAINBOW }} />
             </div>
           </div>
-
-          {/* EDITOR */}
-          {editing && (
-            <div className="rounded-3xl border border-black/10 p-5 mb-8">
-              <p className="text-xs uppercase tracking-wider text-[#888] mb-3">{tr('profile', 'chooseAvatar', lang)}</p>
-              <div className="grid grid-cols-6 gap-2.5 mb-6">
-                {AVATARS.map(a => (
-                  <button key={a} onClick={() => setAvatar(a)}
-                    className={`rounded-full overflow-hidden aspect-square bg-[#f5f5f5] transition-all ${avatar === a ? 'ring-2 ring-[#e8002d] ring-offset-2' : 'hover:opacity-80'}`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={a} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-
-              <p className="text-xs uppercase tracking-wider text-[#888] mb-3">{tr('profile', 'chooseBanner', lang)}</p>
-              <div className="grid grid-cols-7 gap-2.5 mb-6">
-                {BANNER_IDS.map(id => (
-                  <button key={id} onClick={() => setBanner(id)}
-                    className={`h-10 rounded-xl transition-all ${banner === id ? 'ring-2 ring-[#e8002d] ring-offset-2' : 'hover:opacity-80'}`}
-                    style={{ background: BANNERS[id] }} />
-                ))}
-              </div>
-
-              <input value={bio} onChange={e => setBio(e.target.value)} maxLength={120}
-                placeholder={tr('profile', 'bioPlaceholder', lang)}
-                className="w-full border border-black/12 rounded-xl px-4 py-3 text-sm outline-none focus:border-black/40 mb-3" />
-
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                <input value={ig} onChange={e => setIg(e.target.value)} placeholder="Instagram" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
-                <input value={tt} onChange={e => setTt(e.target.value)} placeholder="TikTok" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
-                <input value={xx} onChange={e => setXx(e.target.value)} placeholder="X" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
-              </div>
-
-              <div className="flex gap-2">
-                <button onClick={save} disabled={saving}
-                  className="flex items-center gap-1.5 bg-[#e8002d] text-white font-bold text-sm px-6 py-2.5 rounded-full hover:opacity-90 disabled:opacity-50">
-                  <Check size={14} /> {saving ? '…' : tr('profile', 'save', lang)}
-                </button>
-                <button onClick={() => setEditing(false)} className="text-sm font-semibold text-[#888] hover:text-black px-4">
-                  {tr('profile', 'cancel', lang)}
-                </button>
-              </div>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="bg-[#f5f5f5] rounded-2xl px-5 py-6 mb-8 text-center mt-6">
-          <p className="text-sm text-[#666] mb-4 max-w-xs mx-auto">{tr('profile', 'signedOut', lang)}</p>
-          <Link href="/login" className="inline-block bg-[#e8002d] text-white font-bold text-sm px-7 py-3 rounded-full hover:opacity-90 transition-opacity">
-            {tr('nav', 'signIn', lang)}
-          </Link>
         </div>
-      )}
 
-      {/* HISTORY */}
+        {/* name + premium */}
+        <div className="flex items-center gap-2">
+          <h1 className="font-display font-extrabold text-2xl tracking-tight truncate">{displayName}</h1>
+          {pro && (
+            <span title="Pro" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-[#ffd700] to-[#ff9500] shrink-0 shadow-sm">
+              <Crown size={13} className="text-white" fill="white" />
+            </span>
+          )}
+        </div>
+
+        <p className="text-sm text-[#666] mt-1.5 leading-relaxed">{bio || user?.email}</p>
+
+        {/* stats — 3 cols with dividers */}
+        <div className="flex items-stretch border-y border-black/[0.07] my-5">
+          {[
+            { v: analysesCount, l: tr('profile', 'statAnalyses', lang) },
+            { v: avg ?? '—', l: tr('profile', 'statAvg', lang) },
+            { v: best ?? '—', l: tr('profile', 'statBest', lang) },
+          ].map((s, i) => (
+            <div key={i} className={`flex-1 text-center py-4 ${i > 0 ? 'border-l border-black/[0.07]' : ''}`}>
+              <p className="font-display font-extrabold text-xl leading-none">{s.v}</p>
+              <p className="text-[11px] text-[#999] mt-1.5">{s.l}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* socials */}
+        <div className="grid grid-cols-3 gap-3">
+          {socials.map(s => (
+            s.val ? (
+              <a key={s.key} href={socialUrl(s.key, s.val)} target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center h-11 rounded-2xl bg-[#f5f5f5] text-black hover:bg-[#ececec] transition-colors">
+                {s.icon}
+              </a>
+            ) : (
+              <div key={s.key} className="flex items-center justify-center h-11 rounded-2xl bg-[#fafafa] text-black/25">
+                {s.icon}
+              </div>
+            )
+          ))}
+        </div>
+
+        <button onClick={signOut} className="text-xs font-semibold text-[#999] hover:text-black transition-colors mt-5">
+          {tr('auth', 'signOut', lang)}
+        </button>
+      </div>
+    </div>
+  );
+
+  const editor = editing && (
+    <div className="rounded-3xl border border-black/10 p-5 mt-6">
+      <p className="text-xs uppercase tracking-wider text-[#888] mb-3">{tr('profile', 'chooseAvatar', lang)}</p>
+      <div className="grid grid-cols-6 gap-2.5 mb-6">
+        {AVATARS.map(a => (
+          <button key={a} onClick={() => setAvatar(a)}
+            className={`rounded-full overflow-hidden aspect-square bg-[#f5f5f5] transition-all ${avatar === a ? 'ring-2 ring-[#e8002d] ring-offset-2' : 'hover:opacity-80'}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={a} alt="" className="w-full h-full object-cover" />
+          </button>
+        ))}
+      </div>
+
+      <p className="text-xs uppercase tracking-wider text-[#888] mb-3">{tr('profile', 'chooseBanner', lang)}</p>
+      <div className="grid grid-cols-7 gap-2.5 mb-6">
+        {BANNER_IDS.map(id => (
+          <button key={id} onClick={() => setBanner(id)}
+            className={`h-10 rounded-xl transition-all ${banner === id ? 'ring-2 ring-[#e8002d] ring-offset-2' : 'hover:opacity-80'}`}
+            style={{ background: BANNERS[id] }} />
+        ))}
+      </div>
+
+      <input value={bio} onChange={e => setBio(e.target.value)} maxLength={120}
+        placeholder={tr('profile', 'bioPlaceholder', lang)}
+        className="w-full border border-black/12 rounded-xl px-4 py-3 text-sm outline-none focus:border-black/40 mb-3" />
+
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        <input value={ig} onChange={e => setIg(e.target.value)} placeholder="Instagram" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
+        <input value={tt} onChange={e => setTt(e.target.value)} placeholder="TikTok" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
+        <input value={xx} onChange={e => setXx(e.target.value)} placeholder="X" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
+      </div>
+
+      <div className="flex gap-2">
+        <button onClick={save} disabled={saving}
+          className="flex items-center gap-1.5 bg-[#e8002d] text-white font-bold text-sm px-6 py-2.5 rounded-full hover:opacity-90 disabled:opacity-50">
+          <Check size={14} /> {saving ? '…' : tr('profile', 'save', lang)}
+        </button>
+        <button onClick={() => setEditing(false)} className="text-sm font-semibold text-[#888] hover:text-black px-4">
+          {tr('profile', 'cancel', lang)}
+        </button>
+      </div>
+    </div>
+  );
+
+  const historySection = (
+    <>
       <h2 className="text-[10px] uppercase tracking-[0.2em] text-[#888] mb-4">{tr('profile', 'myAnalyses', lang)}</h2>
 
       {history === null ? null : history.length === 0 ? (
@@ -336,6 +324,37 @@ export default function ProfilePage() {
           ))}
         </div>
       )}
+    </>
+  );
+
+  if (!isSignedIn) {
+    return (
+      <div className="max-w-lg mx-auto px-5 py-10">
+        <div className="bg-[#f5f5f5] rounded-2xl px-5 py-6 mb-8 text-center mt-6">
+          <p className="text-sm text-[#666] mb-4 max-w-xs mx-auto">{tr('profile', 'signedOut', lang)}</p>
+          <Link href="/login" className="inline-block bg-[#e8002d] text-white font-bold text-sm px-7 py-3 rounded-full hover:opacity-90 transition-opacity">
+            {tr('nav', 'signIn', lang)}
+          </Link>
+        </div>
+        {historySection}
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto px-5 py-10">
+      <div className="grid gap-8 lg:grid-cols-[370px_minmax(0,1fr)] lg:gap-10 lg:items-start">
+        {/* LEFT — profile card + editor (sticky on desktop) */}
+        <div className="lg:sticky lg:top-8 self-start">
+          {profileCard}
+          {editor}
+        </div>
+
+        {/* RIGHT — analyses history */}
+        <div className="min-w-0">
+          {historySection}
+        </div>
+      </div>
     </div>
   );
 }
