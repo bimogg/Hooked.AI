@@ -238,6 +238,10 @@ const t = {
   },
   profile: {
     editProfile: { ru: 'Редактировать', en: 'Edit profile', es: 'Editar perfil', fr: 'Modifier le profil', de: 'Profil bearbeiten', pt: 'Editar perfil', it: 'Modifica profilo', tr: 'Profili düzenle', ar: 'تعديل الملف', ko: '프로필 편집', zh: '编辑资料', ja: 'プロフィール編集' },
+    nameLabel: { ru: 'Имя', en: 'Name', es: 'Nombre', fr: 'Nom', de: 'Name', pt: 'Nome', it: 'Nome', tr: 'İsim', ar: 'الاسم', ko: '이름', zh: '名字', ja: '名前' },
+    namePlaceholder: { ru: 'Твоё имя', en: 'Your name', es: 'Tu nombre', fr: 'Ton nom', de: 'Dein Name', pt: 'Seu nome', it: 'Il tuo nome', tr: 'Adın', ar: 'اسمك', ko: '이름', zh: '你的名字', ja: 'あなたの名前' },
+    uploadPhoto: { ru: 'Загрузить фото', en: 'Upload photo', es: 'Subir foto', fr: 'Importer une photo', de: 'Foto hochladen', pt: 'Enviar foto', it: 'Carica foto', tr: 'Fotoğraf yükle', ar: 'رفع صورة', ko: '사진 업로드', zh: '上传照片', ja: '写真をアップ' },
+    uploadBg: { ru: 'Загрузить фон', en: 'Upload background', es: 'Subir fondo', fr: 'Importer un fond', de: 'Hintergrund hochladen', pt: 'Enviar fundo', it: 'Carica sfondo', tr: 'Arka plan yükle', ar: 'رفع خلفية', ko: '배경 업로드', zh: '上传背景', ja: '背景をアップ' },
     chooseAvatar: { ru: 'Выбери аватар', en: 'Choose avatar', es: 'Elige avatar', fr: 'Choisir un avatar', de: 'Avatar wählen', pt: 'Escolha o avatar', it: 'Scegli avatar', tr: 'Avatar seç', ar: 'اختر الصورة', ko: '아바타 선택', zh: '选择头像', ja: 'アバターを選ぶ' },
     chooseBanner: { ru: 'Выбери фон', en: 'Choose background', es: 'Elige fondo', fr: 'Choisir le fond', de: 'Hintergrund wählen', pt: 'Escolha o fundo', it: 'Scegli sfondo', tr: 'Arka plan seç', ar: 'اختر الخلفية', ko: '배경 선택', zh: '选择背景', ja: '背景を選ぶ' },
     bioPlaceholder: { ru: 'Пара слов о себе', en: 'A few words about you', es: 'Unas palabras sobre ti', fr: 'Quelques mots sur toi', de: 'Ein paar Worte über dich', pt: 'Algumas palavras sobre você', it: 'Due parole su di te', tr: 'Kendin hakkında', ar: 'بضع كلمات عنك', ko: '자기소개', zh: '介绍一下自己', ja: '自己紹介' },
