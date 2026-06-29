@@ -1,6 +1,6 @@
 'use client';
-import { useState } from 'react';
-import { X, Play } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { X, Play, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 import type { Technique, Loc } from '@/lib/techniques';
@@ -8,7 +8,22 @@ import type { Technique, Loc } from '@/lib/techniques';
 export default function TechniqueCard({ t }: { t: Technique }) {
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
+  const [idx, setIdx] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
   const L = (o: Loc) => (lang === 'ru' ? o.ru : o.en);
+  const many = t.clips.length > 1;
+
+  const onScroll = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    setIdx(Math.round(el.scrollLeft / el.clientWidth));
+  };
+
+  const go = (dir: number) => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollTo({ left: (idx + dir) * el.clientWidth, behavior: 'smooth' });
+  };
 
   return (
     <>
@@ -27,6 +42,11 @@ export default function TechniqueCard({ t }: { t: Technique }) {
           <span className="absolute top-2 left-2 bg-[#e8002d] text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">
             {tr('library', 'fTechniques', lang)}
           </span>
+          {many && (
+            <span className="absolute top-2 right-2 flex items-center gap-1 bg-black/55 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-md">
+              <Layers size={11} /> {t.clips.length}
+            </span>
+          )}
         </div>
         <div className="p-3">
           <p className="text-[12px] font-semibold leading-tight line-clamp-2">{L(t.title)}</p>
@@ -43,16 +63,53 @@ export default function TechniqueCard({ t }: { t: Technique }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative w-full bg-black" style={{ aspectRatio: '9/14' }}>
-              <video
-                src={t.videoUrl}
-                poster={t.thumbUrl}
-                controls
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="w-full h-full object-contain"
-              />
+              {/* swipeable carousel of clips */}
+              <div
+                ref={trackRef}
+                onScroll={onScroll}
+                className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-none"
+                style={{ scrollbarWidth: 'none' }}
+              >
+                {t.clips.map((c, i) => (
+                  <div key={i} className="snap-center shrink-0 w-full h-full">
+                    <video
+                      src={c.videoUrl}
+                      poster={c.thumbUrl}
+                      controls
+                      autoPlay={i === 0}
+                      muted
+                      loop
+                      playsInline
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {many && (
+                <>
+                  {/* arrows (desktop) */}
+                  {idx > 0 && (
+                    <button onClick={() => go(-1)}
+                      className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/45 hover:bg-black/70 rounded-full items-center justify-center text-white z-10">
+                      <ChevronLeft size={18} />
+                    </button>
+                  )}
+                  {idx < t.clips.length - 1 && (
+                    <button onClick={() => go(1)}
+                      className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/45 hover:bg-black/70 rounded-full items-center justify-center text-white z-10">
+                      <ChevronRight size={18} />
+                    </button>
+                  )}
+                  {/* dots */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                    {t.clips.map((_, i) => (
+                      <span key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === idx ? 'bg-white' : 'bg-white/40'}`} />
+                    ))}
+                  </div>
+                </>
+              )}
+
               <button
                 onClick={() => setOpen(false)}
                 className="absolute top-3 right-3 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white z-10"
