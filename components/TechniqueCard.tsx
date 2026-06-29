@@ -5,6 +5,8 @@ import { useLang } from './LanguageProvider';
 import { tr } from '@/lib/translations';
 import type { Technique, Loc } from '@/lib/techniques';
 
+const APPLE_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif';
+
 export default function TechniqueCard({ t }: { t: Technique }) {
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
@@ -60,6 +62,7 @@ export default function TechniqueCard({ t }: { t: Technique }) {
         >
           <div
             className="bg-white rounded-2xl overflow-hidden shadow-2xl w-full max-w-[380px] sm:max-w-[840px] h-[90vh] sm:h-[80vh] flex flex-col sm:flex-row"
+            style={{ fontFamily: APPLE_FONT }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* VIDEO carousel — top on mobile, left on desktop (fixed) */}
@@ -117,22 +120,27 @@ export default function TechniqueCard({ t }: { t: Technique }) {
             </div>
 
             {/* STEPS — scrolls independently */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-6">
-              <h3 className="font-display font-extrabold text-lg leading-tight mb-1">{L(t.title)}</h3>
-              <p className="text-[11px] text-[#888] mb-4">{tr('library', 'techApp', lang)}: {L(t.app)}</p>
-              <ol className="flex flex-col gap-4">
+            <div className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-7">
+              <h3 className="text-[22px] font-bold tracking-[-0.02em] text-[#0a0a0a] leading-tight">{L(t.title)}</h3>
+              <span className="inline-flex items-center gap-1.5 mt-2.5 mb-6 bg-[#f1f1f3] text-[#444] text-[12px] font-semibold px-3 py-1.5 rounded-full">
+                <Play size={11} className="fill-current" /> {L(t.app)}
+              </span>
+
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#999] mb-4">{tr('library', 'howTo', lang)}</p>
+
+              <ol className="flex flex-col gap-5">
                 {t.steps.map((s, i) => (
-                  <li key={i} className="flex gap-3">
-                    <span className="shrink-0 w-6 h-6 rounded-full bg-[#e8002d] text-white text-xs font-bold flex items-center justify-center">{i + 1}</span>
+                  <li key={i} className="flex gap-3.5">
+                    <span className="shrink-0 w-7 h-7 rounded-full bg-[#e8002d] text-white text-[13px] font-bold flex items-center justify-center">{i + 1}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm leading-relaxed text-[#222] pt-0.5">{L(s.text)}</p>
+                      <p className="text-[15px] leading-[1.5] text-[#1a1a1a] pt-0.5">{L(s.text)}</p>
                       {s.img && (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={s.img} alt="" loading="lazy" className="mt-2 w-full max-w-[240px] rounded-xl border border-black/10" />
+                        <img src={s.img} alt="" loading="lazy" className="mt-3 w-full max-w-[200px] max-h-[300px] object-contain rounded-2xl border border-black/[0.08] shadow-sm" />
                       )}
                       {s.video && (
                         <video src={s.video} controls muted loop playsInline preload="metadata"
-                          className="mt-2 w-full max-w-[240px] rounded-xl border border-black/10 bg-black" />
+                          className="mt-3 w-full max-w-[200px] max-h-[300px] rounded-2xl border border-black/[0.08] shadow-sm bg-black" />
                       )}
                     </div>
                   </li>
