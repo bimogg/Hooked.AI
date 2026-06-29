@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Eye, Heart, Zap, Copy, Check, Loader2, ArrowRight, ExternalLink, Lock, RotateCcw } from 'lucide-react';
+import { useAuth } from '@/components/AuthProvider';
 
 function fmt(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -104,6 +105,7 @@ function AnalysisCard({ data }: { data: Analysis }) {
 }
 
 export default function ProAnalyzer() {
+  const { user, loading: authLoading } = useAuth();
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Analysis[] | null>(null);
@@ -123,6 +125,8 @@ export default function ProAnalyzer() {
   }, []);
 
   const analyze = async (uname?: string) => {
+    // Not signed in → send straight to the login page (analysis requires auth).
+    if (!authLoading && !user) { window.location.href = `/login?next=${encodeURIComponent('/pro')}`; return; }
     const target = (uname ?? username).replace('@', '').trim();
     if (!target) return;
     setLoading(true); setError(''); setResults(null); setActiveUser(null);
