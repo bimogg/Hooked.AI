@@ -1,7 +1,7 @@
 'use client';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { Crown, Pencil, Check } from 'lucide-react';
+import { Crown, Pencil, Check, Upload } from 'lucide-react';
 import { useLang } from '@/components/LanguageProvider';
 import { useAuth } from '@/components/AuthProvider';
 import { supabaseBrowser } from '@/lib/supabase-browser';
@@ -63,6 +63,13 @@ const BANNER_IDS = Object.keys(BANNERS);
 
 const RAINBOW = 'linear-gradient(90deg,#ff0040,#ff8a00,#ffd500,#22c55e,#3b82f6,#8b5cf6)';
 
+const isUrl = (s: string) => /^https?:\/\//i.test(s);
+function bannerStyle(b: string): React.CSSProperties {
+  return isUrl(b)
+    ? { backgroundImage: `url(${b})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { background: BANNERS[b] || BANNERS.sky };
+}
+
 function InstagramIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -101,11 +108,11 @@ export default function ProfilePage() {
   const { user, loading, signOut } = useAuth();
   const isSignedIn = !!user;
   const isLoaded = !loading;
-  const displayName = (user?.user_metadata?.full_name as string) || user?.email?.split('@')[0] || 'You';
 
   const [history, setHistory] = useState<HistoryItem[] | null>(null);
   const [pro, setPro] = useState(false);
 
+  const [name, setName] = useState('');
   const [avatar, setAvatar] = useState('');
   const [banner, setBanner] = useState('sky');
   const [bio, setBio] = useState('');
@@ -114,12 +121,19 @@ export default function ProfilePage() {
   const [xx, setXx] = useState('');
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<'avatar' | 'banner' | null>(null);
+
+  const avatarInput = useRef<HTMLInputElement>(null);
+  const bannerInput = useRef<HTMLInputElement>(null);
+
+  const displayName = name || user?.email?.split('@')[0] || 'You';
 
   useEffect(() => {
     if (!user) return;
     const m = (user.user_metadata ?? {}) as Record<string, string>;
+    setName(m.full_name || user.email?.split('@')[0] || '');
     setAvatar(m.avatar_url || '');
-    setBanner(m.banner && BANNERS[m.banner] ? m.banner : 'sky');
+    setBanner(m.banner || 'sky');
     setBio(m.bio || '');
     setIg(m.instagram || '');
     setTt(m.tiktok || '');
@@ -141,10 +155,34 @@ export default function ProfilePage() {
     }
   }, [isLoaded, isSignedIn]);
 
+  const uploadImage = async (file: File, kind: 'avatar' | 'banner') => {
+    setUploading(kind);
+    try {
+      const token = (await supabaseBrowser().auth.getSession()).data.session?.access_token;
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('kind', kind);
+      const res = await fetch('/api/profile-upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: fd,
+      });
+      const d = await res.json();
+      if (d.url) {
+        if (kind === 'avatar') setAvatar(d.url);
+        else setBanner(d.url);
+      }
+    } finally {
+      setUploading(null);
+    }
+  };
+
   const save = async () => {
     setSaving(true);
     try {
-      await supabaseBrowser().auth.updateUser({ data: { avatar_url: avatar, banner, bio, instagram: ig, tiktok: tt, x: xx } });
+      await supabaseBrowser().auth.updateUser({
+        data: { full_name: name.trim(), avatar_url: avatar, banner, bio, instagram: ig, tiktok: tt, x: xx },
+      });
       setEditing(false);
     } finally {
       setSaving(false);
@@ -165,12 +203,12 @@ export default function ProfilePage() {
   ];
 
   const profileCard = (
-    <div className="rounded-3xl border border-black/[0.08] overflow-hidden shadow-[0_10px_50px_-18px_rgba(0,0,0,0.25)] bg-white">
+    <div className="rounded-[28px] border border-black/[0.06] overflow-hidden shadow-[0_18px_60px_-24px_rgba(0,0,0,0.28)] bg-white">
       {/* banner */}
-      <div className="relative h-32" style={{ background: BANNERS[banner] }}>
+      <div className="relative h-32" style={bannerStyle(banner)}>
         <button
           onClick={() => setEditing(e => !e)}
-          className="absolute top-3 right-3 flex items-center gap-1.5 bg-white text-black text-[13px] font-semibold px-3.5 py-1.5 rounded-full hover:bg-white/90 transition-colors shadow-sm"
+          className="absolute top-3 right-3 flex items-center gap-1.5 bg-white/95 backdrop-blur text-black text-[13px] font-semibold px-3.5 py-1.5 rounded-full hover:bg-white transition-colors shadow-sm"
         >
           {tr('profile', 'editProfile', lang)} <Pencil size={13} />
         </button>
@@ -178,14 +216,14 @@ export default function ProfilePage() {
 
       <div className="px-6 pb-6">
         {/* avatar + exp bar on one line */}
-        <div className="flex items-end justify-between -mt-11 mb-4">
+        <div className="flex items-end justify-between -mt-12 mb-4">
           {avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatar} alt="" className="relative z-10 w-[92px] h-[92px] rounded-full object-cover bg-white border-4 border-white shadow-[0_4px_14px_-4px_rgba(0,0,0,0.25)]" />
+            <img src={avatar} alt="" className="relative z-10 w-24 h-24 rounded-full object-cover bg-white border-4 border-white shadow-[0_6px_18px_-6px_rgba(0,0,0,0.3)]" />
           ) : (
-            <span className="relative z-10 w-[92px] h-[92px] rounded-full bg-[#e8002d] text-white text-3xl font-bold flex items-center justify-center border-4 border-white shadow-[0_4px_14px_-4px_rgba(0,0,0,0.25)]">{initial}</span>
+            <span className="relative z-10 w-24 h-24 rounded-full bg-[#e8002d] text-white text-3xl font-bold flex items-center justify-center border-4 border-white shadow-[0_6px_18px_-6px_rgba(0,0,0,0.3)]">{initial}</span>
           )}
-          <div className="pb-1.5 w-32">
+          <div className="pb-2 w-32">
             <p className="text-[11px] text-[#999] mb-1 text-right">exp.</p>
             <div className="h-2 rounded-full bg-black/[0.06] overflow-hidden">
               <div className="h-full rounded-full" style={{ width: `${expPct}%`, background: RAINBOW }} />
@@ -206,13 +244,13 @@ export default function ProfilePage() {
         <p className="text-sm text-[#666] mt-1.5 leading-relaxed">{bio || user?.email}</p>
 
         {/* stats — 3 cols with dividers */}
-        <div className="flex items-stretch border-y border-black/[0.07] my-5">
+        <div className="flex items-stretch border-y border-black/[0.06] my-5">
           {[
             { v: analysesCount, l: tr('profile', 'statAnalyses', lang) },
             { v: avg ?? '—', l: tr('profile', 'statAvg', lang) },
             { v: best ?? '—', l: tr('profile', 'statBest', lang) },
           ].map((s, i) => (
-            <div key={i} className={`flex-1 text-center py-4 ${i > 0 ? 'border-l border-black/[0.07]' : ''}`}>
+            <div key={i} className={`flex-1 text-center py-4 ${i > 0 ? 'border-l border-black/[0.06]' : ''}`}>
               <p className="font-display font-extrabold text-xl leading-none">{s.v}</p>
               <p className="text-[11px] text-[#999] mt-1.5">{s.l}</p>
             </div>
@@ -243,9 +281,34 @@ export default function ProfilePage() {
   );
 
   const editor = editing && (
-    <div className="rounded-3xl border border-black/10 p-5 mt-6">
-      <p className="text-xs uppercase tracking-wider text-[#888] mb-3">{tr('profile', 'chooseAvatar', lang)}</p>
+    <div className="rounded-[28px] border border-black/[0.06] bg-white p-5 mt-5 shadow-[0_18px_60px_-24px_rgba(0,0,0,0.18)]">
+      {/* hidden file inputs */}
+      <input ref={avatarInput} type="file" accept="image/*" className="hidden"
+        onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f, 'avatar'); e.target.value = ''; }} />
+      <input ref={bannerInput} type="file" accept="image/*" className="hidden"
+        onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f, 'banner'); e.target.value = ''; }} />
+
+      {/* name */}
+      <p className="text-xs uppercase tracking-wider text-[#888] mb-2">{tr('profile', 'nameLabel', lang)}</p>
+      <input value={name} onChange={e => setName(e.target.value)} maxLength={40}
+        placeholder={tr('profile', 'namePlaceholder', lang)}
+        className="w-full border border-black/[0.1] rounded-2xl px-4 py-3 text-sm outline-none focus:border-black/40 mb-6" />
+
+      {/* avatar */}
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs uppercase tracking-wider text-[#888]">{tr('profile', 'chooseAvatar', lang)}</p>
+        <button onClick={() => avatarInput.current?.click()} disabled={uploading === 'avatar'}
+          className="flex items-center gap-1.5 text-[12px] font-semibold text-[#e8002d] hover:opacity-80 disabled:opacity-50">
+          <Upload size={13} /> {uploading === 'avatar' ? '…' : tr('profile', 'uploadPhoto', lang)}
+        </button>
+      </div>
       <div className="grid grid-cols-6 gap-2.5 mb-6">
+        {avatar && isUrl(avatar) && !AVATARS.includes(avatar) && (
+          <button onClick={() => {}} className="rounded-full overflow-hidden aspect-square ring-2 ring-[#e8002d] ring-offset-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={avatar} alt="" className="w-full h-full object-cover" />
+          </button>
+        )}
         {AVATARS.map(a => (
           <button key={a} onClick={() => setAvatar(a)}
             className={`rounded-full overflow-hidden aspect-square bg-[#f5f5f5] transition-all ${avatar === a ? 'ring-2 ring-[#e8002d] ring-offset-2' : 'hover:opacity-80'}`}>
@@ -255,8 +318,20 @@ export default function ProfilePage() {
         ))}
       </div>
 
-      <p className="text-xs uppercase tracking-wider text-[#888] mb-3">{tr('profile', 'chooseBanner', lang)}</p>
-      <div className="grid grid-cols-7 gap-2.5 mb-6">
+      {/* banner */}
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs uppercase tracking-wider text-[#888]">{tr('profile', 'chooseBanner', lang)}</p>
+        <button onClick={() => bannerInput.current?.click()} disabled={uploading === 'banner'}
+          className="flex items-center gap-1.5 text-[12px] font-semibold text-[#e8002d] hover:opacity-80 disabled:opacity-50">
+          <Upload size={13} /> {uploading === 'banner' ? '…' : tr('profile', 'uploadBg', lang)}
+        </button>
+      </div>
+      <div className="grid grid-cols-8 gap-2.5 mb-6">
+        {isUrl(banner) && (
+          <button onClick={() => {}}
+            className="h-10 rounded-xl ring-2 ring-[#e8002d] ring-offset-2 bg-cover bg-center"
+            style={bannerStyle(banner)} />
+        )}
         {BANNER_IDS.map(id => (
           <button key={id} onClick={() => setBanner(id)}
             className={`h-10 rounded-xl transition-all ${banner === id ? 'ring-2 ring-[#e8002d] ring-offset-2' : 'hover:opacity-80'}`}
@@ -266,12 +341,12 @@ export default function ProfilePage() {
 
       <input value={bio} onChange={e => setBio(e.target.value)} maxLength={120}
         placeholder={tr('profile', 'bioPlaceholder', lang)}
-        className="w-full border border-black/12 rounded-xl px-4 py-3 text-sm outline-none focus:border-black/40 mb-3" />
+        className="w-full border border-black/[0.1] rounded-2xl px-4 py-3 text-sm outline-none focus:border-black/40 mb-3" />
 
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        <input value={ig} onChange={e => setIg(e.target.value)} placeholder="Instagram" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
-        <input value={tt} onChange={e => setTt(e.target.value)} placeholder="TikTok" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
-        <input value={xx} onChange={e => setXx(e.target.value)} placeholder="X" className="border border-black/12 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
+      <div className="grid grid-cols-3 gap-2 mb-5">
+        <input value={ig} onChange={e => setIg(e.target.value)} placeholder="Instagram" className="border border-black/[0.1] rounded-2xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
+        <input value={tt} onChange={e => setTt(e.target.value)} placeholder="TikTok" className="border border-black/[0.1] rounded-2xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
+        <input value={xx} onChange={e => setXx(e.target.value)} placeholder="X" className="border border-black/[0.1] rounded-2xl px-3 py-2.5 text-sm outline-none focus:border-black/40" />
       </div>
 
       <div className="flex gap-2">
@@ -291,7 +366,7 @@ export default function ProfilePage() {
       <h2 className="text-[10px] uppercase tracking-[0.2em] text-[#888] mb-4">{tr('profile', 'myAnalyses', lang)}</h2>
 
       {history === null ? null : history.length === 0 ? (
-        <div className="border border-black/10 rounded-2xl p-10 text-center">
+        <div className="rounded-[28px] bg-[#fafafa] border border-black/[0.05] p-12 text-center">
           <p className="text-sm text-[#888] mb-5">{tr('profile', 'empty', lang)}</p>
           <Link href="/pro" className="inline-block bg-[#e8002d] text-white font-bold text-sm px-7 py-3 rounded-full hover:opacity-90 transition-opacity">
             {tr('profile', 'emptyCta', lang)}
@@ -300,12 +375,12 @@ export default function ProfilePage() {
       ) : (
         <div className="flex flex-col gap-3">
           {history.map(item => (
-            <div key={item.id} className="flex gap-4 items-center border border-black/10 rounded-2xl p-3 hover:shadow-md transition-shadow">
+            <div key={item.id} className="flex gap-4 items-center border border-black/[0.06] rounded-2xl p-3 hover:shadow-md transition-shadow">
               {item.thumb ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.thumb} alt="" className="w-16 h-20 object-cover rounded-lg bg-black/5 shrink-0" />
+                <img src={item.thumb} alt="" className="w-16 h-20 object-cover rounded-xl bg-black/5 shrink-0" />
               ) : (
-                <div className="w-16 h-20 rounded-lg bg-black/5 shrink-0" />
+                <div className="w-16 h-20 rounded-xl bg-black/5 shrink-0" />
               )}
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-sm truncate">{item.videoTopic || item.name || '—'}</p>
@@ -330,7 +405,7 @@ export default function ProfilePage() {
   if (!isSignedIn) {
     return (
       <div className="max-w-lg mx-auto px-5 py-10">
-        <div className="bg-[#f5f5f5] rounded-2xl px-5 py-6 mb-8 text-center mt-6">
+        <div className="bg-[#f5f5f5] rounded-[28px] px-5 py-6 mb-8 text-center mt-6">
           <p className="text-sm text-[#666] mb-4 max-w-xs mx-auto">{tr('profile', 'signedOut', lang)}</p>
           <Link href="/login" className="inline-block bg-[#e8002d] text-white font-bold text-sm px-7 py-3 rounded-full hover:opacity-90 transition-opacity">
             {tr('nav', 'signIn', lang)}
