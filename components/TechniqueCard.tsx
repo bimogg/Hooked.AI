@@ -120,11 +120,21 @@ export default function TechniqueCard({ t }: { t: Technique }) {
             <div className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-6">
               <h3 className="font-display font-extrabold text-lg leading-tight mb-1">{L(t.title)}</h3>
               <p className="text-[11px] text-[#888] mb-4">{tr('library', 'techApp', lang)}: {L(t.app)}</p>
-              <ol className="flex flex-col gap-3">
+              <ol className="flex flex-col gap-4">
                 {t.steps.map((s, i) => (
                   <li key={i} className="flex gap-3">
                     <span className="shrink-0 w-6 h-6 rounded-full bg-[#e8002d] text-white text-xs font-bold flex items-center justify-center">{i + 1}</span>
-                    <span className="text-sm leading-relaxed text-[#222] pt-0.5">{L(s)}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm leading-relaxed text-[#222] pt-0.5">{L(s.text)}</p>
+                      {s.img && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={s.img} alt="" loading="lazy" className="mt-2 w-full max-w-[240px] rounded-xl border border-black/10" />
+                      )}
+                      {s.video && (
+                        <video src={s.video} controls muted loop playsInline preload="metadata"
+                          className="mt-2 w-full max-w-[240px] rounded-xl border border-black/10 bg-black" />
+                      )}
+                    </div>
                   </li>
                 ))}
               </ol>
