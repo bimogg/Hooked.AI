@@ -43,7 +43,9 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: 'save_failed', detail: error.message }, { status: 500 });
 
   lastByIp.set(ip, now);
-  notifyTelegram(message, rating).catch(() => {});
+  // Await so the notification actually fires within the request — fire-and-forget
+  // gets frozen/dropped on serverless after the response is returned.
+  await notifyTelegram(message, rating);
   return NextResponse.json({ ok: true });
 }
 
