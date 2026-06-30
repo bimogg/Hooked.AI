@@ -11,6 +11,7 @@ export default function Nav() {
   const { lang } = useLang();
   const { user } = useAuth();
   const isSignedIn = !!user;
+  const avatarUrl = (user?.user_metadata?.avatar_url as string | undefined) || '';
   const pathname = usePathname();
 
   // clean full-screen auth page — no nav
@@ -42,8 +43,13 @@ export default function Nav() {
         <div className="hidden md:flex items-center gap-3">
           <LanguageSwitcher />
           {isSignedIn ? (
-            <Link href="/profile" className="flex items-center justify-center w-8 h-8 rounded-full bg-[#e8002d] text-white text-xs font-bold uppercase">
-              {(user?.email?.[0] ?? 'U')}
+            <Link href="/profile" className="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden bg-[#e8002d] text-white text-xs font-bold uppercase">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                user?.email?.[0] ?? 'U'
+              )}
             </Link>
           ) : (
             <Link href="/login" className="text-xs text-[#888] hover:text-black transition-colors font-medium px-3 py-1.5">
