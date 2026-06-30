@@ -8,6 +8,23 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 const lastByIp = new Map<string, number>();
 
+// Best-effort Telegram ping to the owner when a new review lands.
+// Set TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID in env to enable; otherwise skipped.
+async function notifyTelegram(message: string, rating: number | null) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+  const stars = rating ? '⭐'.repeat(rating) + ` (${rating}/5)\n` : '';
+  const text = `🆕 New anonymous review on Hooked AI\n\n${stars}${message}`;
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text }),
+    });
+  } catch {}
+}
+
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown';
   const now = Date.now();
@@ -26,6 +43,7 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: 'save_failed', detail: error.message }, { status: 500 });
 
   lastByIp.set(ip, now);
+  notifyTelegram(message, rating).catch(() => {});
   return NextResponse.json({ ok: true });
 }
 
