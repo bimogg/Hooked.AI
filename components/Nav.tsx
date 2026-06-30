@@ -43,7 +43,7 @@ export default function Nav() {
         <div className="hidden md:flex items-center gap-3">
           <LanguageSwitcher />
           {isSignedIn ? (
-            <Link href="/profile" className="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden bg-[#e8002d] text-white text-xs font-bold uppercase">
+            <Link href="/profile" className={`flex items-center justify-center w-8 h-8 rounded-full overflow-hidden text-xs font-bold uppercase ${avatarUrl ? 'bg-white border border-black/10' : 'bg-[#e8002d] text-white'}`}>
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
