@@ -188,6 +188,8 @@ export default function VideoAnalyzer() {
   useEffect(() => () => { if (blobUrl) URL.revokeObjectURL(blobUrl); }, [blobUrl]);
 
   const analyze = useCallback(async (file: File) => {
+    // Must be signed in to analyze — send to the login page first.
+    if (!isSignedIn) { window.location.href = `/login?next=${encodeURIComponent('/')}`; return; }
     if (!file.type.startsWith('video/')) { setError('Загрузи видео (MP4, MOV)'); return; }
     if (file.size > 300 * 1024 * 1024) { setError('Максимум 300MB'); return; }
     if (!isPro && hasUsedFree()) { setLocked(true); return; }
@@ -240,6 +242,8 @@ export default function VideoAnalyzer() {
   }, [blobUrl, isPro, isSignedIn, lang]);
 
   const analyzeFromUrl = useCallback(async (url: string) => {
+    // Must be signed in to analyze — send to the login page first.
+    if (!isSignedIn) { window.location.href = `/login?next=${encodeURIComponent('/')}`; return; }
     const clean = url.trim();
     if (!/instagram\.com\/(reel|reels|p|tv)\//.test(clean)) { setError(tr('upload', 'scrapeError', lang)); return; }
     if (!isPro && hasUsedFree()) { setLocked(true); return; }
