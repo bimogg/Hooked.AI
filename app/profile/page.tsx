@@ -189,6 +189,18 @@ export default function ProfilePage() {
     }
   };
 
+  const deleteAccount = async () => {
+    if (!confirm(tr('profile', 'deleteConfirm', lang))) return;
+    try {
+      const res = await fetch('/api/delete-account', { method: 'POST' });
+      if (!res.ok) throw new Error();
+      await signOut();
+      window.location.href = '/';
+    } catch {
+      alert(tr('profile', 'deleteError', lang));
+    }
+  };
+
   const scores = (history ?? []).map(h => h.hookScore).filter((n): n is number => typeof n === 'number');
   const analysesCount = history?.length ?? 0;
   const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
@@ -273,9 +285,14 @@ export default function ProfilePage() {
           ))}
         </div>
 
-        <button onClick={signOut} className="text-xs font-semibold text-[#999] hover:text-black transition-colors mt-5">
-          {tr('auth', 'signOut', lang)}
-        </button>
+        <div className="flex items-center gap-4 mt-5">
+          <button onClick={signOut} className="text-xs font-semibold text-[#999] hover:text-black transition-colors">
+            {tr('auth', 'signOut', lang)}
+          </button>
+          <button onClick={deleteAccount} className="text-xs font-semibold text-[#c9c9c9] hover:text-[#e8002d] transition-colors">
+            {tr('profile', 'deleteAccount', lang)}
+          </button>
+        </div>
       </div>
     </div>
   );
