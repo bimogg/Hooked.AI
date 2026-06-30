@@ -43,6 +43,7 @@ export default function Footer() {
           <div className="flex flex-col gap-3">
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">{tr('footer', 'legal', lang)}</p>
             <Link href="/privacy" className="text-sm text-white/50 hover:text-white transition-colors">{tr('footer', 'navPrivacy', lang)}</Link>
+            <Link href="/feedback" className="text-sm text-white/50 hover:text-white transition-colors">{tr('footer', 'navFeedback', lang)}</Link>
           </div>
 
         </div>
