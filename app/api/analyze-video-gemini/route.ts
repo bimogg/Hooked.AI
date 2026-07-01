@@ -148,10 +148,11 @@ ${poolList}
 
 LANGUAGE (CRITICAL): Write EVERY user-facing field (verdict, scoreReason, videoTopic, audioHook, whatIsWrong, fix, bestHook.script, bestHook.tip, weakZones.script) in ${outputLang} — ALWAYS. Even if the video's on-screen text / audio / caption is in a DIFFERENT language, you MUST translate everything and respond ONLY in ${outputLang}. Plain, simple words — NO jargon ("retention", "hook type", "engagement"). Use direct commands (Replace / Add / Remove / Say). Only hookType stays in English (internal, not shown).
 "verdict": one punchy sentence — the result + the main problem in plain words, e.g. "Слабый хук — теряешь зрителей на 2-й секунде" or "Сильный хук — он сразу цепляет".
+KEEP IT SHORT — this is a mobile card, not an essay. "scoreReason": MAX 2 short sentences. "whatIsWrong" and "audioHook": 1 short sentence each. No repetition, no filler.
 Each weak zone needs a "fix": a SHORT imperative action in ${outputLang} starting with a verb (Замени / Добавь / Убери / Скажи …), no jargon.
 Return ONLY JSON:
-{"hookScore": <1-10>, "verdict":"<punchy one-liner in ${outputLang}>", "scoreReason":"...", "videoTopic":"...", "contentNiche":"...",
-"audioHook":"<in ${outputLang}: what is heard in first 3s and whether it hooks>",
+{"hookScore": <1-10>, "verdict":"<punchy one-liner in ${outputLang}>", "scoreReason":"<max 2 short sentences in ${outputLang}>", "videoTopic":"...", "contentNiche":"...",
+"audioHook":"<in ${outputLang}: 1 short sentence — what is heard in first 3s and whether it hooks>",
 "bestHook":{"script":"...","hookType":"...","tip":"..."},
 "weakZones":[{"timestamp":"0-3s","whatIsWrong":"<plain ${outputLang}>","fix":"<short imperative action in ${outputLang}>","hookType":"...","script":"...","exampleIndex":<best index per STEP 4 — same niche preferred, marketing fallback; -1 only if nothing relevant>}]}`;
 
