@@ -23,7 +23,11 @@ export async function POST(req: NextRequest) {
   const token = process.env.APIFY_TOKEN;
   if (!token) return NextResponse.json({ error: 'scraping_not_configured' }, { status: 500 });
 
-  if (!(await isPro(req))) return NextResponse.json({ error: 'pro_required' }, { status: 402 });
+  // Require sign-in (bounds API cost to logged-in users), but let free users
+  // analyze by link so leads can actually try the product before upgrading.
+  const user = await getRequestUser(req);
+  if (!user) return NextResponse.json({ error: 'auth_required' }, { status: 401 });
+  void isPro;
 
   let url = '';
   try { url = (await req.json()).url ?? ''; } catch {}
